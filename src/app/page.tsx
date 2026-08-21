@@ -1,0 +1,33 @@
+import Link from "next/link";
+import { ArrowRight, Clock3, MapPin, ShieldCheck } from "lucide-react";
+import { demoMenu } from "@/lib/catalog";
+import MenuCard from "@/components/MenuCard";
+
+export default function Home() {
+  return <>
+    <main>
+      <section className="hero">
+        <div className="hero-copy">
+          <span className="eyebrow">Freshly prepared • Ghana</span>
+          <h1>Good food.<br/><em>Right on time.</em></h1>
+          <p>Order delicious meals from RD Catering for lunch, meetings, family moments and everyday cravings.</p>
+          <div className="actions"><Link className="button primary" href="/menu">Explore the menu <ArrowRight size={18}/></Link><Link className="button ghost" href="/#how-it-works">How it works</Link></div>
+        </div>
+        <div className="hero-card"><div className="plate">RD</div><span>Today’s kitchen pick</span><strong>Jollof Rice & Chicken</strong><small>From GH₵ 65</small></div>
+      </section>
+
+      <section className="trust-strip"><div><Clock3/> Reliable preparation</div><div><MapPin/> Delivery-ready</div><div><ShieldCheck/> Secure ordering</div></section>
+
+      <section className="section" id="featured">
+        <div className="section-heading"><div><span className="eyebrow">Popular today</span><h2>Customer favourites</h2></div><Link href="/menu">View full menu <ArrowRight size={17}/></Link></div>
+        <div className="menu-grid">{demoMenu.filter(x => x.featured).map(x => <MenuCard key={x.id} item={x}/>)}</div>
+      </section>
+
+      <section className="how section" id="how-it-works">
+        <span className="eyebrow">Simple by design</span><h2>From craving to doorstep.</h2>
+        <div className="steps"><div><b>01</b><h3>Choose</h3><p>Pick your meal, combo or extras.</p></div><div><b>02</b><h3>Checkout</h3><p>Tell us where and when to deliver.</p></div><div><b>03</b><h3>Enjoy</h3><p>We prepare it and get it moving.</p></div></div>
+      </section>
+    </main>
+    <footer><strong>RD Catering</strong><span>Fresh food. Thoughtfully delivered.</span></footer>
+  </>;
+}
