@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { ArrowRight, Clock3, MapPin, ShieldCheck } from "lucide-react";
-import { demoMenu } from "@/lib/catalog";
 import MenuCard from "@/components/MenuCard";
+import { getFeaturedMenu } from "@/lib/menu";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const featuredMenu = await getFeaturedMenu();
   return <>
     <main>
       <section className="hero">
@@ -20,7 +23,7 @@ export default function Home() {
 
       <section className="section" id="featured">
         <div className="section-heading"><div><span className="eyebrow">Popular today</span><h2>Customer favourites</h2></div><Link href="/menu">View full menu <ArrowRight size={17}/></Link></div>
-        <div className="menu-grid">{demoMenu.filter(x => x.featured).map(x => <MenuCard key={x.id} item={x}/>)}</div>
+        <div className="menu-grid">{featuredMenu.length ? featuredMenu.map(x => <MenuCard key={x.id} item={x}/>) : <div className="empty"><h3>New favourites are on the way</h3><p>Browse the full menu for today&apos;s availability.</p></div>}</div>
       </section>
 
       <section className="how section" id="how-it-works">
