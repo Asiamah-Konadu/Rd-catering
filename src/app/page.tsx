@@ -5,8 +5,22 @@ import { getFeaturedMenu } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
 
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries = 2,
+  delayMs = 1000,
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (retries <= 0) throw err;
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return withRetry(fn, retries - 1, delayMs);
+  }
+}
+
 export default async function Home() {
-  const featuredMenu = await getFeaturedMenu();
+  const featuredMenu = await withRetry(() => getFeaturedMenu());
   return <>
     <main>
       <section className="hero">
