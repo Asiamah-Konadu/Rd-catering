@@ -3,6 +3,7 @@
         "npm install": true,
         "node_modules/.bin/tsc": true,
         "npx tsc": true,
-        "printf": true
+        "printf": true,
+        "npm audit": true
     }
 }
