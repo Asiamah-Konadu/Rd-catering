@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminPage() {
   const [orders,menuItems,categories] = await Promise.all([
     prisma.order.count(), prisma.menuItem.count(), prisma.category.count()
