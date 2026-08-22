@@ -4,6 +4,7 @@
         "node_modules/.bin/tsc": true,
         "npx tsc": true,
         "printf": true,
-        "npm audit": true
+        "npm audit": true,
+        "git rev-parse": true
     }
 }
