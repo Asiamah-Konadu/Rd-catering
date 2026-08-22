@@ -16,7 +16,9 @@ function orderNumber() {
 }
 
 function text(value: unknown, maxLength: number) {
-  return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+  if (typeof value !== "string") return "";
+  const valueTrimmed = value.trim();
+  return valueTrimmed.length <= maxLength ? valueTrimmed : "";
 }
 
 function validPhone(phone: string) {
@@ -33,18 +35,28 @@ function deliveryFee() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body: unknown = await request.json();
     if (!body || typeof body !== "object") {
       return NextResponse.json({ error: "Invalid order request" }, { status: 400 });
     }
+    const payload = body as {
+      name?: unknown;
+      phone?: unknown;
+      email?: unknown;
+      address?: unknown;
+      city?: unknown;
+      region?: unknown;
+      notes?: unknown;
+      items?: unknown;
+    };
 
-    const name = text(body.name, MAX_NAME_LENGTH);
-    const phone = text(body.phone, MAX_PHONE_LENGTH);
-    const email = text(body.email, 150);
-    const address = text(body.address, MAX_ADDRESS_LENGTH);
-    const city = text(body.city, MAX_CITY_LENGTH);
-    const region = text(body.region, MAX_REGION_LENGTH);
-    const notes = text(body.notes, MAX_NOTES_LENGTH);
+    const name = text(payload.name, MAX_NAME_LENGTH);
+    const phone = text(payload.phone, MAX_PHONE_LENGTH);
+    const email = text(payload.email, 150);
+    const address = text(payload.address, MAX_ADDRESS_LENGTH);
+    const city = text(payload.city, MAX_CITY_LENGTH);
+    const region = text(payload.region, MAX_REGION_LENGTH);
+    const notes = text(payload.notes, MAX_NOTES_LENGTH);
 
     if (!name || name.length < 2 || !phone || !validPhone(phone) || !address || !city) {
       return NextResponse.json({ error: "Enter a valid name, Ghanaian phone number, address, and city." }, { status: 400 });
@@ -52,11 +64,11 @@ export async function POST(request: Request) {
     if (email && !validEmail(email)) {
       return NextResponse.json({ error: "Enter a valid email address or leave it blank." }, { status: 400 });
     }
-    if (!Array.isArray(body.items) || body.items.length === 0) {
+    if (!Array.isArray(payload.items) || payload.items.length === 0) {
       return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
     }
 
-    const requestedItems = body.items.map((item: unknown) => {
+    const requestedItems: Array<{ id: string; quantity: unknown } | null> = payload.items.map((item: unknown) => {
       if (!item || typeof item !== "object") return null;
       const candidate = item as { id?: unknown; quantity?: unknown };
       return {
