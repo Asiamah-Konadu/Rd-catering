@@ -1,4 +1,4 @@
-okimport { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; // adjust path if your prisma client lives elsewhere
 
 // Keeps the Neon compute from scaling to zero by running a trivial query
