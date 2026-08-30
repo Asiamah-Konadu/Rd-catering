@@ -1,47 +1,13 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { signIn } from "next-auth/react";
+import { useActionState } from "react";
+import { authenticateAdmin } from "./actions";
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (loading) return;
-    setLoading(true);
-    setError("");
-
-    try {
-      const result = await signIn("credentials", {
-        email: email.trim(),
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Invalid email or password. Check your credentials and try again.");
-        setLoading(false);
-        return;
-      }
-
-      if (result?.ok) {
-        window.location.assign("/admin");
-        return;
-      }
-
-      // Fallback
-      setError("Sign-in failed. Please check your email and password.");
-    } catch (err) {
-      console.error("Sign-in error:", err);
-      setError("An unexpected error occurred during sign-in. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [errorMessage, dispatch, isPending] = useActionState(
+    authenticateAdmin,
+    undefined
+  );
 
   return (
     <main className="page narrow">
@@ -51,16 +17,15 @@ export default function AdminLoginPage() {
         <p>Sign in with your staff account to continue.</p>
       </div>
 
-      <form className="checkout" onSubmit={submit} aria-busy={loading}>
+      <form action={dispatch} className="checkout" aria-busy={isPending}>
         <label htmlFor="admin-email">
           Email
           <input
             id="admin-email"
+            name="email"
             type="email"
             required
             autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
           />
         </label>
 
@@ -68,26 +33,28 @@ export default function AdminLoginPage() {
           Password
           <input
             id="admin-password"
+            name="password"
             type="password"
             required
             autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
           />
         </label>
 
-        {error && (
-          <p className="form-error font-semibold text-rose-600 bg-rose-50 border border-rose-200 p-3 rounded-lg text-sm" role="alert">
-            {error}
+        {errorMessage && (
+          <p
+            className="form-error font-semibold text-rose-600 bg-rose-50 border border-rose-200 p-3 rounded-lg text-sm"
+            role="alert"
+          >
+            {errorMessage}
           </p>
         )}
 
         <button
           className="button primary full"
           type="submit"
-          disabled={loading}
+          disabled={isPending}
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {isPending ? "Signing in..." : "Sign in"}
         </button>
       </form>
     </main>
