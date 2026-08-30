@@ -16,6 +16,8 @@ function isStaffRole(value: unknown): value is UserRole {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "rd-catering-fallback-secret-key-min-32-chars",
+  trustHost: true,
   pages: { signIn: "/admin/login" },
   session: { strategy: "jwt" },
   providers: [
@@ -25,15 +27,40 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const email = typeof credentials?.email === "string" ? credentials.email.trim().toLowerCase() : "";
-        const password = typeof credentials?.password === "string" ? credentials.password : "";
-        if (!email || !password) return null;
+        try {
+          const email =
+            typeof credentials?.email === "string"
+              ? credentials.email.trim().toLowerCase()
+              : "";
+          const password =
+            typeof credentials?.password === "string"
+              ? credentials.password
+              : "";
 
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user?.isActive || !user.passwordHash || !STAFF_ROLES.includes(user.role)) return null;
-        if (!(await compare(password, user.passwordHash))) return null;
+          if (!email || !password) return null;
 
-        return { id: user.id, name: user.name, email: user.email, role: user.role };
+          const user = await prisma.user.findUnique({ where: { email } });
+          if (!user) {
+            console.log(`[AUTH] User not found: ${email}`);
+            return null;
+          }
+
+          if (!user.isActive || !user.passwordHash || !STAFF_ROLES.includes(user.role)) {
+            console.log(`[AUTH] User ${email} inactive or non-staff role: ${user.role}`);
+            return null;
+          }
+
+          const isValidPassword = await compare(password, user.passwordHash);
+          if (!isValidPassword) {
+            console.log(`[AUTH] Invalid password attempt for: ${email}`);
+            return null;
+          }
+
+          return { id: user.id, name: user.name, email: user.email, role: user.role };
+        } catch (err) {
+          console.error("[AUTH] Exception during authorize:", err);
+          return null;
+        }
       },
     }),
   ],
