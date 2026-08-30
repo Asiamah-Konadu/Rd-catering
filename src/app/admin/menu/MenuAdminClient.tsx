@@ -322,7 +322,7 @@ export function MenuAdminClient({
       {/* Modal Form for Create / Edit */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="text-xl font-bold text-slate-900">
                 {editingItem ? "Edit Menu Dish" : "Add New Dish"}

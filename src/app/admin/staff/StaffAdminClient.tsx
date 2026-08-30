@@ -303,7 +303,7 @@ export function StaffAdminClient({
       {/* Modal: Provision Staff Member */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-6">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-6 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h2 className="text-xl font-bold text-slate-900">
                 Provision New Staff Member
