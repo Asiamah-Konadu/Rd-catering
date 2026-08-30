@@ -39,6 +39,11 @@ export function AdminNav({ user }: AdminNavProps) {
       roles: ["ADMIN", "MENU_MANAGER"],
     },
     {
+      label: "Categories",
+      href: "/admin/categories",
+      roles: ["ADMIN", "MENU_MANAGER"],
+    },
+    {
       label: "Order Queue",
       href: "/admin/orders",
       roles: ["ADMIN", "ORDER_HANDLER"],
