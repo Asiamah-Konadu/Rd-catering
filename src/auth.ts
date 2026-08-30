@@ -65,6 +65,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return url;
+      try {
+        if (new URL(url).origin === new URL(baseUrl).origin) return url;
+      } catch {
+        // invalid URL
+      }
+      return "/admin";
+    },
     jwt({ token, user }) {
       if (user) {
         token.id = user.id;

@@ -8,7 +8,7 @@ export async function authenticateAdmin(
   formData: FormData
 ) {
   try {
-    formData.append("redirectTo", "/admin");
+    formData.set("redirectTo", "/admin");
     await signIn("credentials", formData);
   } catch (error) {
     if (error instanceof AuthError) {
