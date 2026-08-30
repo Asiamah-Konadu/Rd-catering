@@ -26,14 +26,36 @@ export default async function Home() {
       <section className="hero">
         <div className="hero-copy">
           <span className="eyebrow">Freshly prepared • Ghana</span>
-          <h1>Good food.<br/><em>Right on time.</em></h1>
-          <p>Order delicious meals from RD Catering for lunch, meetings, family moments and everyday cravings.</p>
-          <div className="actions"><Link className="button primary" href="/menu">Explore the menu <ArrowRight size={18}/></Link><Link className="button ghost" href="/#how-it-works">How it works</Link></div>
+          <h1>Catering that feels <em>ready for the moment.</em></h1>
+          <p>Order generous Ghanaian favourites for lunch, office meetings, family gatherings and everyday cravings. RD Catering keeps the food fresh, clear and on time.</p>
+          <div className="hero-highlights" aria-label="Service highlights">
+            <span>Same-day favourites</span>
+            <span>Office & family trays</span>
+            <span>Accra delivery</span>
+          </div>
+          <div className="actions">
+            <Link className="button primary" href="/menu">Explore the menu <ArrowRight size={18}/></Link>
+            <Link className="button ghost" href="/#featured">See favourites</Link>
+          </div>
         </div>
-        <div className="hero-card"><div className="plate">RD</div><span>Today’s kitchen pick</span><strong>Jollof Rice & Chicken</strong><small>From GH₵ 65</small></div>
+        <div className="hero-card">
+          <div className="food-mosaic" aria-hidden="true">
+            <span>Jollof</span>
+            <span>Grill</span>
+            <span>Stew</span>
+            <span>Tray</span>
+          </div>
+          <span>Today’s kitchen pick</span>
+          <strong>Jollof Rice & Chicken</strong>
+          <small>From GH₵ 65 • prepared fresh</small>
+        </div>
       </section>
 
-      <section className="trust-strip"><div><Clock3/> Reliable preparation</div><div><MapPin/> Delivery-ready</div><div><ShieldCheck/> Secure ordering</div></section>
+      <section className="trust-strip">
+        <div><Clock3/> Reliable preparation</div>
+        <div><MapPin/> Delivery-ready in Accra</div>
+        <div><ShieldCheck/> Secure ordering</div>
+      </section>
 
       <section className="section" id="featured">
         <div className="section-heading"><div><span className="eyebrow">Popular today</span><h2>Customer favourites</h2></div><Link href="/menu">View full menu <ArrowRight size={17}/></Link></div>
@@ -42,7 +64,11 @@ export default async function Home() {
 
       <section className="how section" id="how-it-works">
         <span className="eyebrow">Simple by design</span><h2>From craving to doorstep.</h2>
-        <div className="steps"><div><b>01</b><h3>Choose</h3><p>Pick your meal, combo or extras.</p></div><div><b>02</b><h3>Checkout</h3><p>Tell us where and when to deliver.</p></div><div><b>03</b><h3>Enjoy</h3><p>We prepare it and get it moving.</p></div></div>
+        <div className="steps">
+          <div><b>01</b><h3>Choose</h3><p>Pick your meal, combo or extras from the live menu.</p></div>
+          <div><b>02</b><h3>Checkout</h3><p>Share delivery details and review the order before it goes in.</p></div>
+          <div><b>03</b><h3>Enjoy</h3><p>RD Catering prepares it fresh and gets it moving.</p></div>
+        </div>
       </section>
     </main>
     <footer><strong>RD Catering</strong><span>Fresh food. Thoughtfully delivered.</span></footer>

@@ -1,12 +1,77 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { OrderTrackerClient } from "./OrderTrackerClient";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function OrderPage({ params }: { params: Promise<{orderNumber:string}> }) {
-  const {orderNumber} = await params;
-  const order = await prisma.order.findUnique({where:{orderNumber},include:{items:true,delivery:true}});
-  if(!order) return <main className="page narrow"><div className="empty"><h1>Order not found</h1><Link href="/menu">Back to menu</Link></div></main>;
-  return <main className="page narrow"><div className="success"><span className="success-mark" aria-hidden="true">✓</span><span className="eyebrow">RD Catering | Order received</span><h1>Thank you, {order.customerName}.</h1><p>Your order reference is <strong>{order.orderNumber}</strong>.</p><p>Status: <strong>{order.status.replaceAll("_"," ")}</strong></p></div><div className="summary"><h2>Order summary</h2>{order.items.map(i=><p key={i.id}><span>{i.quantity} × {i.name}</span><b>GH₵ {Number(i.totalPrice).toFixed(2)}</b></p>)}<hr/><p><span>Subtotal</span><b>GH₵ {Number(order.subtotal).toFixed(2)}</b></p><p><span>Delivery</span><b>GH₵ {Number(order.deliveryFee).toFixed(2)}</b></p><p className="total"><span>Total</span><b>GH₵ {Number(order.total).toFixed(2)}</b></p></div><div className="summary order-details"><h2>Delivery details</h2><p><span>Address</span><b>{order.delivery?.address}, {order.delivery?.city}{order.delivery?.region ? `, ${order.delivery.region}` : ""}</b></p><p><span>Order date</span><b>{order.createdAt.toLocaleString("en-GH", { dateStyle: "medium", timeStyle: "short" })}</b></p></div></main>;
+export default async function OrderPage({
+  params,
+}: {
+  params: Promise<{ orderNumber: string }>;
+}) {
+  const { orderNumber } = await params;
+  const order = await prisma.order.findUnique({
+    where: { orderNumber },
+    include: {
+      items: true,
+      delivery: true,
+    },
+  });
+
+  if (!order) {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-white border border-slate-200 shadow-md p-8 rounded-2xl max-w-md text-center space-y-4">
+          <h1 className="text-2xl font-bold text-slate-900">Order Not Found</h1>
+          <p className="text-sm text-slate-600">
+            We couldn't find an order matching reference code{" "}
+            <strong className="font-mono">{orderNumber}</strong>.
+          </p>
+          <Link
+            href="/menu"
+            className="inline-block px-5 py-2.5 bg-amber-600 text-white font-semibold text-sm rounded-xl hover:bg-amber-700 transition"
+          >
+            Back to Menu
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const formattedOrder = {
+    id: order.id,
+    orderNumber: order.orderNumber,
+    customerName: order.customerName,
+    customerPhone: order.customerPhone,
+    customerEmail: order.customerEmail,
+    subtotal: Number(order.subtotal),
+    deliveryFee: Number(order.deliveryFee),
+    discount: Number(order.discount),
+    total: Number(order.total),
+    status: order.status,
+    notes: order.notes,
+    createdAt: order.createdAt.toISOString(),
+    items: order.items.map((i) => ({
+      id: i.id,
+      name: i.name,
+      quantity: i.quantity,
+      unitPrice: Number(i.unitPrice),
+      totalPrice: Number(i.totalPrice),
+    })),
+    delivery: order.delivery
+      ? {
+          address: order.delivery.address,
+          city: order.delivery.city,
+          region: order.delivery.region,
+          status: order.delivery.status,
+        }
+      : null,
+  };
+
+  return (
+    <main className="min-h-screen bg-slate-50 py-8">
+      <OrderTrackerClient initialOrder={formattedOrder} />
+    </main>
+  );
 }
