@@ -26,7 +26,7 @@ export default function MenuCard({ item }: { item: PublicMenuItem }) {
       </Link>
       <div className="menu-card-body">
         <h3><Link href={`/menu/${item.slug}`}>{item.name}</Link></h3>
-        <p>{item.description || "Prepared fresh by RD Catering."}</p>
+        <p>{item.description || "Prepared fresh by Rich-Dons Catering."}</p>
         <div className="menu-card-footer">
           <div className="menu-card-price">
             <span>Price</span>

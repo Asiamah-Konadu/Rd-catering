@@ -95,3 +95,50 @@ export async function getPublicMenuItem(slug: string) {
 
   return item ? serializeMenuItem(item) : null;
 }
+
+export async function getDailyPick(): Promise<PublicMenuItem | null> {
+  const featuredItem = await prisma.menuItem.findFirst({
+    where: {
+      isAvailable: true,
+      isFeatured: true,
+      category: { isActive: true },
+    },
+    orderBy: { updatedAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      imageUrl: true,
+      price: true,
+      isAvailable: true,
+      isFeatured: true,
+      category: { select: { name: true, slug: true } },
+    },
+  });
+
+  if (featuredItem) {
+    return serializeMenuItem(featuredItem);
+  }
+
+  const anyItem = await prisma.menuItem.findFirst({
+    where: {
+      isAvailable: true,
+      category: { isActive: true },
+    },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      imageUrl: true,
+      price: true,
+      isAvailable: true,
+      isFeatured: true,
+      category: { select: { name: true, slug: true } },
+    },
+  });
+
+  return anyItem ? serializeMenuItem(anyItem) : null;
+}

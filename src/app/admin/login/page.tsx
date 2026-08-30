@@ -12,7 +12,7 @@ export default function AdminLoginPage() {
   return (
     <main className="page narrow">
       <div className="page-heading">
-        <span className="eyebrow">RD Catering</span>
+        <span className="eyebrow">Rich-Dons Catering</span>
         <h1>Admin Sign In</h1>
         <p>Sign in with your staff account to continue.</p>
       </div>

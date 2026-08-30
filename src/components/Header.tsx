@@ -21,8 +21,11 @@ export default function Header() {
   return (
     <header className="site-header">
       <Link href="/" className="brand" onClick={closeNav}>
-        <img className="brand-logo" src="/logo.svg" alt="RD Catering" />
-        <span>RD Catering</span>
+        <img className="brand-logo" src="/logo.svg" alt="Rich-Dons Catering" />
+        <span className="brand-wordmark" aria-label="Rich-Dons Catering">
+          <span className="brand-name">Rich-Dons</span>
+          <span className="brand-service">Catering</span>
+        </span>
       </Link>
 
       <button

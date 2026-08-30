@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Clock3, MapPin, ShieldCheck } from "lucide-react";
 import MenuCard from "@/components/MenuCard";
-import { getFeaturedMenu } from "@/lib/menu";
+import DailyPickCard from "@/components/DailyPickCard";
+import { getFeaturedMenu, getDailyPick } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
 
@@ -20,14 +21,17 @@ async function withRetry<T>(
 }
 
 export default async function Home() {
-  const featuredMenu = await withRetry(() => getFeaturedMenu());
+  const [featuredMenu, dailyPick] = await Promise.all([
+    withRetry(() => getFeaturedMenu()),
+    withRetry(() => getDailyPick()),
+  ]);
   return <>
     <main>
       <section className="hero">
         <div className="hero-copy">
           <span className="eyebrow">Freshly prepared • Ghana</span>
           <h1>Catering that feels <em>ready for the moment.</em></h1>
-          <p>Order generous Ghanaian favourites for lunch, office meetings, family gatherings and everyday cravings. RD Catering keeps the food fresh, clear and on time.</p>
+          <p>Order generous Ghanaian favourites for lunch, office meetings, family gatherings and everyday cravings. Rich-Dons Catering keeps the food fresh, clear and on time.</p>
           <div className="hero-highlights" aria-label="Service highlights">
             <span>Same-day favourites</span>
             <span>Office & family trays</span>
@@ -38,17 +42,7 @@ export default async function Home() {
             <Link className="button ghost" href="/#featured">See favourites</Link>
           </div>
         </div>
-        <div className="hero-card">
-          <div className="food-mosaic" aria-hidden="true">
-            <span>Jollof</span>
-            <span>Grill</span>
-            <span>Stew</span>
-            <span>Tray</span>
-          </div>
-          <span>Today’s kitchen pick</span>
-          <strong>Jollof Rice & Chicken</strong>
-          <small>From GH₵ 65 • prepared fresh</small>
-        </div>
+        <DailyPickCard item={dailyPick} />
       </section>
 
       <section className="trust-strip">
@@ -67,10 +61,10 @@ export default async function Home() {
         <div className="steps">
           <div><b>01</b><h3>Choose</h3><p>Pick your meal, combo or extras from the live menu.</p></div>
           <div><b>02</b><h3>Checkout</h3><p>Share delivery details and review the order before it goes in.</p></div>
-          <div><b>03</b><h3>Enjoy</h3><p>RD Catering prepares it fresh and gets it moving.</p></div>
+          <div><b>03</b><h3>Enjoy</h3><p>Rich-Dons Catering prepares it fresh and gets it moving.</p></div>
         </div>
       </section>
     </main>
-    <footer><strong>RD Catering</strong><span>Fresh food. Thoughtfully delivered.</span></footer>
+    <footer><strong>Rich-Dons Catering</strong><span>Fresh food. Thoughtfully delivered.</span></footer>
   </>;
 }

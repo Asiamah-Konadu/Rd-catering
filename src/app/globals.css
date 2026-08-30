@@ -42,13 +42,29 @@ img { max-width: 100%; }
   gap: 10px;
   color: var(--ink);
   text-decoration: none;
-  font-weight: 800;
-  font-size: 1.15rem;
 }
 .brand-logo {
   width: 36px;
   height: 36px;
   object-fit: contain;
+}
+.brand-wordmark {
+  display: grid;
+  gap: 1px;
+  line-height: .92;
+}
+.brand-name {
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.28rem;
+  font-weight: 800;
+}
+.brand-service {
+  color: var(--brand);
+  font-size: .64rem;
+  font-weight: 900;
+  letter-spacing: .22em;
+  text-transform: uppercase;
 }
 .site-header nav {
   display: flex;
@@ -237,6 +253,84 @@ img { max-width: 100%; }
   display: block;
   font-size: 1.25rem;
   margin-top: 6px;
+}
+.daily-pick-image-wrap {
+  display: block;
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  height: 320px;
+  text-decoration: none;
+}
+.daily-pick-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .35s ease;
+}
+.daily-pick-image-wrap:hover .daily-pick-image {
+  transform: scale(1.04);
+}
+.daily-pick-floating-pill {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(25, 25, 24, .82);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.daily-pick-content {
+  margin-top: 16px;
+}
+.daily-pick-category {
+  display: block;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--brand);
+}
+.daily-pick-title {
+  display: block;
+  font-size: 1.35rem;
+  margin-top: 4px;
+  line-height: 1.25;
+}
+.daily-pick-title a {
+  color: var(--ink);
+  text-decoration: none;
+  transition: color .18s ease;
+}
+.daily-pick-title a:hover {
+  color: var(--brand);
+}
+.daily-pick-price {
+  display: block;
+  color: var(--muted);
+  font-size: .92rem;
+  font-weight: 600;
+  margin-top: 6px;
+}
+.daily-pick-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.daily-pick-btn {
+  flex: 1;
+  padding: 11px 16px;
+  font-size: .88rem;
+}
+.daily-pick-view-btn {
+  padding: 11px 16px;
+  font-size: .88rem;
 }
 .trust-strip {
   display: grid;
@@ -800,6 +894,8 @@ footer strong { color: var(--ink); }
     width: 32px;
     height: 32px;
   }
+  .brand-name { font-size: 1.08rem; }
+  .brand-service { font-size: .58rem; letter-spacing: .18em; }
 }
 
 @media (max-width: 520px) {

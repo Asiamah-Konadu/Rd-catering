@@ -19,7 +19,7 @@ export default function MenuItemDetail({ item }: { item: PublicMenuItem }) {
       <div className="detail-copy">
         <span className="eyebrow">{item.category.name}</span>
         <h1>{item.name}</h1>
-        <p>{item.description || "Prepared fresh by RD Catering."}</p>
+        <p>{item.description || "Prepared fresh by Rich-Dons Catering."}</p>
         <strong className="detail-price">GH₵ {item.price.toFixed(2)}</strong>
         <p className={item.isAvailable ? "availability available" : "availability"}>
           {item.isAvailable ? "Available today" : "Currently unavailable"}

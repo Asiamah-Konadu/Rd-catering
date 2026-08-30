@@ -4,8 +4,8 @@ import Header from "@/components/Header";
 import { CartProvider } from "@/components/cart/CartProvider";
 
 export const metadata: Metadata = {
-  title: "RD Catering | Fresh food, made easy",
-  description: "Order fresh, delicious meals from RD Catering.",
+  title: "Rich-Dons Catering | Fresh food, made easy",
+  description: "Order fresh, delicious meals from Rich-Dons Catering.",
   icons: {
     icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
     shortcut: [{ url: "/logo.svg", type: "image/svg+xml" }],

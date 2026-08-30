@@ -36,7 +36,7 @@ export default async function AdminPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <span className="text-amber-400 font-bold uppercase tracking-wider text-xs">
-              RD Catering Staff Hub
+              Rich-Dons Catering Staff Hub
             </span>
             <h1 className="text-3xl md:text-4xl font-extrabold mt-1">
               Welcome back, {user.name || "Staff User"}!
