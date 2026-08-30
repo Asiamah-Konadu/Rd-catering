@@ -17,12 +17,20 @@ type OrderItem = {
   }[];
 };
 
+type DeliveryAgentInfo = {
+  id: string;
+  name: string;
+  phone: string | null;
+};
+
 type Delivery = {
   id: string;
   address: string;
   city: string;
   region: string | null;
   status: string;
+  agentId?: string | null;
+  agent?: DeliveryAgentInfo | null;
 };
 
 type Payment = {
@@ -72,8 +80,10 @@ const STATUS_BADGE_CLASSES: Record<string, string> = {
 
 export function OrdersAdminClient({
   initialOrders,
+  deliveryAgents,
 }: {
   initialOrders: AdminOrder[];
+  deliveryAgents: DeliveryAgentInfo[];
 }) {
   const [orders, setOrders] = useState<AdminOrder[]>(initialOrders);
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
@@ -121,6 +131,37 @@ export function OrdersAdminClient({
     }
   };
 
+  const handleAssignAgent = async (orderId: string, agentId: string) => {
+    setUpdatingId(orderId);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId: agentId || null }),
+      });
+
+      if (!res.ok) throw new Error("Failed to assign delivery agent");
+
+      const updated = await res.json();
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, delivery: updated.delivery } : o))
+      );
+
+      if (activeModalOrder && activeModalOrder.id === orderId) {
+        setActiveModalOrder((prev) =>
+          prev ? { ...prev, delivery: updated.delivery } : null
+        );
+      }
+
+      const agentName = deliveryAgents.find((a) => a.id === agentId)?.name || "Unassigned";
+      showToast(`Delivery agent set to "${agentName}"`);
+    } catch {
+      alert("Failed to assign delivery agent. Please try again.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const filteredOrders = orders.filter((o) => {
     const matchesStatus =
       selectedStatus === "ALL" ? true : o.status === selectedStatus;
@@ -136,17 +177,17 @@ export function OrdersAdminClient({
   return (
     <div className="space-y-6">
       {notification && (
-        <div className="fixed top-4 right-4 z-50 bg-emerald-700 text-white px-4 py-3 rounded-lg shadow-lg border border-emerald-600 transition-all">
-          {notification}
+        <div className="fixed top-20 right-6 z-50 bg-amber-950 text-amber-200 px-4 py-3 rounded-xl shadow-2xl border border-amber-800 transition-all font-medium text-sm">
+          ✓ {notification}
         </div>
       )}
 
       {/* Header Actions & Filters */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
           <button
             onClick={() => setSelectedStatus("ALL")}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
               selectedStatus === "ALL"
                 ? "bg-slate-900 text-white"
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -175,7 +216,7 @@ export function OrdersAdminClient({
         <div className="w-full md:w-72">
           <input
             type="text"
-            placeholder="Search by order #, name, phone..."
+            placeholder="Search order #, name, phone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -184,7 +225,7 @@ export function OrdersAdminClient({
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {filteredOrders.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <h3 className="text-lg font-semibold text-slate-700">No orders found</h3>
@@ -197,10 +238,9 @@ export function OrdersAdminClient({
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-xs">
                   <th className="p-4">Order #</th>
                   <th className="p-4">Customer</th>
-                  <th className="p-4">Items</th>
-                  <th className="p-4">Total</th>
-                  <th className="p-4">Date</th>
-                  <th className="p-4">Status</th>
+                  <th className="p-4">Items & Total</th>
+                  <th className="p-4">Kitchen Status</th>
+                  <th className="p-4">Assigned Delivery Agent</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -209,27 +249,30 @@ export function OrdersAdminClient({
                   <tr key={order.id} className="hover:bg-slate-50/80 transition">
                     <td className="p-4 font-mono font-bold text-amber-700">
                       {order.orderNumber}
+                      <div className="text-[11px] font-sans font-normal text-slate-400 mt-0.5">
+                        {new Date(order.createdAt).toLocaleTimeString("en-GH", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
                     </td>
+
                     <td className="p-4">
                       <div className="font-semibold text-slate-900">
                         {order.customerName}
                       </div>
                       <div className="text-xs text-slate-500">{order.customerPhone}</div>
                     </td>
+
                     <td className="p-4">
-                      <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-medium">
+                      <div className="font-bold text-slate-900">
+                        GH₵ {Number(order.total).toFixed(2)}
+                      </div>
+                      <div className="text-xs text-slate-500">
                         {order.items?.reduce((acc, i) => acc + i.quantity, 0) || 0} items
-                      </span>
+                      </div>
                     </td>
-                    <td className="p-4 font-bold text-slate-900">
-                      GH₵ {Number(order.total).toFixed(2)}
-                    </td>
-                    <td className="p-4 text-xs text-slate-500">
-                      {new Date(order.createdAt).toLocaleString("en-GH", {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      })}
-                    </td>
+
                     <td className="p-4">
                       <select
                         disabled={updatingId === order.id}
@@ -249,12 +292,29 @@ export function OrdersAdminClient({
                         ))}
                       </select>
                     </td>
+
+                    <td className="p-4">
+                      <select
+                        disabled={updatingId === order.id}
+                        value={order.delivery?.agentId || ""}
+                        onChange={(e) => handleAssignAgent(order.id, e.target.value)}
+                        className="text-xs border border-slate-300 bg-white rounded-lg px-2.5 py-1.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      >
+                        <option value="">-- Unassigned --</option>
+                        {deliveryAgents.map((agent) => (
+                          <option key={agent.id} value={agent.id}>
+                            🛵 {agent.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+
                     <td className="p-4 text-right">
                       <button
                         onClick={() => setActiveModalOrder(order)}
-                        className="px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition"
+                        className="px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-lg transition"
                       >
-                        Details & View
+                        View Details
                       </button>
                     </td>
                   </tr>
@@ -311,11 +371,11 @@ export function OrdersAdminClient({
               </div>
               <div>
                 <h4 className="font-semibold text-slate-700 text-xs uppercase mb-1">
-                  Delivery Destination
+                  Delivery Destination & Agent
                 </h4>
                 {activeModalOrder.delivery ? (
                   <>
-                    <p className="text-slate-900">
+                    <p className="text-slate-900 font-medium">
                       {activeModalOrder.delivery.address}
                     </p>
                     <p className="text-slate-600 text-xs">
@@ -324,19 +384,15 @@ export function OrdersAdminClient({
                         ? `, ${activeModalOrder.delivery.region}`
                         : ""}
                     </p>
+                    <div className="mt-2 text-xs font-bold text-emerald-800">
+                      Agent: {activeModalOrder.delivery.agent?.name || "Unassigned"}
+                    </div>
                   </>
                 ) : (
                   <p className="text-slate-500 italic">No delivery detail attached</p>
                 )}
               </div>
             </div>
-
-            {/* Notes if any */}
-            {activeModalOrder.notes && (
-              <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg text-xs text-amber-900">
-                <strong>Customer Notes:</strong> {activeModalOrder.notes}
-              </div>
-            )}
 
             {/* Line Items */}
             <div>
@@ -385,12 +441,6 @@ export function OrdersAdminClient({
                 <span>Delivery Fee</span>
                 <span>GH₵ {Number(activeModalOrder.deliveryFee).toFixed(2)}</span>
               </div>
-              {Number(activeModalOrder.discount) > 0 && (
-                <div className="flex justify-between text-emerald-600">
-                  <span>Discount</span>
-                  <span>-GH₵ {Number(activeModalOrder.discount).toFixed(2)}</span>
-                </div>
-              )}
               <div className="flex justify-between text-slate-900 font-bold text-base pt-2 border-t border-slate-100">
                 <span>Total Amount</span>
                 <span>GH₵ {Number(activeModalOrder.total).toFixed(2)}</span>

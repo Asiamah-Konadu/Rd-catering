@@ -7,26 +7,47 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function OrdersAdminPage() {
-  const user = await requireAnyRole();
+  const user = await requireAnyRole(["ADMIN", "ORDER_HANDLER"]);
   if (!user) redirect("/admin/login");
 
-  const orders = await prisma.order.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: {
-      items: {
-        include: {
-          extras: {
-            include: {
-              extra: true,
+  const [orders, deliveryAgents] = await Promise.all([
+    prisma.order.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      include: {
+        items: {
+          include: {
+            extras: {
+              include: {
+                extra: true,
+              },
+            },
+          },
+        },
+        payment: true,
+        delivery: {
+          include: {
+            agent: {
+              select: {
+                id: true,
+                name: true,
+                phone: true,
+              },
             },
           },
         },
       },
-      payment: true,
-      delivery: true,
-    },
-  });
+    }),
+    prisma.user.findMany({
+      where: { role: "DELIVERY_AGENT", isActive: true },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+      },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   const formattedOrders = orders.map((o) => ({
     id: o.id,
@@ -70,6 +91,8 @@ export default async function OrdersAdminPage() {
           city: o.delivery.city,
           region: o.delivery.region,
           status: o.delivery.status,
+          agentId: o.delivery.agentId,
+          agent: o.delivery.agent,
         }
       : null,
   }));
@@ -79,12 +102,15 @@ export default async function OrdersAdminPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <span className="text-xs font-semibold tracking-wider text-amber-600 uppercase">
-            Staff Operations
+            Kitchen & Staff Operations
           </span>
-          <h1 className="text-3xl font-extrabold text-slate-900">Order Management</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900">Order Management Queue</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Track customer orders, advance status from kitchen prep to ready, and assign delivery agents.
+          </p>
         </div>
       </div>
-      <OrdersAdminClient initialOrders={formattedOrders} />
+      <OrdersAdminClient initialOrders={formattedOrders} deliveryAgents={deliveryAgents} />
     </main>
   );
 }
