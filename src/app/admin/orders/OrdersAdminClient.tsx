@@ -114,7 +114,7 @@ export function OrdersAdminClient({
       }
 
       showToast(`Order #${updated.orderNumber || orderId} status updated to ${newStatus}`);
-    } catch (err) {
+    } catch {
       alert("Failed to update status. Please try again.");
     } finally {
       setUpdatingId(null);

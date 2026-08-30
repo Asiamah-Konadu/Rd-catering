@@ -102,7 +102,7 @@ export function MenuAdminClient({
       showToast(
         `Updated "${item.name}" - ${field === "isAvailable" ? (newValue ? "Available" : "Out of Stock") : (newValue ? "Featured" : "Unfeatured")}`
       );
-    } catch (err) {
+    } catch {
       alert("Error updating item state");
     }
   };
@@ -116,7 +116,7 @@ export function MenuAdminClient({
       if (!res.ok) throw new Error("Failed to delete item");
       setItems((prev) => prev.filter((i) => i.id !== item.id));
       showToast(`Deleted "${item.name}" successfully`);
-    } catch (err) {
+    } catch {
       alert("Failed to delete item");
     }
   };
@@ -156,7 +156,7 @@ export function MenuAdminClient({
         showToast(`Created dish "${created.name}"`);
       }
       setIsModalOpen(false);
-    } catch (err) {
+    } catch {
       alert("Failed to save menu item");
     } finally {
       setLoading(false);

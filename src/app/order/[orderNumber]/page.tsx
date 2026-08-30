@@ -25,7 +25,7 @@ export default async function OrderPage({
         <div className="bg-white border border-slate-200 shadow-md p-8 rounded-2xl max-w-md text-center space-y-4">
           <h1 className="text-2xl font-bold text-slate-900">Order Not Found</h1>
           <p className="text-sm text-slate-600">
-            We couldn't find an order matching reference code{" "}
+            We couldn&apos;t find an order matching reference code{" "}
             <strong className="font-mono">{orderNumber}</strong>.
           </p>
           <Link

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 
 type OrderItem = {
@@ -53,7 +53,7 @@ export function OrderTrackerClient({
   const [lastSync, setLastSync] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  const fetchLatest = async () => {
+  const fetchLatest = useCallback(async () => {
     setIsRefreshing(true);
     try {
       const res = await fetch(`/api/orders/${initialOrder.orderNumber}`);
@@ -67,7 +67,7 @@ export function OrderTrackerClient({
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [initialOrder.orderNumber]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -75,7 +75,7 @@ export function OrderTrackerClient({
     }, 10000); // Poll every 10s
 
     return () => clearInterval(interval);
-  }, [initialOrder.orderNumber]);
+  }, [fetchLatest]);
 
   const currentStepIndex = STEPS.findIndex((s) => s.key === order.status);
   const isCancelled = order.status === "CANCELLED";
