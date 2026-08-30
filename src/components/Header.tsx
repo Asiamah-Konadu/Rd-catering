@@ -8,7 +8,6 @@ import { useCart } from "./cart/CartProvider";
 const navItems = [
   { href: "/menu", label: "Menu" },
   { href: "/#how-it-works", label: "How it works" },
-  { href: "/admin", label: "Admin" },
 ];
 
 export default function Header() {

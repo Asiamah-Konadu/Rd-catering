@@ -5,7 +5,11 @@ import { CartProvider } from "@/components/cart/CartProvider";
 
 export const metadata: Metadata = {
   title: "RD Catering | Fresh food, made easy",
-  description: "Order fresh, delicious meals from RD Catering."
+  description: "Order fresh, delicious meals from RD Catering.",
+  icons: {
+    icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
+    shortcut: [{ url: "/logo.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
