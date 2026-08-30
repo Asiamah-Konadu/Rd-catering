@@ -30,6 +30,16 @@ function loadEnvFile(filePath) {
 loadEnvFile(path.resolve(process.cwd(), ".env.local"));
 loadEnvFile(path.resolve(process.cwd(), ".env"));
 
+if (!process.env.DATABASE_URL) {
+  console.error("❌ DATABASE_URL is not set locally in your .env.local file.");
+  console.error("Vercel CLI replaces secret connection strings with '[SENSITIVE]' for security.\n");
+  console.error("To fix this:");
+  console.error("1. Copy your actual DATABASE_URL from Vercel Dashboard -> Settings -> Environment Variables");
+  console.error("2. Paste it into your local .env.local file as DATABASE_URL=\"postgresql://...\"");
+  console.error("   OR trigger creation directly on your deployed site via /api/admin/setup\n");
+  process.exit(1);
+}
+
 const prisma = new PrismaClient();
 
 const name = (process.env.STAFF_NAME || process.env.ADMIN_NAME)?.trim();
@@ -43,7 +53,7 @@ if (!VALID_ROLES.includes(rawRole)) {
   console.error(`Invalid STAFF_ROLE: "${rawRole}". Must be one of: ${VALID_ROLES.join(", ")}`);
   process.exitCode = 1;
   await prisma.$disconnect();
-  process.exit();
+  process.exit(1);
 }
 
 const role = rawRole;
