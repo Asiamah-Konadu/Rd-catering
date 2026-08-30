@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus } from "lucide-react";
+import { Plus, Utensils } from "lucide-react";
 import { useCart } from "./cart/CartProvider";
 import Link from "next/link";
 import { useState } from "react";
@@ -15,24 +15,29 @@ export default function MenuCard({ item }: { item: PublicMenuItem }) {
         {item.imageUrl && !imageFailed ? (
           <img src={item.imageUrl} alt="" onError={() => setImageFailed(true)} />
         ) : (
-          <span>{item.name.slice(0, 1)}</span>
+          <span>
+            <Utensils size={34} aria-hidden="true" />
+          </span>
         )}
+        <span className="menu-card-category">{item.category.name}</span>
+        <span className={item.isAvailable ? "status-pill available" : "status-pill"}>
+          {item.isAvailable ? "Available" : "Sold out"}
+        </span>
       </Link>
       <div className="menu-card-body">
-        <div className="menu-card-meta">
-          <span className="eyebrow">{item.category.name}</span>
-          <span className={item.isAvailable ? "status-pill available" : "status-pill"}>{item.isAvailable ? "Available" : "Sold out"}</span>
-        </div>
         <h3><Link href={`/menu/${item.slug}`}>{item.name}</Link></h3>
         <p>{item.description || "Prepared fresh by RD Catering."}</p>
         <div className="menu-card-footer">
-          <strong>GH₵ {item.price.toFixed(2)}</strong>
+          <div className="menu-card-price">
+            <span>Price</span>
+            <strong>GH₵ {item.price.toFixed(2)}</strong>
+          </div>
           <button
             type="button"
             disabled={!item.isAvailable}
             onClick={() => add({ id: item.id, name: item.name, price: item.price })}
           >
-            <Plus size={17}/> {item.isAvailable ? "Add" : "Unavailable"}
+            <Plus size={17} aria-hidden="true" /> {item.isAvailable ? "Add to bag" : "Unavailable"}
           </button>
         </div>
       </div>
