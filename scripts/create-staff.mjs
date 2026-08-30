@@ -30,8 +30,10 @@ function loadEnvFile(filePath) {
 loadEnvFile(path.resolve(process.cwd(), ".env.local"));
 loadEnvFile(path.resolve(process.cwd(), ".env"));
 
-if (!process.env.DATABASE_URL) {
-  console.error("❌ DATABASE_URL is not set locally in your .env.local file.");
+const dbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
+
+if (!dbUrl || dbUrl === "[SENSITIVE]") {
+  console.error("❌ DATABASE_URL or DIRECT_URL is not set locally in your .env.local file.");
   console.error("Vercel CLI replaces secret connection strings with '[SENSITIVE]' for security.\n");
   console.error("To fix this:");
   console.error("1. Copy your actual DATABASE_URL from Vercel Dashboard -> Settings -> Environment Variables");
@@ -40,9 +42,13 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasources: {
+    db: { url: dbUrl },
+  },
+});
 
-const name = (process.env.STAFF_NAME || process.env.ADMIN_NAME)?.trim();
+const name = (process.env.STAFF_NAME || process.env.ADMIN_NAME || "Menu Manager")?.trim();
 const email = (process.env.STAFF_EMAIL || process.env.ADMIN_EMAIL)?.trim().toLowerCase();
 const password = process.env.STAFF_PASSWORD || process.env.ADMIN_PASSWORD;
 const rawRole = (process.env.STAFF_ROLE || "MENU_MANAGER").trim().toUpperCase();
