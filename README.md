@@ -10,7 +10,13 @@ There is no public staff registration. Provision the first administrator from a 
 ADMIN_NAME="Staff name" ADMIN_EMAIL="staff@example.com" ADMIN_PASSWORD="use-a-long-unique-password" npm run admin:create
 ```
 
-The command creates or updates only the specified `ADMIN` user and stores a bcrypt hash. Admin pages require an active staff role (`ADMIN`, `MENU_MANAGER`, `ORDER_HANDLER`, or `DELIVERY_AGENT`). Future privileged API routes should call `requireApiRole` from `src/lib/authz.ts`; it returns HTTP 401 for unauthenticated requests and 403 for insufficient roles.
+The command creates or updates only the specified `ADMIN` user and stores a bcrypt hash. Admin pages require an active staff role (`ADMIN`, `MENU_MANAGER`, `ORDER_HANDLER`, or `DELIVERY_AGENT`).
+
+To provision a specific staff role (such as `MENU_MANAGER`, `ORDER_HANDLER`, or `DELIVERY_AGENT`):
+
+```sh
+STAFF_NAME="Menu Manager" STAFF_EMAIL="manager@example.com" STAFF_PASSWORD="use-a-long-unique-password" STAFF_ROLE="MENU_MANAGER" npm run staff:create
+```
 
 Production-oriented starter application for RD Catering.
 
