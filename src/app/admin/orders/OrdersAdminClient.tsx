@@ -1,7 +1,186 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Printer } from "lucide-react";
+
+// ─── Receipt Printer ─────────────────────────────────────────────────────────
+function printReceipt(order: AdminOrder) {
+  const formatGHS = (val: number | string) =>
+    `GH₵ ${Number(val).toFixed(2)}`;
+
+  const itemsHtml = order.items
+    .map(
+      (item) => `
+        <tr>
+          <td>${item.quantity} &times; ${item.name}${
+            item.extras && item.extras.length > 0
+              ? `<br/><small style="color:#666">Extras: ${item.extras
+                  .map((ex) => `${ex.extra.name} (+${formatGHS(ex.extra.price)})`)
+                  .join(", ")}</small>`
+              : ""
+          }</td>
+          <td style="text-align:right;white-space:nowrap">${formatGHS(item.totalPrice)}</td>
+        </tr>`
+    )
+    .join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Receipt – Order #${order.orderNumber}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      color: #111;
+      background: #fff;
+      padding: 16px;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+    .logo {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-bottom: 2px dashed #111;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+    .logo span { color: #b45309; }
+    .tagline {
+      text-align: center;
+      font-size: 10px;
+      color: #555;
+      margin-bottom: 14px;
+    }
+    .section-label {
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #777;
+      margin-bottom: 3px;
+    }
+    .info-block { margin-bottom: 10px; }
+    .info-block p { line-height: 1.5; font-size: 11px; }
+    hr { border: none; border-top: 1px dashed #bbb; margin: 10px 0; }
+    table { width: 100%; border-collapse: collapse; }
+    td { padding: 4px 0; vertical-align: top; font-size: 11px; }
+    td:last-child { width: 80px; }
+    .totals-row td { font-size: 11px; padding: 2px 0; }
+    .totals-row.total td {
+      font-size: 14px;
+      font-weight: bold;
+      padding-top: 6px;
+      border-top: 2px solid #111;
+    }
+    .payment-badge {
+      text-align: center;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 1px solid #111;
+      display: inline-block;
+      padding: 2px 8px;
+      margin-top: 4px;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 10px;
+      color: #555;
+      border-top: 2px dashed #111;
+      padding-top: 10px;
+    }
+    @media print {
+      body { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">RD <span>Catering</span></div>
+  <p class="tagline">Fresh &bull; Fast &bull; Delicious</p>
+
+  <div class="info-block">
+    <div class="section-label">Order</div>
+    <p><strong>#${order.orderNumber}</strong></p>
+    <p>${new Date(order.createdAt).toLocaleString("en-GH", { dateStyle: "medium", timeStyle: "short" })}</p>
+  </div>
+
+  <div class="info-block">
+    <div class="section-label">Customer</div>
+    <p>${order.customerName}</p>
+    <p>${order.customerPhone}</p>
+    ${order.customerEmail ? `<p>${order.customerEmail}</p>` : ""}
+  </div>
+
+  ${order.delivery ? `
+  <div class="info-block">
+    <div class="section-label">Delivery To</div>
+    <p>${order.delivery.address}</p>
+    <p>${order.delivery.city}${order.delivery.region ? ", " + order.delivery.region : ""}</p>
+    ${order.delivery.agent ? `<p><strong>Agent:</strong> ${order.delivery.agent.name}</p>` : ""}
+  </div>` : ""}
+
+  <hr />
+  <table>
+    <tbody>
+      ${itemsHtml}
+    </tbody>
+  </table>
+  <hr />
+
+  <table>
+    <tbody>
+      <tr class="totals-row">
+        <td>Subtotal</td>
+        <td style="text-align:right">${formatGHS(order.subtotal)}</td>
+      </tr>
+      <tr class="totals-row">
+        <td>Delivery Fee</td>
+        <td style="text-align:right">${formatGHS(order.deliveryFee)}</td>
+      </tr>
+      ${Number(order.discount) > 0 ? `
+      <tr class="totals-row">
+        <td>Discount</td>
+        <td style="text-align:right">- ${formatGHS(order.discount)}</td>
+      </tr>` : ""}
+      <tr class="totals-row total">
+        <td>TOTAL</td>
+        <td style="text-align:right">${formatGHS(order.total)}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  ${order.payment ? `
+  <div style="text-align:center;margin-top:8px">
+    <span class="payment-badge">${order.payment.method.replace(/_/g, " ")} &bull; ${order.payment.status}</span>
+  </div>` : ""}
+
+  ${order.notes ? `<hr /><div class="info-block"><div class="section-label">Notes</div><p>${order.notes}</p></div>` : ""}
+
+  <div class="footer">
+    <p>Thank you for your order!</p>
+    <p style="margin-top:4px">RD Catering &mdash; Serving with Love</p>
+  </div>
+
+  <script>window.onload = function(){ window.print(); window.onafterprint = function(){ window.close(); }; }<\/script>
+</body>
+</html>`;
+
+  const popup = window.open("", "_blank", "width=420,height=700,scrollbars=yes");
+  if (!popup) {
+    alert("Please allow pop-ups to print the receipt.");
+    return;
+  }
+  popup.document.write(html);
+  popup.document.close();
+}
 
 type OrderItem = {
   id: string;
@@ -370,12 +549,22 @@ export function OrdersAdminClient({
                     </td>
 
                     <td className="p-4 text-right">
-                      <button
-                        onClick={() => setActiveModalOrder(order)}
-                        className="px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-lg transition"
-                      >
-                        View Details
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => printReceipt(order)}
+                          title="Print Receipt"
+                          className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          Receipt
+                        </button>
+                        <button
+                          onClick={() => setActiveModalOrder(order)}
+                          className="px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-lg transition"
+                        >
+                          View Details
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -513,7 +702,14 @@ export function OrdersAdminClient({
             </div>
 
             {/* Modal Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <div className="flex justify-between items-center gap-3 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => printReceipt(activeModalOrder)}
+                className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-800 border border-amber-200 text-sm font-semibold rounded-lg hover:bg-amber-100 transition"
+              >
+                <Printer className="w-4 h-4" />
+                Print Receipt
+              </button>
               <button
                 onClick={() => setActiveModalOrder(null)}
                 className="px-4 py-2 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition"
