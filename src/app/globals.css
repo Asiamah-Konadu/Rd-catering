@@ -909,10 +909,31 @@ footer strong { color: var(--ink); }
     min-height: 120px;
   }
   .food-mosaic span:first-child { grid-row: auto; }
+
+@media (max-width: 520px) {
+  .hero h1 { font-size: 3.2rem; }
+  .actions .button { width: 100%; }
+  .food-mosaic {
+    height: auto;
+    grid-template-columns: 1fr 1fr;
+  }
+  .food-mosaic span {
+    min-height: 120px;
+  }
+  .food-mosaic span:first-child { grid-row: auto; }
   .menu-card-footer {
     align-items: stretch;
     flex-direction: column;
   }
   .menu-card-footer button { justify-content: center; }
   .empty { padding: 42px 20px; }
+}
+
+/* ── Rating card animation ─────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease both;
 }

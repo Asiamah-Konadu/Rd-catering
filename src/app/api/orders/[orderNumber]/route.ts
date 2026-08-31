@@ -20,8 +20,12 @@ export async function GET(
         },
         payment: true,
         delivery: true,
+        review: {
+          select: { rating: true, comment: true, createdAt: true },
+        },
       },
     });
+
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });

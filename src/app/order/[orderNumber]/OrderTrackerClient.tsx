@@ -20,6 +20,12 @@ type Delivery = {
   status: string;
 };
 
+type Review = {
+  rating: number;
+  comment?: string | null;
+  createdAt: string;
+};
+
 type OrderData = {
   id: string;
   orderNumber: string;
@@ -35,6 +41,7 @@ type OrderData = {
   createdAt: string;
   items: OrderItem[];
   delivery?: Delivery | null;
+  review?: Review | null;
 };
 
 const STEPS = [
@@ -46,6 +53,201 @@ const STEPS = [
   { key: "DELIVERED", label: "Delivered", desc: "Enjoy your meal!" },
 ];
 
+// ─── Star Rating Picker ──────────────────────────────────────────────────────
+function StarPicker({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  const [hovered, setHovered] = useState(0);
+  const active = hovered || value;
+
+  const labels = ["", "Poor", "Fair", "Good", "Great", "Excellent"];
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            id={`star-${star}`}
+            onMouseEnter={() => setHovered(star)}
+            onMouseLeave={() => setHovered(0)}
+            onClick={() => onChange(star)}
+            className="text-4xl transition-transform duration-100 hover:scale-125 focus:outline-none"
+            aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+          >
+            <span
+              className={`transition-colors duration-150 ${
+                star <= active ? "text-amber-400" : "text-slate-200"
+              }`}
+            >
+              ★
+            </span>
+          </button>
+        ))}
+      </div>
+      <span
+        className={`text-sm font-semibold transition-opacity duration-200 ${
+          active > 0 ? "opacity-100 text-amber-700" : "opacity-0"
+        }`}
+      >
+        {labels[active]}
+      </span>
+    </div>
+  );
+}
+
+// ─── Static star display ─────────────────────────────────────────────────────
+function StarDisplay({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span
+          key={star}
+          className={`text-2xl ${star <= rating ? "text-amber-400" : "text-slate-200"}`}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ─── Rating Card (form) ──────────────────────────────────────────────────────
+function RatingCard({
+  orderNumber,
+  onSubmitted,
+}: {
+  orderNumber: string;
+  onSubmitted: (review: Review) => void;
+}) {
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (rating === 0) {
+      setError("Please select a star rating before submitting.");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/orders/${orderNumber}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating, comment: comment.trim() || null }),
+      });
+      const data: unknown = await res.json();
+      if (!res.ok) {
+        const msg =
+          data && typeof data === "object" && "error" in data
+            ? String((data as { error: unknown }).error)
+            : "Something went wrong. Please try again.";
+        setError(msg);
+      } else {
+        onSubmitted(data as Review);
+      }
+    } catch {
+      setError("Network error — please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div
+      id="rating-card"
+      className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm animate-fade-in"
+    >
+      <div className="text-center mb-5">
+        <span className="text-3xl">🛵</span>
+        <h3 className="text-lg font-bold text-slate-900 mt-1">
+          How was your delivery?
+        </h3>
+        <p className="text-sm text-slate-500 mt-0.5">
+          Rate your experience — it helps us improve!
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="flex justify-center">
+          <StarPicker value={rating} onChange={setRating} />
+        </div>
+
+        <div>
+          <label
+            htmlFor="review-comment"
+            className="block text-xs font-semibold text-slate-600 uppercase mb-1.5"
+          >
+            Comments <span className="text-slate-400 font-normal normal-case">(optional)</span>
+          </label>
+          <textarea
+            id="review-comment"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            maxLength={500}
+            rows={3}
+            placeholder="Tell us what you loved or what we can do better…"
+            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent resize-none bg-white"
+          />
+          <p className="text-right text-[11px] text-slate-400 mt-0.5">
+            {comment.length}/500
+          </p>
+        </div>
+
+        {error && (
+          <p className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
+
+        <button
+          id="submit-rating-btn"
+          type="submit"
+          disabled={submitting || rating === 0}
+          className="w-full py-3 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl text-sm transition-all duration-200 shadow-md hover:shadow-lg"
+        >
+          {submitting ? "Submitting…" : "Submit Rating"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+// ─── Already rated card ───────────────────────────────────────────────────────
+function RatedCard({ review }: { review: Review }) {
+  return (
+    <div
+      id="already-rated-card"
+      className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-6 shadow-sm text-center space-y-3 animate-fade-in"
+    >
+      <span className="text-3xl">🎉</span>
+      <h3 className="text-lg font-bold text-slate-900">
+        Thanks for your feedback!
+      </h3>
+      <StarDisplay rating={review.rating} />
+      {review.comment && (
+        <p className="text-sm text-slate-600 italic">"{review.comment}"</p>
+      )}
+      <p className="text-xs text-slate-400">
+        Submitted{" "}
+        {new Date(review.createdAt).toLocaleString("en-GH", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })}
+      </p>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 export function OrderTrackerClient({
   initialOrder,
 }: {
@@ -81,6 +283,11 @@ export function OrderTrackerClient({
 
   const currentStepIndex = STEPS.findIndex((s) => s.key === order.status);
   const isCancelled = order.status === "CANCELLED";
+  const isDelivered = order.status === "DELIVERED";
+
+  function handleReviewSubmitted(review: Review) {
+    setOrder((prev) => ({ ...prev, review }));
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-8">
@@ -183,6 +390,20 @@ export function OrderTrackerClient({
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* ── Delivery Rating ─────────────────────────────────────── */}
+      {isDelivered && (
+        <div>
+          {order.review ? (
+            <RatedCard review={order.review} />
+          ) : (
+            <RatingCard
+              orderNumber={order.orderNumber}
+              onSubmitted={handleReviewSubmitted}
+            />
+          )}
         </div>
       )}
 
