@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import type { UserRole } from "@prisma/client";
+import {
+  Navigation,
+  ExternalLink,
+  MapPin,
+  Route,
+  Phone,
+  ListOrdered,
+} from "lucide-react";
 
 export type DeliveryRecord = {
   id: string;
@@ -9,6 +17,8 @@ export type DeliveryRecord = {
   address: string;
   city: string;
   region: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   status: string;
   assignedAt: string | null;
   deliveredAt: string | null;
@@ -47,10 +57,45 @@ const STATUS_BADGE: Record<string, string> = {
   PENDING: "bg-slate-100 text-slate-700 border-slate-300",
   ASSIGNED: "bg-blue-100 text-blue-800 border-blue-300",
   PICKED_UP: "bg-purple-100 text-purple-800 border-purple-300",
-  IN_TRANSIT: "bg-amber-100 text-amber-800 border-amber-300",
+  IN_TRANSIT: "bg-amber-100 text-amber-800 border-amber-300 animate-pulse",
   DELIVERED: "bg-emerald-100 text-emerald-800 border-emerald-300",
   FAILED: "bg-rose-100 text-rose-800 border-rose-300",
 };
+
+/**
+ * Format a single delivery stop location for Google Maps (lat,lng or full address)
+ */
+function getStopLocationString(delivery: DeliveryRecord): string {
+  if (delivery.latitude && delivery.longitude) {
+    return `${delivery.latitude},${delivery.longitude}`;
+  }
+  const parts = [delivery.address, delivery.city, delivery.region].filter(Boolean);
+  return parts.join(", ");
+}
+
+/**
+ * Generate Google Maps directions URL with multiple stops:
+ * - Waypoints: Stops 1 to N-1
+ * - Destination: Stop N (the final stop)
+ */
+function getMultiStopGoogleMapsUrl(deliveries: DeliveryRecord[]): string {
+  if (deliveries.length === 0) return "";
+
+  const stops = deliveries.map(getStopLocationString);
+
+  if (stops.length === 1) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+      stops[0]
+    )}&travelmode=driving`;
+  }
+
+  const destination = stops[stops.length - 1];
+  const waypoints = stops.slice(0, stops.length - 1);
+
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+    destination
+  )}&waypoints=${encodeURIComponent(waypoints.join("|"))}&travelmode=driving`;
+}
 
 export function DeliveriesAdminClient({
   initialDeliveries,
@@ -63,6 +108,7 @@ export function DeliveriesAdminClient({
   const [selectedFilter, setSelectedFilter] = useState<string>("ALL");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [showRouteModal, setShowRouteModal] = useState<boolean>(false);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -94,6 +140,10 @@ export function DeliveriesAdminClient({
     }
   };
 
+  // Orders currently marked En Route (IN_TRANSIT)
+  const enRouteDeliveries = deliveries.filter((d) => d.status === "IN_TRANSIT");
+  const multiStopMapsUrl = getMultiStopGoogleMapsUrl(enRouteDeliveries);
+
   const filteredDeliveries = deliveries.filter((d) =>
     selectedFilter === "ALL" ? true : d.status === selectedFilter
   );
@@ -103,6 +153,49 @@ export function DeliveriesAdminClient({
       {toast && (
         <div className="fixed top-20 right-6 z-50 bg-emerald-950 text-emerald-200 px-4 py-3 rounded-xl shadow-2xl border border-emerald-800 font-medium text-sm">
           ✓ {toast}
+        </div>
+      )}
+
+      {/* START RIDE MULTI-STOP HERO BANNER */}
+      {enRouteDeliveries.length > 0 && (
+        <div className="bg-gradient-to-r from-amber-600 via-amber-700 to-amber-900 text-white p-6 rounded-2xl shadow-xl border border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-400 text-amber-950 uppercase tracking-wide animate-pulse">
+                <Route className="w-3.5 h-3.5" /> En Route Active
+              </span>
+              <span className="text-amber-200 text-xs font-semibold">
+                {enRouteDeliveries.length} {enRouteDeliveries.length === 1 ? "Stop" : "Stops"} Pending Delivery
+              </span>
+            </div>
+            <h2 className="text-2xl font-black tracking-tight">
+              Ready for Dispatch Navigation
+            </h2>
+            <p className="text-amber-100 text-xs md:text-sm max-w-xl">
+              All {enRouteDeliveries.length} orders marked &quot;En Route&quot; are grouped into a multi-stop itinerary. Click &quot;Start Ride&quot; to open real-time turn-by-turn directions in Google Maps.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <button
+              onClick={() => setShowRouteModal(true)}
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold backdrop-blur-xs border border-white/20 transition"
+            >
+              <ListOrdered className="w-4 h-4" />
+              View {enRouteDeliveries.length} Stops
+            </button>
+
+            <a
+              href={multiStopMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-amber-50 text-amber-900 font-extrabold text-sm rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5"
+            >
+              <Navigation className="w-4 h-4 text-amber-600 fill-amber-600" />
+              Start Ride in Google Maps
+              <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+            </a>
+          </div>
         </div>
       )}
 
@@ -145,10 +238,18 @@ export function DeliveriesAdminClient({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDeliveries.map((delivery) => {
             const isUpdating = updatingId === delivery.id;
+            const singleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+              getStopLocationString(delivery)
+            )}&travelmode=driving`;
+
+            const isEnRoute = delivery.status === "IN_TRANSIT";
+
             return (
               <div
                 key={delivery.id}
-                className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-4"
+                className={`bg-white rounded-2xl border p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-4 ${
+                  isEnRoute ? "border-amber-400 ring-2 ring-amber-300/40" : "border-slate-200"
+                }`}
               >
                 <div>
                   {/* Top Bar: Order # & Status Badge */}
@@ -188,16 +289,23 @@ export function DeliveriesAdminClient({
                         href={`tel:${delivery.order.customerPhone}`}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition shadow-xs"
                       >
-                        📞 Call
+                        <Phone className="w-3.5 h-3.5" /> Call
                       </a>
                     </div>
                   </div>
 
-                  {/* Delivery Location */}
-                  <div className="py-3 border-b border-slate-100 space-y-1">
-                    <span className="text-[10px] uppercase text-slate-400 font-bold block">
-                      Destination Address
-                    </span>
+                  {/* Delivery Location & Direct Navigation */}
+                  <div className="py-3 border-b border-slate-100 space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] uppercase text-slate-400 font-bold block">
+                        Destination Address
+                      </span>
+                      {delivery.latitude && delivery.longitude && (
+                        <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
+                          <MapPin className="w-2.5 h-2.5" /> GPS Pinned
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm font-medium text-slate-800">
                       📍 {delivery.address}
                     </p>
@@ -205,6 +313,17 @@ export function DeliveriesAdminClient({
                       {delivery.city}
                       {delivery.region ? `, ${delivery.region}` : ""}
                     </p>
+
+                    <div className="pt-1">
+                      <a
+                        href={singleMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800 hover:underline"
+                      >
+                        <Navigation className="w-3 h-3" /> Navigate to this stop
+                      </a>
+                    </div>
                   </div>
 
                   {/* Order Items Preview */}
@@ -257,7 +376,7 @@ export function DeliveriesAdminClient({
                       onClick={() => handleUpdateStatus(delivery.id, "IN_TRANSIT")}
                       className={`px-3 py-2 text-xs font-bold rounded-lg border transition ${
                         delivery.status === "IN_TRANSIT"
-                          ? "bg-amber-600 text-white border-amber-600"
+                          ? "bg-amber-600 text-white border-amber-600 shadow-xs"
                           : "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100"
                       }`}
                     >
@@ -280,6 +399,94 @@ export function DeliveriesAdminClient({
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* MULTI-STOP ROUTE MODAL */}
+      {showRouteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-xl w-full p-6 space-y-5">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Route className="w-5 h-5 text-amber-600" />
+                <h3 className="font-extrabold text-lg text-slate-900">
+                  En Route Ride Itinerary ({enRouteDeliveries.length} Stops)
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowRouteModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600">
+              Deliveries will be navigated in sequence. The last delivery stop is set as the final destination on Google Maps, with prior stops routed as intermediate waypoints.
+            </p>
+
+            <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+              {enRouteDeliveries.map((del, idx) => {
+                const isLast = idx === enRouteDeliveries.length - 1;
+                return (
+                  <div
+                    key={del.id}
+                    className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-start justify-between gap-3 text-xs"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span
+                        className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-white shrink-0 mt-0.5 ${
+                          isLast ? "bg-amber-600" : "bg-slate-700"
+                        }`}
+                      >
+                        {idx + 1}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <strong className="text-slate-900 font-bold">
+                            {del.order.customerName}
+                          </strong>
+                          <span className="font-mono text-amber-700 text-[11px]">
+                            #{del.order.orderNumber}
+                          </span>
+                          {isLast && (
+                            <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
+                              Final Stop
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-slate-600 mt-0.5">
+                          📍 {del.address}, {del.city}
+                        </p>
+                        <p className="text-slate-500 font-mono text-[11px]">
+                          📞 {del.order.customerPhone}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <button
+                onClick={() => setShowRouteModal(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+              >
+                Close
+              </button>
+              <a
+                href={multiStopMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-md transition"
+              >
+                <Navigation className="w-3.5 h-3.5" />
+                Launch in Google Maps
+                <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </div>

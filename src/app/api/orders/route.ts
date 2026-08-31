@@ -58,6 +58,13 @@ export async function POST(request: Request) {
     const region = text(payload.region, MAX_REGION_LENGTH);
     const notes = text(payload.notes, MAX_NOTES_LENGTH);
 
+    const latitude = typeof (payload as { latitude?: unknown }).latitude === "number" && !isNaN(Number((payload as { latitude?: unknown }).latitude))
+      ? Number((payload as { latitude?: unknown }).latitude)
+      : null;
+    const longitude = typeof (payload as { longitude?: unknown }).longitude === "number" && !isNaN(Number((payload as { longitude?: unknown }).longitude))
+      ? Number((payload as { longitude?: unknown }).longitude)
+      : null;
+
     if (!name || name.length < 2 || !phone || !validPhone(phone) || !address || !city) {
       return NextResponse.json({ error: "Enter a valid name, Ghanaian phone number, address, and city." }, { status: 400 });
     }
@@ -123,7 +130,16 @@ export async function POST(request: Request) {
           unitPrice: line.unitPrice,
           totalPrice: line.totalPrice,
         })) },
-        delivery: { create: { address, city, region: region || null, status: "PENDING" } },
+        delivery: {
+          create: {
+            address,
+            city,
+            region: region || null,
+            latitude,
+            longitude,
+            status: "PENDING",
+          },
+        },
         payment: { create: { amount: total, method: "CASH", status: "PENDING" } },
       },
       select: { orderNumber: true },

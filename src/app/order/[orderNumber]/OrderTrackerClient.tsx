@@ -15,6 +15,8 @@ type Delivery = {
   address: string;
   city: string;
   region?: string | null;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
   status: string;
 };
 
@@ -244,9 +246,21 @@ export function OrderTrackerClient({
 
             {order.delivery && (
               <div>
-                <span className="text-xs text-slate-500 block uppercase font-semibold">
-                  Address
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 block uppercase font-semibold">
+                    Address
+                  </span>
+                  {order.delivery.latitude && order.delivery.longitude && (
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${order.delivery.latitude},${order.delivery.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-emerald-700 font-bold hover:underline"
+                    >
+                      📍 View on Map
+                    </a>
+                  )}
+                </div>
                 <p className="text-slate-900 font-medium">
                   {order.delivery.address}, {order.delivery.city}
                   {order.delivery.region ? `, ${order.delivery.region}` : ""}

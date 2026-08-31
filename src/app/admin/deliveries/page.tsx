@@ -37,6 +37,8 @@ export default async function DeliveriesAdminPage() {
     address: d.address,
     city: d.city,
     region: d.region,
+    latitude: d.latitude ? Number(d.latitude) : null,
+    longitude: d.longitude ? Number(d.longitude) : null,
     status: d.status,
     assignedAt: d.assignedAt ? d.assignedAt.toISOString() : null,
     deliveredAt: d.deliveredAt ? d.deliveredAt.toISOString() : null,
