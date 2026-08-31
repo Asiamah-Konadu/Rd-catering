@@ -33,7 +33,8 @@ export default async function AdminPage() {
   const role = user.role as UserRole;
 
   // Fetch initial role-scoped analytics data server-side
-  let initialAnalyticsData: unknown = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let initialAnalyticsData: any = null;
   try {
     if (role === "ADMIN") {
       initialAnalyticsData = await getAdminAnalytics("7d");
@@ -72,9 +73,9 @@ export default async function AdminPage() {
       </div>
 
       {/* Role-Based Analytics & Intelligence Dashboard */}
-      {initialAnalyticsData && (
+      {initialAnalyticsData ? (
         <AnalyticsDashboard role={role} initialData={initialAnalyticsData} />
-      )}
+      ) : null}
 
       {/* Role Action Modules */}
       <section className="space-y-4 pt-2">
