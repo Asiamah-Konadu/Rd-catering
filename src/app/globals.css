@@ -909,18 +909,6 @@ footer strong { color: var(--ink); }
     min-height: 120px;
   }
   .food-mosaic span:first-child { grid-row: auto; }
-
-@media (max-width: 520px) {
-  .hero h1 { font-size: 3.2rem; }
-  .actions .button { width: 100%; }
-  .food-mosaic {
-    height: auto;
-    grid-template-columns: 1fr 1fr;
-  }
-  .food-mosaic span {
-    min-height: 120px;
-  }
-  .food-mosaic span:first-child { grid-row: auto; }
   .menu-card-footer {
     align-items: stretch;
     flex-direction: column;
