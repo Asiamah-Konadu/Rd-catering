@@ -234,7 +234,7 @@ function RatedCard({ review }: { review: Review }) {
       </h3>
       <StarDisplay rating={review.rating} />
       {review.comment && (
-        <p className="text-sm text-slate-600 italic">"{review.comment}"</p>
+        <p className="text-sm text-slate-600 italic">&ldquo;{review.comment}&rdquo;</p>
       )}
       <p className="text-xs text-slate-400">
         Submitted{" "}
