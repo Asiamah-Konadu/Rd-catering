@@ -28,7 +28,36 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(deliveries);
+    const formatted = deliveries.map((d) => ({
+      id: d.id,
+      orderId: d.orderId,
+      address: d.address,
+      city: d.city,
+      region: d.region,
+      latitude: d.latitude ? Number(d.latitude) : null,
+      longitude: d.longitude ? Number(d.longitude) : null,
+      status: d.status,
+      assignedAt: d.assignedAt ? d.assignedAt.toISOString() : null,
+      deliveredAt: d.deliveredAt ? d.deliveredAt.toISOString() : null,
+      agent: d.agent,
+      order: {
+        id: d.order.id,
+        orderNumber: d.order.orderNumber,
+        customerName: d.order.customerName,
+        customerPhone: d.order.customerPhone,
+        customerEmail: d.order.customerEmail,
+        total: Number(d.order.total),
+        status: d.order.status,
+        notes: d.order.notes,
+        items: d.order.items.map((i) => ({
+          id: i.id,
+          name: i.name,
+          quantity: i.quantity,
+        })),
+      },
+    }));
+
+    return NextResponse.json(formatted);
   } catch (error) {
     console.error("GET /api/admin/deliveries error:", error);
     return NextResponse.json(

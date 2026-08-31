@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { UserRole } from "@prisma/client";
 import {
   Navigation,
@@ -9,6 +9,7 @@ import {
   Route,
   Phone,
   ListOrdered,
+  RefreshCw,
 } from "lucide-react";
 
 export type DeliveryRecord = {
@@ -109,11 +110,37 @@ export function DeliveriesAdminClient({
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [showRouteModal, setShowRouteModal] = useState<boolean>(false);
+  const [lastSync, setLastSync] = useState<Date>(new Date());
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3500);
   };
+
+  const fetchLatest = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch("/api/admin/deliveries");
+      if (res.ok) {
+        const data = await res.json();
+        setDeliveries(data);
+        setLastSync(new Date());
+      }
+    } catch (err) {
+      console.error("Failed to sync deliveries:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchLatest();
+    }, 10000); // Auto-poll every 10s
+
+    return () => clearInterval(interval);
+  }, [fetchLatest]);
 
   const handleUpdateStatus = async (deliveryId: string, newStatus: string) => {
     setUpdatingId(deliveryId);
@@ -155,6 +182,31 @@ export function DeliveriesAdminClient({
           ✓ {toast}
         </div>
       )}
+
+      {/* Live Status Control & Sync Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+            Live Dispatch Stream
+          </span>
+          <span className="text-xs text-slate-400">
+            • Updated {lastSync.toLocaleTimeString("en-GH", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+          </span>
+        </div>
+
+        <button
+          onClick={fetchLatest}
+          disabled={isRefreshing}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 text-xs font-semibold rounded-xl transition"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-amber-600" : ""}`} />
+          {isRefreshing ? "Syncing..." : "Refresh Feed"}
+        </button>
+      </div>
 
       {/* START RIDE MULTI-STOP HERO BANNER */}
       {enRouteDeliveries.length > 0 && (

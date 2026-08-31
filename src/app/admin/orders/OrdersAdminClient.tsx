@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { RefreshCw } from "lucide-react";
 
 type OrderItem = {
   id: string;
@@ -28,6 +29,8 @@ type Delivery = {
   address: string;
   city: string;
   region: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   status: string;
   agentId?: string | null;
   agent?: DeliveryAgentInfo | null;
@@ -93,11 +96,43 @@ export function OrdersAdminClient({
     null
   );
   const [notification, setNotification] = useState<string | null>(null);
+  const [lastSync, setLastSync] = useState<Date>(new Date());
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const showToast = (msg: string) => {
     setNotification(msg);
-    setTimeout(() => setNotification(null), 3000);
+    setTimeout(() => setNotification(null), 3500);
   };
+
+  const fetchLatest = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch("/api/admin/orders");
+      if (res.ok) {
+        const data = await res.json();
+        setOrders((prev) => {
+          // If new orders detected, alert with toast
+          if (data.length > prev.length && prev.length > 0) {
+            showToast(`🔔 ${data.length - prev.length} new order(s) received!`);
+          }
+          return data;
+        });
+        setLastSync(new Date());
+      }
+    } catch (err) {
+      console.error("Failed to sync orders:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchLatest();
+    }, 10000); // Poll every 10s
+
+    return () => clearInterval(interval);
+  }, [fetchLatest]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setUpdatingId(orderId);
@@ -182,6 +217,31 @@ export function OrdersAdminClient({
         </div>
       )}
 
+      {/* Live Status Control & Sync Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+            Live Orders Stream
+          </span>
+          <span className="text-xs text-slate-400">
+            • Updated {lastSync.toLocaleTimeString("en-GH", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+          </span>
+        </div>
+
+        <button
+          onClick={fetchLatest}
+          disabled={isRefreshing}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 text-xs font-semibold rounded-xl transition"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-amber-600" : ""}`} />
+          {isRefreshing ? "Syncing..." : "Refresh Feed"}
+        </button>
+      </div>
+
       {/* Header Actions & Filters */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
@@ -219,7 +279,7 @@ export function OrdersAdminClient({
             placeholder="Search order #, name, phone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
           />
         </div>
       </div>
@@ -280,7 +340,7 @@ export function OrdersAdminClient({
                         onChange={(e) =>
                           handleStatusChange(order.id, e.target.value)
                         }
-                        className={`text-xs font-bold px-2.5 py-1 rounded-full border cursor-pointer focus:outline-none ${
+                        className={`text-xs font-bold px-2.5 py-1 rounded-full border cursor-pointer focus:outline-hidden ${
                           STATUS_BADGE_CLASSES[order.status] ||
                           "bg-slate-100 text-slate-800"
                         }`}
@@ -298,7 +358,7 @@ export function OrdersAdminClient({
                         disabled={updatingId === order.id}
                         value={order.delivery?.agentId || ""}
                         onChange={(e) => handleAssignAgent(order.id, e.target.value)}
-                        className="text-xs border border-slate-300 bg-white rounded-lg px-2.5 py-1.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                        className="text-xs border border-slate-300 bg-white rounded-lg px-2.5 py-1.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
                       >
                         <option value="">-- Unassigned --</option>
                         {deliveryAgents.map((agent) => (
@@ -384,6 +444,11 @@ export function OrdersAdminClient({
                         ? `, ${activeModalOrder.delivery.region}`
                         : ""}
                     </p>
+                    {activeModalOrder.delivery.latitude && activeModalOrder.delivery.longitude && (
+                      <p className="text-[11px] text-emerald-700 font-mono mt-1">
+                        GPS: {activeModalOrder.delivery.latitude.toFixed(5)}, {activeModalOrder.delivery.longitude.toFixed(5)}
+                      </p>
+                    )}
                     <div className="mt-2 text-xs font-bold text-emerald-800">
                       Agent: {activeModalOrder.delivery.agent?.name || "Unassigned"}
                     </div>
