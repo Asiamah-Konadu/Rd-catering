@@ -43,12 +43,13 @@ export default function Header() {
         {navItems.map((item) => (
           <Link key={item.href} href={item.href} onClick={closeNav}>{item.label}</Link>
         ))}
-        <Link href="/cart" className="cart-link" onClick={closeNav}>
-          <ShoppingBag size={18} />
-          <span>Cart</span>
-          {count > 0 && <b>{count}</b>}
-        </Link>
       </nav>
+
+      <Link href="/cart" className="cart-link" onClick={closeNav}>
+        <ShoppingBag size={18} />
+        <span>Cart</span>
+        {count > 0 && <b>{count}</b>}
+      </Link>
     </header>
   );
 }

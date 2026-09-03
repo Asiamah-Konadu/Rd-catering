@@ -854,6 +854,11 @@ footer strong { color: var(--ink); }
     border-radius: 10px;
   }
   .site-header nav a:hover { background: var(--brand-soft); }
+  .cart-link {
+    display: flex !important;
+    position: relative;
+    z-index: 10;
+  }
   .hero {
     grid-template-columns: 1fr;
     padding: 70px 6vw;
