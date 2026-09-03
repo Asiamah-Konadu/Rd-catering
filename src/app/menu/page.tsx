@@ -1,7 +1,21 @@
+import type { Metadata } from "next";
 import MenuCard from "@/components/MenuCard";
 import { getPublicMenu } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Our Menu",
+  description:
+    "Browse Rich-Dons Catering's full menu of fresh Ghanaian dishes. From jollof rice to soups, order your favourites for delivery in Accra.",
+  alternates: { canonical: "/menu" },
+  openGraph: {
+    title: "Our Menu | Rich-Dons Catering",
+    description:
+      "Browse fresh Ghanaian dishes and add your favourites to your bag. Delivery available in Accra.",
+    url: "/menu",
+  },
+};
 
 export default async function MenuPage() {
   const categories = await getPublicMenu();
