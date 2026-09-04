@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-      url      = env("DATABASE_URL")
+    url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -167,6 +167,9 @@ model Order {
   total          Decimal        @db.Decimal(10, 2)
   status         OrderStatus    @default(PENDING)
   notes          String?
+  isScheduled    Boolean        @default(false)
+  scheduledFor   DateTime?
+  scheduledSlot  String?
   user           User?          @relation(fields: [userId], references: [id])
   items          OrderItem[]
   payment        Payment?
@@ -176,6 +179,7 @@ model Order {
   updatedAt      DateTime       @updatedAt
   @@index([status])
   @@index([createdAt])
+  @@index([isScheduled])
 }
 
 model OrderItem {

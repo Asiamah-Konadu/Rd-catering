@@ -26,6 +26,14 @@ type Review = {
   createdAt: string;
 };
 
+type Payment = {
+  id: string;
+  method: string;
+  status: string;
+  amount: number | string;
+  transactionId?: string | null;
+};
+
 type OrderData = {
   id: string;
   orderNumber: string;
@@ -38,8 +46,12 @@ type OrderData = {
   total: number | string;
   status: string;
   notes?: string | null;
+  isScheduled?: boolean;
+  scheduledFor?: string | null;
+  scheduledSlot?: string | null;
   createdAt: string;
   items: OrderItem[];
+  payment?: Payment | null;
   delivery?: Delivery | null;
   review?: Review | null;
 };
@@ -311,6 +323,21 @@ export function OrderTrackerClient({
             <p className="text-amber-100 text-sm mt-1">
               Order Ref: <strong className="font-mono">{order.orderNumber}</strong>
             </p>
+            {order.isScheduled && (
+              <div className="mt-2.5 inline-flex items-center gap-2 bg-amber-500/40 border border-amber-300/40 text-amber-50 px-3 py-1 rounded-xl text-xs font-semibold">
+                <span>📅 Scheduled Delivery:</span>
+                <strong>
+                  {order.scheduledFor
+                    ? new Date(order.scheduledFor).toLocaleDateString("en-GH", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "Tomorrow"}{" "}
+                  • {order.scheduledSlot}
+                </strong>
+              </div>
+            )}
           </div>
           <button
             onClick={fetchLatest}
@@ -321,6 +348,32 @@ export function OrderTrackerClient({
           </button>
         </div>
       </div>
+
+      {/* Scheduled Info Notice */}
+      {order.isScheduled && !isCancelled && !isDelivered && (
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-5 rounded-2xl flex items-start gap-3.5 text-amber-950 shadow-xs">
+          <span className="text-2xl">⏰</span>
+          <div className="space-y-1">
+            <h3 className="font-bold text-sm text-amber-900">
+              Scheduled Kitchen Batch & Delivery Window
+            </h3>
+            <p className="text-xs text-amber-800">
+              This order is locked into tomorrow&apos;s kitchen preparation batch for{" "}
+              <strong>{order.scheduledSlot}</strong> on{" "}
+              <strong>
+                {order.scheduledFor
+                  ? new Date(order.scheduledFor).toLocaleDateString("en-GH", {
+                      weekday: "long",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "Tomorrow"}
+              </strong>
+              . Our chefs will begin cooking fresh ahead of your dispatch time.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Progress Timeline */}
       {isCancelled ? (
@@ -485,6 +538,38 @@ export function OrderTrackerClient({
                 <p className="text-slate-900 font-medium">
                   {order.delivery.address}, {order.delivery.city}
                   {order.delivery.region ? `, ${order.delivery.region}` : ""}
+                </p>
+              </div>
+            )}
+
+            {/* Payment status badge */}
+            <div className="pt-2">
+              <span className="text-xs text-slate-500 block uppercase font-semibold">
+                Payment Status
+              </span>
+              <div className="mt-1 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold w-fit">
+                <span>✓ PAID</span>
+                <span className="text-[11px] font-normal text-emerald-700">
+                  via {order.payment?.method === "CARD" ? "Card" : "Mobile Money"}
+                </span>
+              </div>
+            </div>
+
+            {/* Schedule details if scheduled */}
+            {order.isScheduled && (
+              <div className="pt-2">
+                <span className="text-xs text-slate-500 block uppercase font-semibold">
+                  Scheduled Delivery
+                </span>
+                <p className="text-xs font-bold text-amber-900 mt-0.5">
+                  {order.scheduledFor
+                    ? new Date(order.scheduledFor).toLocaleDateString("en-GH", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "Tomorrow"}{" "}
+                  ({order.scheduledSlot})
                 </p>
               </div>
             )}

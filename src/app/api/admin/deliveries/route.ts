@@ -49,6 +49,9 @@ export async function GET() {
         total: Number(d.order.total),
         status: d.order.status,
         notes: d.order.notes,
+        isScheduled: d.order.isScheduled,
+        scheduledFor: d.order.scheduledFor ? d.order.scheduledFor.toISOString() : null,
+        scheduledSlot: d.order.scheduledSlot,
         items: d.order.items.map((i) => ({
           id: i.id,
           name: i.name,

@@ -37,6 +37,9 @@ export type DeliveryRecord = {
     total: number;
     status: string;
     notes: string | null;
+    isScheduled?: boolean;
+    scheduledFor?: string | null;
+    scheduledSlot?: string | null;
     items: {
       id: string;
       name: string;
@@ -313,6 +316,16 @@ export function DeliveriesAdminClient({
                       <strong className="text-lg font-mono text-amber-700 font-extrabold">
                         #{delivery.order.orderNumber}
                       </strong>
+                      {delivery.order.isScheduled ? (
+                        <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-md text-[10px] font-bold">
+                          <span>📅 Tomorrow:</span>
+                          <span>{delivery.order.scheduledSlot?.split(" ")[0] || "Scheduled"}</span>
+                        </div>
+                      ) : (
+                        <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-semibold">
+                          <span>⚡ ASAP (Today)</span>
+                        </div>
+                      )}
                     </div>
                     <span
                       className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${

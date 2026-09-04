@@ -106,6 +106,13 @@ function printReceipt(order: AdminOrder) {
   <div class="logo">RD <span>Catering</span></div>
   <p class="tagline">Fresh &bull; Fast &bull; Delicious</p>
 
+  ${order.isScheduled ? `
+  <div class="info-block" style="background:#fef3c7;padding:6px;border:1px solid #d97706;border-radius:4px;margin-bottom:10px;">
+    <div class="section-label" style="color:#b45309;">Scheduled Delivery</div>
+    <p><strong>${order.scheduledFor ? new Date(order.scheduledFor).toLocaleDateString("en-GH", { weekday: "short", month: "short", day: "numeric" }) : "Tomorrow"}</strong></p>
+    <p>${order.scheduledSlot || "Scheduled Slot"}</p>
+  </div>` : ""}
+
   <div class="info-block">
     <div class="section-label">Order</div>
     <p><strong>#${order.orderNumber}</strong></p>
@@ -159,7 +166,8 @@ function printReceipt(order: AdminOrder) {
 
   ${order.payment ? `
   <div style="text-align:center;margin-top:8px">
-    <span class="payment-badge">${order.payment.method.replace(/_/g, " ")} &bull; ${order.payment.status}</span>
+    <span class="payment-badge" style="border-color:#059669;color:#065f46;background:#ecfdf5;">PAID &bull; ${order.payment.method.replace(/_/g, " ")}</span>
+    ${order.payment.transactionId ? `<div style="font-size:9px;color:#666;margin-top:3px;font-family:monospace">Ref: ${order.payment.transactionId}</div>` : ""}
   </div>` : ""}
 
   ${order.notes ? `<hr /><div class="info-block"><div class="section-label">Notes</div><p>${order.notes}</p></div>` : ""}
@@ -220,6 +228,7 @@ type Payment = {
   method: string;
   status: string;
   amount: number | string;
+  transactionId?: string | null;
 };
 
 export type AdminOrder = {
@@ -234,6 +243,9 @@ export type AdminOrder = {
   total: number | string;
   status: string;
   notes: string | null;
+  isScheduled?: boolean;
+  scheduledFor?: string | null;
+  scheduledSlot?: string | null;
   createdAt: string | Date;
   items: OrderItem[];
   payment?: Payment | null;
@@ -277,6 +289,8 @@ export function OrdersAdminClient({
   const [notification, setNotification] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  const [scheduleFilter, setScheduleFilter] = useState<"ALL" | "SCHEDULED" | "ASAP">("ALL");
 
   const showToast = (msg: string) => {
     setNotification(msg);
@@ -376,16 +390,25 @@ export function OrdersAdminClient({
     }
   };
 
+  const scheduledCount = orders.filter((o) => o.isScheduled).length;
+  const asapCount = orders.filter((o) => !o.isScheduled).length;
+
   const filteredOrders = orders.filter((o) => {
     const matchesStatus =
       selectedStatus === "ALL" ? true : o.status === selectedStatus;
+    const matchesSchedule =
+      scheduleFilter === "ALL"
+        ? true
+        : scheduleFilter === "SCHEDULED"
+        ? Boolean(o.isScheduled)
+        : !o.isScheduled;
     const matchesSearch =
       searchQuery.trim() === ""
         ? true
         : o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
           o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           o.customerPhone.includes(searchQuery);
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesSchedule && matchesSearch;
   });
 
   return (
@@ -421,9 +444,62 @@ export function OrdersAdminClient({
         </button>
       </div>
 
-      {/* Header Actions & Filters */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+      {/* Schedule Timing Quick Switcher & Filters */}
+      <div className="flex flex-col gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        {/* Schedule Mode Selector Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setScheduleFilter("ALL")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                scheduleFilter === "ALL"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              All Orders ({orders.length})
+            </button>
+            <button
+              onClick={() => setScheduleFilter("SCHEDULED")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                scheduleFilter === "SCHEDULED"
+                  ? "bg-amber-600 text-white shadow-xs"
+                  : "bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100"
+              }`}
+            >
+              <span>📅 Scheduled for Tomorrow</span>
+              <span className="bg-amber-900/30 text-white text-[10px] px-1.5 py-0.2 rounded-full">
+                {scheduledCount}
+              </span>
+            </button>
+            <button
+              onClick={() => setScheduleFilter("ASAP")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                scheduleFilter === "ASAP"
+                  ? "bg-emerald-700 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              <span>⚡ Same-Day (ASAP)</span>
+              <span className="bg-slate-300 text-slate-800 text-[10px] px-1.5 py-0.2 rounded-full">
+                {asapCount}
+              </span>
+            </button>
+          </div>
+
+          <div className="w-full md:w-64">
+            <input
+              type="text"
+              placeholder="Search order #, name, phone..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+            />
+          </div>
+        </div>
+
+        {/* Kitchen Status Sub-Filter Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
           <button
             onClick={() => setSelectedStatus("ALL")}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
@@ -432,10 +508,18 @@ export function OrdersAdminClient({
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
             }`}
           >
-            All ({orders.length})
+            All Statuses
           </button>
           {ORDER_STATUSES.map((status) => {
-            const count = orders.filter((o) => o.status === status).length;
+            const count = orders.filter((o) => {
+              const matchSch =
+                scheduleFilter === "ALL"
+                  ? true
+                  : scheduleFilter === "SCHEDULED"
+                  ? Boolean(o.isScheduled)
+                  : !o.isScheduled;
+              return o.status === status && matchSch;
+            }).length;
             return (
               <button
                 key={status}
@@ -451,16 +535,6 @@ export function OrdersAdminClient({
             );
           })}
         </div>
-
-        <div className="w-full md:w-72">
-          <input
-            type="text"
-            placeholder="Search order #, name, phone..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-          />
-        </div>
       </div>
 
       {/* Orders Table */}
@@ -475,7 +549,7 @@ export function OrdersAdminClient({
             <table className="w-full text-left border-collapse text-sm">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-xs">
-                  <th className="p-4">Order #</th>
+                  <th className="p-4">Order & Timing</th>
                   <th className="p-4">Customer</th>
                   <th className="p-4">Items & Total</th>
                   <th className="p-4">Kitchen Status</th>
@@ -487,8 +561,18 @@ export function OrdersAdminClient({
                 {filteredOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-slate-50/80 transition">
                     <td className="p-4 font-mono font-bold text-amber-700">
-                      {order.orderNumber}
-                      <div className="text-[11px] font-sans font-normal text-slate-400 mt-0.5">
+                      <div>#{order.orderNumber}</div>
+                      {order.isScheduled ? (
+                        <div className="mt-1 font-sans inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-md text-[10px] font-bold">
+                          <span>📅 Scheduled:</span>
+                          <span>{order.scheduledSlot?.split(" ")[0] || "Tomorrow"}</span>
+                        </div>
+                      ) : (
+                        <div className="mt-1 font-sans inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-semibold">
+                          <span>⚡ ASAP (Today)</span>
+                        </div>
+                      )}
+                      <div className="text-[10px] font-sans font-normal text-slate-400 mt-0.5">
                         {new Date(order.createdAt).toLocaleTimeString("en-GH", {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -507,8 +591,13 @@ export function OrdersAdminClient({
                       <div className="font-bold text-slate-900">
                         GH₵ {Number(order.total).toFixed(2)}
                       </div>
-                      <div className="text-xs text-slate-500">
-                        {order.items?.reduce((acc, i) => acc + i.quantity, 0) || 0} items
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-xs text-slate-500">
+                          {order.items?.reduce((acc, i) => acc + i.quantity, 0) || 0} items
+                        </span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded">
+                          ✓ PAID ({order.payment?.method === "CARD" ? "Card" : "MoMo"})
+                        </span>
                       </div>
                     </td>
 
@@ -602,6 +691,28 @@ export function OrdersAdminClient({
               </button>
             </div>
 
+            {/* Scheduled Order Highlight Card */}
+            {activeModalOrder.isScheduled && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-4 rounded-xl flex items-center gap-3">
+                <span className="text-2xl">📅</span>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                    Scheduled For Tomorrow
+                  </h4>
+                  <p className="text-sm font-semibold text-amber-950">
+                    {activeModalOrder.scheduledFor
+                      ? new Date(activeModalOrder.scheduledFor).toLocaleDateString("en-GH", {
+                          weekday: "long",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "Tomorrow"}{" "}
+                    • <span className="text-amber-800">{activeModalOrder.scheduledSlot}</span>
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Customer & Delivery Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl text-sm">
               <div>
@@ -646,6 +757,27 @@ export function OrdersAdminClient({
                   <p className="text-slate-500 italic">No delivery detail attached</p>
                 )}
               </div>
+            </div>
+
+            {/* Payment Record Section */}
+            <div className="bg-emerald-50/70 border border-emerald-200 p-4 rounded-xl flex items-center justify-between text-xs">
+              <div>
+                <span className="font-bold uppercase tracking-wider text-emerald-900 block mb-0.5">
+                  Payment Status
+                </span>
+                <span className="font-bold text-emerald-800 text-sm">
+                  ✓ PAID IN FULL (GH₵ {Number(activeModalOrder.total).toFixed(2)})
+                </span>
+                <p className="text-emerald-700 text-[11px] mt-0.5">
+                  Method: {activeModalOrder.payment?.method === "CARD" ? "Credit / Debit Card" : "Mobile Money"}
+                </p>
+              </div>
+              {activeModalOrder.payment?.transactionId && (
+                <div className="text-right font-mono text-[10px] text-emerald-800 bg-white/80 border border-emerald-200 px-2.5 py-1.5 rounded-lg">
+                  <span className="text-slate-400 block uppercase">Transaction Ref</span>
+                  <strong>{activeModalOrder.payment.transactionId}</strong>
+                </div>
+              )}
             </div>
 
             {/* Line Items */}

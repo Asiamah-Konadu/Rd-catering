@@ -61,6 +61,9 @@ export default async function OrdersAdminPage() {
     total: Number(o.total),
     status: o.status,
     notes: o.notes,
+    isScheduled: o.isScheduled,
+    scheduledFor: o.scheduledFor ? o.scheduledFor.toISOString() : null,
+    scheduledSlot: o.scheduledSlot,
     createdAt: o.createdAt.toISOString(),
     items: o.items.map((i) => ({
       id: i.id,
@@ -82,6 +85,7 @@ export default async function OrdersAdminPage() {
           method: o.payment.method,
           status: o.payment.status,
           amount: Number(o.payment.amount),
+          transactionId: o.payment.transactionId,
         }
       : null,
     delivery: o.delivery

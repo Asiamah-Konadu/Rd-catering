@@ -48,6 +48,12 @@ export async function POST(request: Request) {
       region?: unknown;
       notes?: unknown;
       items?: unknown;
+      isScheduled?: unknown;
+      scheduledFor?: unknown;
+      scheduledSlot?: unknown;
+      paymentMethod?: unknown;
+      momoNetwork?: unknown;
+      momoPhone?: unknown;
     };
 
     const name = text(payload.name, MAX_NAME_LENGTH);
@@ -57,6 +63,48 @@ export async function POST(request: Request) {
     const city = text(payload.city, MAX_CITY_LENGTH);
     const region = text(payload.region, MAX_REGION_LENGTH);
     const notes = text(payload.notes, MAX_NOTES_LENGTH);
+
+    const isScheduled = Boolean(payload.isScheduled);
+    let scheduledFor: Date | null = null;
+    let scheduledSlot: string | null = null;
+
+    if (isScheduled) {
+      if (typeof payload.scheduledSlot !== "string" || !payload.scheduledSlot.trim()) {
+        return NextResponse.json(
+          { error: "Please select a delivery time slot for your scheduled order." },
+          { status: 400 }
+        );
+      }
+      scheduledSlot = payload.scheduledSlot.trim().slice(0, 100);
+
+      if (typeof payload.scheduledFor === "string" && payload.scheduledFor) {
+        const parsedDate = new Date(payload.scheduledFor);
+        if (!isNaN(parsedDate.getTime())) {
+          scheduledFor = parsedDate;
+        }
+      }
+
+      if (!scheduledFor) {
+        // Default to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(12, 0, 0, 0);
+        scheduledFor = tomorrow;
+      }
+    }
+
+    // Payment validation - All orders must be paid upfront
+    const paymentMethodRaw = typeof payload.paymentMethod === "string" ? payload.paymentMethod.toUpperCase() : "MOBILE_MONEY";
+    const paymentMethod = paymentMethodRaw === "CARD" ? "CARD" : "MOBILE_MONEY";
+    const momoNetwork = typeof payload.momoNetwork === "string" ? payload.momoNetwork.trim() : "MTN";
+    const momoPhone = typeof payload.momoPhone === "string" ? payload.momoPhone.trim() : phone;
+
+    if (paymentMethod === "MOBILE_MONEY" && (!momoPhone || !validPhone(momoPhone))) {
+      return NextResponse.json(
+        { error: "Enter a valid Mobile Money phone number for payment authorization." },
+        { status: 400 }
+      );
+    }
 
     const latitude = typeof (payload as { latitude?: unknown }).latitude === "number" && !isNaN(Number((payload as { latitude?: unknown }).latitude))
       ? Number((payload as { latitude?: unknown }).latitude)
@@ -113,6 +161,12 @@ export async function POST(request: Request) {
     const subtotal = orderLines.reduce((sum, line) => sum + line.totalPrice, 0);
     const fee = deliveryFee();
     const total = subtotal + fee;
+
+    const txnSuffix = crypto.randomUUID().slice(0, 8).toUpperCase();
+    const transactionId = paymentMethod === "CARD"
+      ? `CARD-TXN-${Date.now().toString().slice(-6)}-${txnSuffix}`
+      : `${momoNetwork.toUpperCase()}-MOMO-${Date.now().toString().slice(-6)}-${txnSuffix}`;
+
     const order = await prisma.$transaction(async transaction => transaction.order.create({
       data: {
         orderNumber: orderNumber(),
@@ -123,6 +177,9 @@ export async function POST(request: Request) {
         deliveryFee: fee,
         total,
         notes: notes || null,
+        isScheduled,
+        scheduledFor,
+        scheduledSlot,
         items: { create: orderLines.map(line => ({
           menuItemId: line.item.id,
           name: line.item.name,
@@ -140,12 +197,20 @@ export async function POST(request: Request) {
             status: "PENDING",
           },
         },
-        payment: { create: { amount: total, method: "CASH", status: "PENDING" } },
+        payment: {
+          create: {
+            amount: total,
+            method: paymentMethod,
+            status: "PAID",
+            transactionId,
+          },
+        },
       },
       select: { orderNumber: true },
     }));
     return NextResponse.json({ orderNumber: order.orderNumber }, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error("Failed to create order:", err);
     return NextResponse.json({ error: "Unable to create your order right now. Please try again." }, { status: 500 });
   }
 }
