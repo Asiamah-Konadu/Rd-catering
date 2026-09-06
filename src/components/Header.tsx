@@ -7,6 +7,7 @@ import { useCart } from "./cart/CartProvider";
 
 const navItems = [
   { href: "/menu", label: "Menu" },
+  { href: "/coming-soon", label: "VIP Waitlist" },
   { href: "/#how-it-works", label: "How it works" },
 ];
 

@@ -37,6 +37,13 @@ export default async function Home() {
             <span>Office & family trays</span>
             <span>Accra delivery</span>
           </div>
+          <Link
+            href="/coming-soon"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs font-bold hover:bg-amber-500/20 transition w-fit"
+          >
+            <span>🎁 Claim Free Delivery on 1st Order (Launch Code)</span>
+            <ArrowRight size={14} />
+          </Link>
           <div className="actions">
             <Link className="button primary" href="/menu">Explore the menu <ArrowRight size={18}/></Link>
             <Link className="button ghost" href="/#featured">See favourites</Link>

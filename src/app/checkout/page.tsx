@@ -15,6 +15,9 @@ import {
   Smartphone,
   ShieldCheck,
   CheckCircle2,
+  Tag,
+  Gift,
+  X,
 } from "lucide-react";
 
 type DeliveryTiming = "ASAP" | "SCHEDULED";
@@ -114,8 +117,55 @@ export default function CheckoutPage() {
     return tomorrow.toISOString();
   }, []);
 
+  const [promoCodeInput, setPromoCodeInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    discount: number;
+    description: string;
+  } | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState("");
+  const [promoSuccess, setPromoSuccess] = useState("");
+
   const delivery = items.length ? 20 : 0;
-  const total = subtotal + delivery;
+  const promoDiscount = appliedPromo ? Math.min(delivery, appliedPromo.discount) : 0;
+  const total = Math.max(0, subtotal + delivery - promoDiscount);
+
+  async function handleApplyPromo() {
+    if (!promoCodeInput.trim()) return;
+    setPromoLoading(true);
+    setPromoError("");
+    setPromoSuccess("");
+    try {
+      const res = await fetch("/api/promo/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoCodeInput.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Invalid promo code.");
+      }
+      setAppliedPromo({
+        code: data.code,
+        discount: Number(data.discountAmount) || 20,
+        description: data.description || "Free Delivery Applied",
+      });
+      setPromoSuccess(`🎉 Free delivery applied with ${data.code}!`);
+      setPromoCodeInput("");
+    } catch (err: unknown) {
+      setPromoError(err instanceof Error ? err.message : "Failed to apply promo code");
+      setAppliedPromo(null);
+    } finally {
+      setPromoLoading(false);
+    }
+  }
+
+  function handleRemovePromo() {
+    setAppliedPromo(null);
+    setPromoSuccess("");
+    setPromoError("");
+  }
 
   const handleLocationSelect = (loc: LocationData) => {
     setForm((prev) => ({
@@ -158,6 +208,7 @@ export default function CheckoutPage() {
           paymentMethod,
           momoNetwork,
           momoPhone: payloadMomoPhone,
+          promoCode: appliedPromo?.code || null,
           items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
         }),
       });
@@ -670,6 +721,62 @@ export default function CheckoutPage() {
             ))}
           </div>
 
+          {/* ─── PROMO CODE VOUCHER SECTION ──────────────────────── */}
+          <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+              <Tag className="w-3.5 h-3.5 text-amber-600" />
+              <span>Have a Launch Promo Code?</span>
+            </div>
+
+            {appliedPromo ? (
+              <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div>
+                    <div className="text-xs font-bold text-emerald-900">{appliedPromo.code}</div>
+                    <div className="text-[10px] text-emerald-700">Free delivery applied (-GH₵ 20.00)</div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemovePromo}
+                  className="p-1 hover:bg-emerald-100 rounded text-emerald-800 transition"
+                  title="Remove promo code"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. RDFREE-ABC123"
+                  value={promoCodeInput}
+                  onChange={(e) => {
+                    setPromoCodeInput(e.target.value.toUpperCase());
+                    setPromoError("");
+                  }}
+                  className="flex-1 px-3 py-1.5 text-xs uppercase font-mono tracking-wider border border-slate-300 rounded-lg bg-white focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyPromo}
+                  disabled={promoLoading || !promoCodeInput.trim()}
+                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition shrink-0"
+                >
+                  {promoLoading ? "..." : "Apply"}
+                </button>
+              </div>
+            )}
+
+            {promoError && (
+              <p className="text-[11px] text-rose-600 font-medium">{promoError}</p>
+            )}
+            {promoSuccess && !promoError && (
+              <p className="text-[11px] text-emerald-700 font-medium">{promoSuccess}</p>
+            )}
+          </div>
+
           <div className="border-t border-slate-100 pt-3 space-y-2 text-sm">
             <p className="flex justify-between text-slate-600">
               <span>Subtotal</span>
@@ -679,6 +786,12 @@ export default function CheckoutPage() {
               <span>Delivery Fee</span>
               <b>GH₵ {delivery.toFixed(2)}</b>
             </p>
+            {promoDiscount > 0 && (
+              <p className="flex justify-between text-emerald-700 font-medium">
+                <span>Free Delivery Promo</span>
+                <b>- GH₵ {promoDiscount.toFixed(2)}</b>
+              </p>
+            )}
             <hr className="border-slate-200" />
             <p className="total flex justify-between items-center text-lg font-extrabold text-slate-900 pt-1">
               <span>Total to Pay</span>

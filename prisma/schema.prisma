@@ -170,6 +170,7 @@ model Order {
   isScheduled    Boolean        @default(false)
   scheduledFor   DateTime?
   scheduledSlot  String?
+  promoCode      String?
   user           User?          @relation(fields: [userId], references: [id])
   items          OrderItem[]
   payment        Payment?
@@ -180,6 +181,22 @@ model Order {
   @@index([status])
   @@index([createdAt])
   @@index([isScheduled])
+}
+
+model WaitlistEntry {
+  id            String    @id @default(uuid())
+  contact       String    @unique
+  contactType   String    // PHONE or EMAIL
+  name          String?
+  promoCode     String    @unique
+  isUsed        Boolean   @default(false)
+  usedAt        DateTime?
+  usedInOrderId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([contact])
+  @@index([promoCode])
 }
 
 model OrderItem {

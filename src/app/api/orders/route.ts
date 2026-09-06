@@ -54,6 +54,7 @@ export async function POST(request: Request) {
       paymentMethod?: unknown;
       momoNetwork?: unknown;
       momoPhone?: unknown;
+      promoCode?: unknown;
     };
 
     const name = text(payload.name, MAX_NAME_LENGTH);
@@ -160,57 +161,101 @@ export async function POST(request: Request) {
     });
     const subtotal = orderLines.reduce((sum, line) => sum + line.totalPrice, 0);
     const fee = deliveryFee();
-    const total = subtotal + fee;
+
+    const promoCodeRaw = typeof payload.promoCode === "string" ? payload.promoCode.trim().toUpperCase() : null;
 
     const txnSuffix = crypto.randomUUID().slice(0, 8).toUpperCase();
     const transactionId = paymentMethod === "CARD"
       ? `CARD-TXN-${Date.now().toString().slice(-6)}-${txnSuffix}`
       : `${momoNetwork.toUpperCase()}-MOMO-${Date.now().toString().slice(-6)}-${txnSuffix}`;
 
-    const order = await prisma.$transaction(async transaction => transaction.order.create({
-      data: {
-        orderNumber: orderNumber(),
-        customerName: name,
-        customerPhone: phone,
-        customerEmail: email || null,
-        subtotal,
-        deliveryFee: fee,
-        total,
-        notes: notes || null,
-        isScheduled,
-        scheduledFor,
-        scheduledSlot,
-        items: { create: orderLines.map(line => ({
-          menuItemId: line.item.id,
-          name: line.item.name,
-          quantity: line.quantity,
-          unitPrice: line.unitPrice,
-          totalPrice: line.totalPrice,
-        })) },
-        delivery: {
-          create: {
-            address,
-            city,
-            region: region || null,
-            latitude,
-            longitude,
-            status: "PENDING",
+    const order = await prisma.$transaction(async transaction => {
+      let discount = 0;
+      let validPromoCode: string | null = null;
+
+      if (promoCodeRaw) {
+        const promoEntry = await transaction.waitlistEntry.findUnique({
+          where: { promoCode: promoCodeRaw },
+        });
+
+        if (!promoEntry) {
+          throw new Error("Invalid promo code.");
+        }
+        if (promoEntry.isUsed) {
+          throw new Error("This early-bird promo code has already been redeemed.");
+        }
+
+        // Free delivery perk: discount equals delivery fee
+        discount = fee;
+        validPromoCode = promoEntry.promoCode;
+      }
+
+      const finalTotal = Math.max(0, subtotal + fee - discount);
+
+      const createdOrder = await transaction.order.create({
+        data: {
+          orderNumber: orderNumber(),
+          customerName: name,
+          customerPhone: phone,
+          customerEmail: email || null,
+          subtotal,
+          deliveryFee: fee,
+          discount,
+          total: finalTotal,
+          promoCode: validPromoCode,
+          notes: notes || null,
+          isScheduled,
+          scheduledFor,
+          scheduledSlot,
+          items: {
+            create: orderLines.map(line => ({
+              menuItemId: line.item.id,
+              name: line.item.name,
+              quantity: line.quantity,
+              unitPrice: line.unitPrice,
+              totalPrice: line.totalPrice,
+            })),
+          },
+          delivery: {
+            create: {
+              address,
+              city,
+              region: region || null,
+              latitude,
+              longitude,
+              status: "PENDING",
+            },
+          },
+          payment: {
+            create: {
+              amount: finalTotal,
+              method: paymentMethod,
+              status: "PAID",
+              transactionId,
+            },
           },
         },
-        payment: {
-          create: {
-            amount: total,
-            method: paymentMethod,
-            status: "PAID",
-            transactionId,
+        select: { id: true, orderNumber: true },
+      });
+
+      if (validPromoCode) {
+        await transaction.waitlistEntry.update({
+          where: { promoCode: validPromoCode },
+          data: {
+            isUsed: true,
+            usedAt: new Date(),
+            usedInOrderId: createdOrder.id,
           },
-        },
-      },
-      select: { orderNumber: true },
-    }));
+        });
+      }
+
+      return createdOrder;
+    });
+
     return NextResponse.json({ orderNumber: order.orderNumber }, { status: 201 });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Failed to create order:", err);
-    return NextResponse.json({ error: "Unable to create your order right now. Please try again." }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : "Unable to create your order right now. Please try again.";
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 }
