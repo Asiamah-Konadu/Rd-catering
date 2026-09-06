@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Rich-Dons Catering - Fresh Ghanaian Food, Delivered in Accra";
+export const alt = "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -16,108 +16,127 @@ export default function OGImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #1a0a00 0%, #3d1a00 50%, #1a0a00 100%)",
-          fontFamily: "Georgia, serif",
+          background: "linear-gradient(135deg, #180d04 0%, #2e1605 50%, #150a02 100%)",
+          fontFamily: "system-ui, -apple-system, sans-serif",
           position: "relative",
           overflow: "hidden",
+          padding: "40px",
         }}
       >
-        {/* Decorative blobs */}
+        {/* Glow backdrop circles */}
         <div
           style={{
             position: "absolute",
-            top: "-120px",
-            right: "-120px",
-            width: "480px",
-            height: "480px",
+            top: "-100px",
+            right: "-100px",
+            width: "450px",
+            height: "450px",
             borderRadius: "50%",
-            background: "rgba(210, 120, 30, 0.15)",
+            background: "rgba(245, 158, 11, 0.15)",
+            filter: "blur(60px)",
             display: "flex",
           }}
         />
         <div
           style={{
             position: "absolute",
-            bottom: "-80px",
-            left: "-80px",
-            width: "320px",
-            height: "320px",
+            bottom: "-100px",
+            left: "-100px",
+            width: "450px",
+            height: "450px",
             borderRadius: "50%",
-            background: "rgba(210, 120, 30, 0.1)",
+            background: "rgba(234, 88, 12, 0.15)",
+            filter: "blur(60px)",
             display: "flex",
           }}
         />
 
-        {/* Brand name */}
+        {/* Top VIP Badge */}
         <div
           style={{
-            fontSize: "18px",
+            display: "flex",
+            alignItems: "center",
+            padding: "8px 20px",
+            background: "rgba(245, 158, 11, 0.15)",
+            border: "1px solid rgba(245, 158, 11, 0.35)",
+            borderRadius: "9999px",
+            color: "#fbbf24",
+            fontSize: "15px",
             fontWeight: "700",
-            letterSpacing: "6px",
+            letterSpacing: "2px",
             textTransform: "uppercase",
-            color: "#d2781e",
             marginBottom: "24px",
+          }}
+        >
+          🇬🇭 ACCRA PRE-LAUNCH • VIP EARLY ACCESS
+        </div>
+
+        {/* Brand Name */}
+        <div
+          style={{
+            fontSize: "64px",
+            fontWeight: "900",
+            color: "#ffffff",
+            textAlign: "center",
+            lineHeight: 1.1,
+            letterSpacing: "-1px",
             display: "flex",
           }}
         >
           RICH-DONS CATERING
         </div>
 
-        {/* Amber divider */}
+        {/* Tagline */}
         <div
           style={{
-            width: "80px",
-            height: "3px",
-            background: "linear-gradient(90deg, transparent, #d2781e, transparent)",
-            borderRadius: "2px",
-            marginBottom: "32px",
-            display: "flex",
-          }}
-        />
-
-        {/* Main headline */}
-        <div
-          style={{
-            fontSize: "64px",
-            fontWeight: "800",
-            color: "#fff8f0",
-            textAlign: "center",
-            lineHeight: 1.1,
-            letterSpacing: "-1px",
-            maxWidth: "900px",
-            display: "flex",
-          }}
-        >
-          Fresh Ghanaian Food
-        </div>
-
-        {/* Sub-headline */}
-        <div
-          style={{
-            fontSize: "40px",
-            fontWeight: "400",
-            fontStyle: "italic",
-            color: "#d2781e",
+            fontSize: "32px",
+            fontWeight: "600",
+            color: "#f59e0b",
             textAlign: "center",
             marginTop: "12px",
             display: "flex",
           }}
         >
-          Delivered in Accra
+          Fresh Ghanaian Food, Coming to Your Doorstep.
         </div>
 
-        {/* Tagline */}
+        {/* Sub-bullet items */}
         <div
           style={{
-            marginTop: "40px",
-            fontSize: "22px",
-            color: "#c4a882",
-            textAlign: "center",
-            letterSpacing: "1px",
             display: "flex",
+            alignItems: "center",
+            gap: "24px",
+            marginTop: "32px",
+            color: "#e2e8f0",
+            fontSize: "18px",
+            fontWeight: "500",
           }}
         >
-          Office meals · Family trays · Same-day favourites
+          <span>🍚 Smoky Jollof</span>
+          <span>•</span>
+          <span>🧇 Fresh Waffles</span>
+          <span>•</span>
+          <span>🐟 Banku & Tilapia</span>
+          <span>•</span>
+          <span>🥘 Special Waakye</span>
+        </div>
+
+        {/* Perk highlight pill */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginTop: "36px",
+            padding: "12px 28px",
+            background: "linear-gradient(90deg, #d97706, #b45309)",
+            borderRadius: "16px",
+            color: "#ffffff",
+            fontSize: "18px",
+            fontWeight: "700",
+            boxShadow: "0 10px 25px -5px rgba(217, 119, 6, 0.4)",
+          }}
+        >
+          🎁 Claim Free Delivery on Your 1st Order (Launch Code)
         </div>
       </div>
     ),
