@@ -1,18 +1,16 @@
 'use client';
 
 import Link from "next/link";
-import { Menu, ShoppingBag, X } from "lucide-react";
+import { Menu, X, Gift } from "lucide-react";
 import { useState } from "react";
-import { useCart } from "./cart/CartProvider";
 
 const navItems = [
-  { href: "/menu", label: "Menu" },
-  { href: "/coming-soon", label: "VIP Waitlist" },
-  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#waitlist", label: "Join Waitlist" },
+  { href: "/#sneak-peek", label: "Sneak Peek Menu" },
+  { href: "/#about-launch", label: "Accra Launch" },
 ];
 
 export default function Header() {
-  const { count } = useCart();
   const [navOpen, setNavOpen] = useState(false);
 
   function closeNav() {
@@ -42,15 +40,22 @@ export default function Header() {
 
       <nav id="site-navigation" className={navOpen ? "open" : ""}>
         {navItems.map((item) => (
-          <Link key={item.href} href={item.href} onClick={closeNav}>{item.label}</Link>
+          <Link key={item.href} href={item.href} onClick={closeNav}>
+            {item.label}
+          </Link>
         ))}
       </nav>
 
-      <Link href="/cart" className="cart-link" onClick={closeNav}>
-        <ShoppingBag size={18} />
-        <span>Cart</span>
-        {count > 0 && <b>{count}</b>}
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/#waitlist"
+          onClick={closeNav}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-sm transition"
+        >
+          <Gift className="w-3.5 h-3.5" />
+          <span>Free Delivery Code</span>
+        </Link>
+      </div>
     </header>
   );
 }

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from "react";
+import Image from "next/image";
+import CountdownTimer from "./CountdownTimer";
 import {
   Gift,
   CheckCircle2,
@@ -12,11 +14,13 @@ import {
   Clock,
   ShieldCheck,
   Flame,
+  ChevronDown,
 } from "lucide-react";
 
 interface TeaserItem {
   id: string;
   name: string;
+  imageSrc: string;
   emoji: string;
   tagline: string;
   description: string;
@@ -27,49 +31,55 @@ const TEASER_MENU: TeaserItem[] = [
   {
     id: "jollof",
     name: "Smoky Ghanaian Jollof",
+    imageSrc: "/coming-soon/jolof.avif",
     emoji: "🍚",
     tagline: "The one you argue about. Ours settles it.",
-    description: "Smoky, rich, perfectly spiced firewood-style Jollof rice served with succulent protein and spicy shito.",
+    description: "Smoky, rich, perfectly spiced firewood-style Jollof rice served with seasoned chicken and authentic homemade shito.",
     highlight: "Customer Favourite",
   },
   {
     id: "waffles",
     name: "Golden Sweet Waffles",
+    imageSrc: "/coming-soon/Waffle.jpg",
     emoji: "🧇",
     tagline: "Sweet, golden, made to order.",
-    description: "Fluffy Belgian-style waffles made fresh for breakfast, sweet cravings, or dessert.",
+    description: "Crispy-edged, fluffy Belgian-style waffles made fresh for breakfast meetings, sweet cravings, or afternoon treats.",
     highlight: "Freshly Made",
   },
   {
     id: "banku",
     name: "Banku & Grilled Tilapia",
+    imageSrc: "/coming-soon/banku-and-tilapia.jpg",
     emoji: "🐟",
     tagline: "Grilled fresh. Served hot. No shortcuts.",
-    description: "Hot, soft banku paired with seasoned charcoal-grilled tilapia, freshly ground pepper and diced onions.",
+    description: "Steaming hot, soft banku paired with fresh charcoal-grilled tilapia, freshly ground red and green pepper, and sliced onions.",
     highlight: "Local Classic",
   },
   {
     id: "fried-rice",
     name: "Fried Rice & Crispy Chicken",
+    imageSrc: "/coming-soon/fried-rice.png",
     emoji: "🍗",
     tagline: "Office lunch, solved.",
-    description: "Generous portions of stir-fried rice loaded with veggies, seasoned spices, and tender golden chicken.",
+    description: "Generous portions of aromatic Ghanaian stir-fried rice with mixed vegetables and crispy golden chicken.",
     highlight: "Workday Fuel",
   },
   {
     id: "waakye",
     name: "Special Waakye Platter",
+    imageSrc: "/coming-soon/waakye.jpg",
     emoji: "🥘",
     tagline: "A little bit of everything, done right.",
-    description: "The full waakye experience — slow-cooked rice & beans, spaghetti/talia, boiled egg, wele, and black shito.",
+    description: "The full Ghanaian waakye feast — tender rice & beans, spaghetti (talia), boiled egg, seasoned wele, and rich black shito.",
     highlight: "Accra Essential",
   },
   {
     id: "smoothies",
     name: "Chilled Smoothies & Fresh Juices",
+    imageSrc: "/coming-soon/smoothies.jpg",
     emoji: "🥤",
     tagline: "Something cold to go with something good.",
-    description: "100% natural tropical smoothies and cold-pressed juices to refresh your day.",
+    description: "100% natural tropical fruit smoothies and cold-pressed juices to keep you refreshed throughout the day.",
     highlight: "Pure Refreshment",
   },
 ];
@@ -127,43 +137,51 @@ export default function WaitlistSection() {
   }
 
   const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(
-    `Hey! I just claimed my Early-Bird Free Delivery promo code for Rich-Dons Catering in Accra: *${signupResult?.promoCode}*. Get yours before launch at https://rd-catering.vercel.app/coming-soon`
+    `Hey! I just claimed my Early-Bird Free Delivery promo code for Rich-Dons Catering in Accra: *${signupResult?.promoCode}*. Claim yours before launch: https://rd-catering.vercel.app`
   )}`;
 
   return (
-    <div className="w-full space-y-12">
-      {/* ─── HERO WAITLIST CARD ──────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-amber-950 via-slate-900 to-stone-950 text-white p-6 sm:p-10 shadow-2xl border border-amber-500/20">
-        {/* Glow ambient effects */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-orange-600/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="w-full space-y-16">
+      {/* ─── HERO WAITLIST & COUNTDOWN CARD ──────────────────────── */}
+      <section
+        id="waitlist"
+        className="relative overflow-hidden rounded-3xl bg-linear-to-br from-amber-950 via-slate-900 to-stone-950 text-white p-6 sm:p-12 shadow-2xl border border-amber-500/25"
+      >
+        {/* Glow ambient background lights */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-orange-600/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-2xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
+        <div className="relative z-10 max-w-3xl mx-auto text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>VIP Launch Early Access • Accra, Ghana</span>
+            <span>Pre-Launch VIP Early Access • Accra, Ghana</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-tight">
             Fresh Ghanaian Food,{" "}
             <span className="bg-linear-to-r from-amber-300 via-amber-400 to-orange-400 bg-clip-text text-transparent">
               Coming to Your Doorstep.
             </span>
           </h1>
 
-          <p className="text-slate-300 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl mx-auto">
-            Jollof, waffles, banku and more — freshly prepared and delivered fast to your office or home in Accra. Join the waitlist to claim your exclusive early-bird perk.
+          <p className="text-slate-300 text-sm sm:text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
+            Accra&apos;s newest destination for real home-cooked Ghanaian flavours. Jollof, banku, waakye, waffles, and more — delivered hot & fast to your office or home.
           </p>
 
-          {/* Perk Callout Card */}
-          <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-amber-400/10 border border-amber-400/20 text-amber-200 text-xs sm:text-sm font-semibold text-left">
+          {/* Live Countdown Timer */}
+          <div className="py-2">
+            <CountdownTimer />
+          </div>
+
+          {/* Perk Callout Badge */}
+          <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-amber-400/10 border border-amber-400/20 text-amber-200 text-xs sm:text-sm font-semibold text-left max-w-xl mx-auto">
             <Gift className="w-5 h-5 text-amber-400 shrink-0" />
             <span>
-              <strong>Early-Bird Perk:</strong> Get a unique single-use code for <strong>FREE DELIVERY</strong> on your 1st order!
+              <strong>Early-Bird Perk:</strong> Join today and receive a unique single-use code for <strong>FREE DELIVERY</strong> on your 1st order when we launch!
             </span>
           </div>
 
-          {/* Form or Result View */}
+          {/* Sign-up Form or Confirmation Voucher */}
           {!signupResult ? (
             <form onSubmit={handleSubmit} className="mt-8 space-y-4 max-w-lg mx-auto text-left">
               {/* Toggle switch for Phone vs Email */}
@@ -198,10 +216,10 @@ export default function WaitlistSection() {
                   placeholder="Your Name (Optional)"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-white placeholder:text-slate-500 text-sm focus:outline-hidden focus:border-amber-400 transition"
+                  className="w-full px-4 py-3.5 rounded-xl bg-slate-900/90 border border-slate-700 text-white placeholder:text-slate-500 text-sm focus:outline-hidden focus:border-amber-400 transition"
                 />
 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type={contactMode === "EMAIL" ? "email" : "tel"}
                     required
@@ -215,18 +233,18 @@ export default function WaitlistSection() {
                       setContact(e.target.value);
                       setError("");
                     }}
-                    className="flex-1 px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-white placeholder:text-slate-500 text-sm focus:outline-hidden focus:border-amber-400 transition"
+                    className="flex-1 px-4 py-3.5 rounded-xl bg-slate-900/90 border border-slate-700 text-white placeholder:text-slate-500 text-sm focus:outline-hidden focus:border-amber-400 transition"
                   />
                   <button
                     type="submit"
                     disabled={loading || !contact.trim()}
-                    className="px-5 py-3 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition shadow-lg shadow-amber-600/30 flex items-center gap-2 shrink-0"
+                    className="px-6 py-3.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
                   >
                     {loading ? (
-                      "Generating..."
+                      "Generating Code..."
                     ) : (
                       <>
-                        <span>Get Code</span>
+                        <span>Get Free Delivery Code</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}
@@ -235,48 +253,50 @@ export default function WaitlistSection() {
               </div>
 
               {error && (
-                <p className="text-xs text-rose-400 bg-rose-950/50 border border-rose-800 p-2.5 rounded-xl">
+                <p className="text-xs text-rose-400 bg-rose-950/50 border border-rose-800 p-3 rounded-xl">
                   {error}
                 </p>
               )}
 
               <p className="text-[11px] text-slate-400 text-center">
-                🔒 No spam — just a heads up with your voucher code the day we launch.
+                🔒 No spam — just a reminder with your voucher code on launch day.
               </p>
             </form>
           ) : (
             /* ─── ON-SCREEN VOUCHER CONFIRMATION ───────────────────── */
-            <div className="mt-8 p-6 rounded-2xl bg-slate-900/90 border border-amber-500/40 text-left space-y-5 animate-fadeIn">
+            <div className="mt-8 p-6 sm:p-8 rounded-2xl bg-slate-900/95 border border-amber-500/50 text-left space-y-6 animate-fadeIn shadow-xl">
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-7 h-7 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-8 h-8 text-emerald-400 shrink-0" />
                 <div>
-                  <h3 className="font-bold text-white text-lg">
+                  <h3 className="font-bold text-white text-lg sm:text-xl">
                     {signupResult.alreadyRegistered
-                      ? "Welcome Back! Here is Your Code"
+                      ? "Welcome Back! Here is Your Unique Voucher Code"
                       : "You're On The VIP Launch List!"}
                   </h3>
-                  <p className="text-xs text-slate-300">{signupResult.message}</p>
+                  <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
+                    {signupResult.message}
+                  </p>
                 </div>
               </div>
 
-              {/* Promo Code Voucher Box */}
-              <div className="p-4 rounded-xl bg-linear-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-2 border-dashed border-amber-400/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Promo Code Voucher Card */}
+              <div className="p-5 rounded-2xl bg-linear-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-2 border-dashed border-amber-400/60 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="space-y-1 text-center sm:text-left">
-                  <span className="text-[10px] uppercase tracking-wider font-bold text-amber-300">
-                    Your One-Time Free Delivery Voucher Code
+                  <span className="text-[11px] uppercase tracking-wider font-extrabold text-amber-300">
+                    Your One-Time Free Delivery Code
                   </span>
-                  <div className="font-mono text-2xl font-extrabold text-white tracking-wider">
+                  <div className="font-mono text-3xl font-extrabold text-white tracking-wider">
                     {signupResult.promoCode}
                   </div>
-                  <p className="text-xs text-amber-200/90">
-                    🎁 Free Delivery (GH₵ 20.00 off) on your first order
+                  <p className="text-xs text-amber-200/90 font-medium">
+                    🎁 Free Delivery (GH₵ 20.00 off) on your first order when we launch on Nov 6.
                   </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="w-full sm:w-auto px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shrink-0"
+                  className="w-full sm:w-auto px-5 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-md shrink-0 cursor-pointer"
                 >
                   {copied ? (
                     <>
@@ -297,106 +317,153 @@ export default function WaitlistSection() {
                   href={whatsappShareUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 text-center shadow-md"
+                  className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 text-center shadow-md cursor-pointer"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Share on WhatsApp</span>
+                  <Send className="w-4 h-4" />
+                  <span>Share with Friends on WhatsApp</span>
                 </a>
                 <button
                   type="button"
                   onClick={() => setSignupResult(null)}
-                  className="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition"
+                  className="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-semibold rounded-xl transition cursor-pointer"
                 >
                   Register Another Contact
                 </button>
               </div>
             </div>
           )}
-        </div>
-      </div>
 
-      {/* ─── MENU TEASERS GRID ───────────────────────────────────── */}
-      <section className="space-y-6">
+          {/* Quick jump to menu teasers */}
+          <div className="pt-4">
+            <a
+              href="#sneak-peek"
+              className="inline-flex items-center gap-1.5 text-xs text-amber-300/80 hover:text-amber-200 transition font-medium"
+            >
+              <span>Explore the Sneak Peek Menu</span>
+              <ChevronDown className="w-3.5 h-3.5 animate-bounce" />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── MENU SNEAK PEEK GRID WITH REAL FOOD IMAGES ──────────── */}
+      <section id="sneak-peek" className="space-y-8 scroll-mt-24">
         <div className="text-center space-y-2 max-w-xl mx-auto">
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
-            Sneak Peek
+          <span className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-3.5 py-1 rounded-full">
+            Sneak Peek Menu
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
             What&apos;s Cooking for Launch
           </h2>
-          <p className="text-slate-600 text-sm">
-            Generous portions, authentic spices, and made-to-order Ghanaian favourites.
+          <p className="text-slate-600 text-sm sm:text-base">
+            Authentic recipes, generous portions, and premium Ghanaian ingredients. Here is a preview of what you can order on launch day.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {TEASER_MENU.map((item) => (
             <div
               key={item.id}
-              className="relative p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md transition flex flex-col justify-between group"
+              className="group overflow-hidden rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
             >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-4xl" role="img" aria-label={item.name}>
-                    {item.emoji}
-                  </span>
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-slate-950 px-2.5 py-1 rounded-full shadow-xs">
-                    Coming Soon
-                  </span>
+              {/* Card Image Header */}
+              <div className="relative w-full h-52 bg-slate-100 overflow-hidden">
+                <Image
+                  src={item.imageSrc}
+                  alt={item.name}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+
+                {/* Coming Soon Badge Overlay */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 text-slate-950 text-[11px] font-extrabold uppercase tracking-wider shadow-lg">
+                  <span>Coming Soon</span>
                 </div>
 
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base group-hover:text-amber-700 transition">
+                {/* Emoji / Food Pill */}
+                <div className="absolute bottom-3 left-3 text-2xl drop-shadow-md">
+                  {item.emoji}
+                </div>
+              </div>
+
+              {/* Card Content */}
+              <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-amber-700 transition">
                     {item.name}
                   </h3>
-                  <p className="text-xs font-semibold text-amber-800 italic mt-0.5">
+                  <p className="text-xs font-semibold text-amber-800 italic">
                     &ldquo;{item.tagline}&rdquo;
+                  </p>
+                  <p className="text-xs text-slate-600 leading-relaxed pt-1">
+                    {item.description}
                   </p>
                 </div>
 
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {item.description}
-                </p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                <span className="font-semibold text-amber-900">{item.highlight}</span>
-                <span className="text-slate-400">Accra Fast Delivery</span>
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="font-bold text-amber-900 bg-amber-50 px-2.5 py-1 rounded-lg">
+                    {item.highlight}
+                  </span>
+                  <a
+                    href="#waitlist"
+                    className="text-amber-700 font-bold hover:text-amber-900 transition flex items-center gap-1 text-[11px]"
+                  >
+                    <span>Get Launch Code</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ─── TRUST & VALUE BADGES ────────────────────────────────── */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6 bg-amber-50/70 border border-amber-200/60 rounded-2xl">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-white text-amber-700 rounded-xl shadow-xs shrink-0">
-            <Flame className="w-5 h-5" />
+      {/* ─── ABOUT ACCRA LAUNCH & VALUE PROPOSITIONS ─────────────── */}
+      <section
+        id="about-launch"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-8 bg-amber-50/70 border border-amber-200/60 rounded-3xl"
+      >
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-white text-amber-700 rounded-2xl shadow-xs shrink-0">
+            <Flame className="w-6 h-6" />
           </div>
-          <div>
-            <h4 className="font-bold text-slate-900 text-sm">Real Home-Cooked Taste</h4>
-            <p className="text-xs text-slate-600">Fresh ingredients, traditional Ghanaian recipes.</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-white text-amber-700 rounded-xl shadow-xs shrink-0">
-            <Clock className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-900 text-sm">On-Time Accra Dispatch</h4>
-            <p className="text-xs text-slate-600">Office lunch or home dinner delivered hot.</p>
+          <div className="space-y-1">
+            <h4 className="font-bold text-slate-900 text-sm sm:text-base">
+              Real Home-Cooked Taste
+            </h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              No shortcuts, no compromise. Fresh ingredients and traditional Ghanaian recipes.
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-white text-amber-700 rounded-xl shadow-xs shrink-0">
-            <ShieldCheck className="w-5 h-5" />
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-white text-amber-700 rounded-2xl shadow-xs shrink-0">
+            <Clock className="w-6 h-6" />
           </div>
-          <div>
-            <h4 className="font-bold text-slate-900 text-sm">Guaranteed Early Perk</h4>
-            <p className="text-xs text-slate-600">Free delivery voucher stored to your contact.</p>
+          <div className="space-y-1">
+            <h4 className="font-bold text-slate-900 text-sm sm:text-base">
+              On-Time Accra Dispatch
+            </h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Dispatched swiftly across Accra for office lunch hours, meetings, and family dinners.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-white text-amber-700 rounded-2xl shadow-xs shrink-0">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-bold text-slate-900 text-sm sm:text-base">
+              Locked Early Perk
+            </h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Single-use free delivery promo code securely stored to your phone or email.
+            </p>
           </div>
         </div>
       </section>
