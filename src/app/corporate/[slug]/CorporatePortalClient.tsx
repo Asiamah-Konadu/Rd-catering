@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Building2,
   Clock,
   MapPin,
   Package,
@@ -12,7 +11,6 @@ import {
   ShoppingBag,
   Plus,
   Minus,
-  Trash2,
   ChevronRight,
   Utensils,
   Smartphone,

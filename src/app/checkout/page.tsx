@@ -19,7 +19,6 @@ import {
   Gift,
   X,
   Building2,
-  Percent,
 } from "lucide-react";
 
 type DeliveryTiming = "ASAP" | "SCHEDULED";

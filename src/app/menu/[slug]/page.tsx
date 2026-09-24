@@ -12,8 +12,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const item = await getPublicMenuItem(slug);
   if (!item) return { title: "Menu Item Not Found" };
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://richdonscatering.com";
-
   return {
     title: item.name,
     description:

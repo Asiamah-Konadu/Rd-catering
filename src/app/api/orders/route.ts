@@ -195,7 +195,7 @@ export async function POST(request: Request) {
     const subtotal = orderLines.reduce((sum, line) => sum + line.totalPrice, 0);
     
     // Corporate batch orders can unlock free delivery
-    let fee = company?.freeDelivery ? 0 : deliveryFee();
+    const fee = company?.freeDelivery ? 0 : deliveryFee();
 
     const promoCodeRaw = typeof payload.promoCode === "string" ? payload.promoCode.trim().toUpperCase() : null;
 

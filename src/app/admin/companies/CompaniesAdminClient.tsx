@@ -14,8 +14,6 @@ import {
   Package,
   Tag,
   Clock,
-  Phone,
-  Mail,
   MapPin,
   TrendingUp,
   Users,
