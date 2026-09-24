@@ -171,6 +171,9 @@ model Order {
   scheduledFor   DateTime?
   scheduledSlot  String?
   promoCode      String?
+  companyId      String?
+  company        Company?       @relation(fields: [companyId], references: [id])
+  staffDepartment String?
   user           User?          @relation(fields: [userId], references: [id])
   items          OrderItem[]
   payment        Payment?
@@ -181,6 +184,33 @@ model Order {
   @@index([status])
   @@index([createdAt])
   @@index([isScheduled])
+  @@index([companyId])
+}
+
+model Company {
+  id                String    @id @default(uuid())
+  name              String
+  slug              String    @unique
+  address           String
+  city              String    @default("Accra")
+  region            String?   @default("Greater Accra")
+  dropoffLocation   String?
+  contactPersonName String?
+  contactPhone      String?
+  contactEmail      String?
+  cutoffTime        String    @default("10:30 AM")
+  batchDeliveryTime String    @default("12:00 PM - 1:00 PM")
+  discountPercent   Decimal   @default(0) @db.Decimal(5, 2)
+  freeDelivery      Boolean   @default(true)
+  customPackaging   Boolean   @default(true)
+  isActive          Boolean   @default(true)
+  notes             String?
+  orders            Order[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
 }
 
 model WaitlistEntry {

@@ -21,8 +21,15 @@ if (fs.existsSync(envPath)) {
   }
 }
 
-if (process.env.DATABASE_POSTGRES_URL && !process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = process.env.DATABASE_POSTGRES_URL;
+const validPostgresUrl = [
+  process.env.DATABASE_URL_UNPOOLED,
+  process.env.DATABASE_POSTGRES_URL,
+  process.env.DIRECT_URL,
+  process.env.DATABASE_URL,
+].find(url => url && (url.startsWith("postgresql://") || url.startsWith("postgres://")));
+
+if (validPostgresUrl) {
+  process.env.DATABASE_URL = validPostgresUrl;
 }
 
 try {

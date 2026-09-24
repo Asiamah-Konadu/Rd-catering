@@ -58,6 +58,11 @@ export function AdminNav({ user }: AdminNavProps) {
       href: "/admin/staff",
       roles: ["ADMIN"],
     },
+    {
+      label: "Companies",
+      href: "/admin/companies",
+      roles: ["ADMIN", "ORDER_HANDLER"],
+    },
   ];
 
   const allowedNavItems = navItems.filter((item) => item.roles.includes(role));

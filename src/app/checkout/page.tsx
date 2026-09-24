@@ -1,7 +1,7 @@
 'use client';
 
 import { useCart } from "@/components/cart/CartProvider";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LocationPicker, type LocationData } from "@/components/LocationPicker";
 import {
@@ -18,6 +18,8 @@ import {
   Tag,
   Gift,
   X,
+  Building2,
+  Percent,
 } from "lucide-react";
 
 type DeliveryTiming = "ASAP" | "SCHEDULED";
@@ -127,9 +129,71 @@ export default function CheckoutPage() {
   const [promoError, setPromoError] = useState("");
   const [promoSuccess, setPromoSuccess] = useState("");
 
-  const delivery = items.length ? 20 : 0;
+  // Corporate office order state
+  type CompanyOption = {
+    id: string;
+    name: string;
+    slug: string;
+    address: string;
+    city: string;
+    region: string | null;
+    dropoffLocation: string | null;
+    cutoffTime: string;
+    batchDeliveryTime: string;
+    discountPercent: number;
+    freeDelivery: boolean;
+    customPackaging: boolean;
+  };
+
+  const [companies, setCompanies] = useState<CompanyOption[]>([]);
+  const [isCorporateOrder, setIsCorporateOrder] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState("");
+  const [staffDepartment, setStaffDepartment] = useState("");
+
+  useEffect(() => {
+    fetch("/api/companies")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCompanies(data);
+        }
+      })
+      .catch((err) => console.error("Failed to load companies", err));
+  }, []);
+
+  const selectedCompany = useMemo(
+    () => companies.find((c) => c.id === selectedCompanyId),
+    [companies, selectedCompanyId]
+  );
+
+  const delivery = items.length
+    ? isCorporateOrder && selectedCompany?.freeDelivery
+      ? 0
+      : 20
+    : 0;
+
+  const corporateDiscount =
+    isCorporateOrder && selectedCompany && selectedCompany.discountPercent > 0
+      ? (subtotal * selectedCompany.discountPercent) / 100
+      : 0;
+
   const promoDiscount = appliedPromo ? Math.min(delivery, appliedPromo.discount) : 0;
-  const total = Math.max(0, subtotal + delivery - promoDiscount);
+  const total = Math.max(0, subtotal + delivery - promoDiscount - corporateDiscount);
+
+  function handleSelectCompany(compId: string) {
+    setSelectedCompanyId(compId);
+    const comp = companies.find((c) => c.id === compId);
+    if (comp) {
+      setForm((prev) => ({
+        ...prev,
+        address: comp.dropoffLocation
+          ? `${comp.address} [${comp.dropoffLocation}]`
+          : comp.address,
+        city: comp.city,
+        region: comp.region || "Greater Accra",
+      }));
+    }
+  }
 
   async function handleApplyPromo() {
     if (!promoCodeInput.trim()) return;
@@ -186,8 +250,16 @@ export default function CheckoutPage() {
     setError("");
 
     try {
-      const isScheduled = timing === "SCHEDULED";
+      const isScheduled = timing === "SCHEDULED" || isCorporateOrder;
       const payloadMomoPhone = (momoPhone || form.phone).trim();
+
+      if (isCorporateOrder && !selectedCompanyId) {
+        throw new Error("Please select your company for the corporate batch order.");
+      }
+
+      if (isCorporateOrder && !staffDepartment.trim()) {
+        throw new Error("Please specify your department or desk location for labeled delivery.");
+      }
 
       if (paymentMethod === "MOBILE_MONEY" && !payloadMomoPhone) {
         throw new Error("Please enter your Mobile Money phone number.");
@@ -197,6 +269,12 @@ export default function CheckoutPage() {
         throw new Error("Please enter a valid card number.");
       }
 
+      const scheduledSlotVal = isCorporateOrder && selectedCompany
+        ? `Corporate Lunch Batch (${selectedCompany.batchDeliveryTime})`
+        : isScheduled
+        ? selectedSlot
+        : null;
+
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -204,7 +282,9 @@ export default function CheckoutPage() {
           ...form,
           isScheduled,
           scheduledFor: isScheduled ? tomorrowISO : null,
-          scheduledSlot: isScheduled ? selectedSlot : null,
+          scheduledSlot: scheduledSlotVal,
+          companyId: isCorporateOrder && selectedCompany ? selectedCompany.id : null,
+          staffDepartment: isCorporateOrder ? staffDepartment.trim() : null,
           paymentMethod,
           momoNetwork,
           momoPhone: payloadMomoPhone,
@@ -383,6 +463,100 @@ export default function CheckoutPage() {
                 Step 2 of 3
               </span>
             </div>
+
+            {/* Corporate Batch Delivery Switch */}
+            {companies.length > 0 && (
+              <div className="p-4 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200/90 rounded-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-blue-700 shrink-0" />
+                    <div>
+                      <div className="text-xs font-bold text-blue-950">Delivering to a Corporate Office?</div>
+                      <div className="text-[11px] text-blue-700">Unlock free delivery & group perks for registered offices</div>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isCorporateOrder}
+                      onChange={(e) => {
+                        setIsCorporateOrder(e.target.checked);
+                        if (!e.target.checked) {
+                          setSelectedCompanyId("");
+                          setStaffDepartment("");
+                        }
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+
+                {isCorporateOrder && (
+                  <div className="pt-2 border-t border-blue-200/70 space-y-3 animate-in fade-in">
+                    <div>
+                      <label className="block text-xs font-bold text-blue-900 mb-1">
+                        Select Your Company *
+                      </label>
+                      <select
+                        required={isCorporateOrder}
+                        value={selectedCompanyId}
+                        onChange={(e) => handleSelectCompany(e.target.value)}
+                        className="w-full bg-white border border-blue-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="">-- Choose your registered office --</option>
+                        {companies.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name} ({c.city}) — Dropoff: {c.batchDeliveryTime}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {selectedCompany && (
+                      <div className="p-3 bg-white/90 rounded-lg border border-blue-200 space-y-1.5 text-xs text-blue-900">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-bold">{selectedCompany.name}</span>
+                          {selectedCompany.freeDelivery && (
+                            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                              ✓ Free Delivery
+                            </span>
+                          )}
+                          {selectedCompany.discountPercent > 0 && (
+                            <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                              {selectedCompany.discountPercent}% Off Group Perk
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-600">
+                          📍 {selectedCompany.address}{selectedCompany.dropoffLocation ? ` [${selectedCompany.dropoffLocation}]` : ""}
+                        </p>
+                        <p className="text-[11px] text-blue-800">
+                          🕒 Synchronized Batch Delivery: <strong>{selectedCompany.batchDeliveryTime}</strong> (Cutoff: {selectedCompany.cutoffTime})
+                        </p>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-xs font-bold text-blue-900 mb-1">
+                        Your Department / Desk / Floor *
+                      </label>
+                      <input
+                        required={isCorporateOrder}
+                        type="text"
+                        placeholder="e.g. Marketing Dept, 3rd Floor, Desk #14"
+                        value={staffDepartment}
+                        onChange={(e) => setStaffDepartment(e.target.value)}
+                        className="w-full bg-white border border-blue-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+                      />
+                      <p className="text-[10px] text-blue-700 mt-0.5">
+                        This is printed on your meal box so your office receptionist knows who it belongs to.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <label className="block text-xs font-semibold text-slate-700">
@@ -784,8 +958,20 @@ export default function CheckoutPage() {
             </p>
             <p className="flex justify-between text-slate-600">
               <span>Delivery Fee</span>
-              <b>GH₵ {delivery.toFixed(2)}</b>
+              <b>
+                {isCorporateOrder && selectedCompany?.freeDelivery ? (
+                  <span className="text-emerald-700 font-bold">FREE (Corporate)</span>
+                ) : (
+                  `GH₵ ${delivery.toFixed(2)}`
+                )}
+              </b>
             </p>
+            {corporateDiscount > 0 && (
+              <p className="flex justify-between text-blue-700 font-medium">
+                <span>Corporate Perk ({selectedCompany?.name})</span>
+                <b>- GH₵ {corporateDiscount.toFixed(2)}</b>
+              </p>
+            )}
             {promoDiscount > 0 && (
               <p className="flex justify-between text-emerald-700 font-medium">
                 <span>Free Delivery Promo</span>

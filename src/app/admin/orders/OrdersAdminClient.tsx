@@ -113,6 +113,13 @@ function printReceipt(order: AdminOrder) {
     <p>${order.scheduledSlot || "Scheduled Slot"}</p>
   </div>` : ""}
 
+  ${order.companyName ? `
+  <div class="info-block" style="background:#eff6ff;padding:6px;border:1px solid #93c5fd;border-radius:4px;margin-bottom:10px;">
+    <div class="section-label" style="color:#1d4ed8;">Corporate Batch Delivery</div>
+    <p><strong>${order.companyName}</strong></p>
+    ${order.staffDepartment ? `<p>Department / Desk: <strong>${order.staffDepartment}</strong></p>` : ""}
+  </div>` : ""}
+
   <div class="info-block">
     <div class="section-label">Order</div>
     <p><strong>#${order.orderNumber}</strong></p>
@@ -246,6 +253,9 @@ export type AdminOrder = {
   isScheduled?: boolean;
   scheduledFor?: string | null;
   scheduledSlot?: string | null;
+  companyId?: string | null;
+  companyName?: string | null;
+  staffDepartment?: string | null;
   createdAt: string | Date;
   items: OrderItem[];
   payment?: Payment | null;
@@ -290,7 +300,7 @@ export function OrdersAdminClient({
   const [lastSync, setLastSync] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  const [scheduleFilter, setScheduleFilter] = useState<"ALL" | "SCHEDULED" | "ASAP">("ALL");
+  const [scheduleFilter, setScheduleFilter] = useState<"ALL" | "SCHEDULED" | "ASAP" | "CORPORATE">("ALL");
 
   const showToast = (msg: string) => {
     setNotification(msg);
@@ -392,6 +402,7 @@ export function OrdersAdminClient({
 
   const scheduledCount = orders.filter((o) => o.isScheduled).length;
   const asapCount = orders.filter((o) => !o.isScheduled).length;
+  const corporateCount = orders.filter((o) => Boolean(o.companyId || o.companyName)).length;
 
   const filteredOrders = orders.filter((o) => {
     const matchesStatus =
@@ -401,13 +412,17 @@ export function OrdersAdminClient({
         ? true
         : scheduleFilter === "SCHEDULED"
         ? Boolean(o.isScheduled)
+        : scheduleFilter === "CORPORATE"
+        ? Boolean(o.companyId || o.companyName)
         : !o.isScheduled;
     const matchesSearch =
       searchQuery.trim() === ""
         ? true
         : o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
           o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          o.customerPhone.includes(searchQuery);
+          o.customerPhone.includes(searchQuery) ||
+          Boolean(o.companyName?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          Boolean(o.staffDepartment?.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesStatus && matchesSchedule && matchesSearch;
   });
 
@@ -483,6 +498,19 @@ export function OrdersAdminClient({
               <span>⚡ Same-Day (ASAP)</span>
               <span className="bg-slate-300 text-slate-800 text-[10px] px-1.5 py-0.2 rounded-full">
                 {asapCount}
+              </span>
+            </button>
+            <button
+              onClick={() => setScheduleFilter("CORPORATE")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                scheduleFilter === "CORPORATE"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-blue-50 text-blue-900 border border-blue-200 hover:bg-blue-100"
+              }`}
+            >
+              <span>🏢 Corporate Batch</span>
+              <span className="bg-blue-200 text-blue-900 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                {corporateCount}
               </span>
             </button>
           </div>
@@ -585,6 +613,14 @@ export function OrdersAdminClient({
                         {order.customerName}
                       </div>
                       <div className="text-xs text-slate-500">{order.customerPhone}</div>
+                      {order.companyName && (
+                        <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-800 border border-blue-200 rounded-md text-[10px] font-bold">
+                          <span>🏢 {order.companyName}</span>
+                          {order.staffDepartment && (
+                            <span className="text-blue-600 font-medium">({order.staffDepartment})</span>
+                          )}
+                        </div>
+                      )}
                     </td>
 
                     <td className="p-4">
@@ -709,6 +745,31 @@ export function OrdersAdminClient({
                       : "Tomorrow"}{" "}
                     • <span className="text-amber-800">{activeModalOrder.scheduledSlot}</span>
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* Corporate Batch Highlight Card */}
+            {activeModalOrder.companyName && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-xl flex items-start gap-3">
+                <span className="text-2xl">🏢</span>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900">
+                      Corporate Office Batch Order
+                    </h4>
+                    <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full border border-blue-300">
+                      Synchronized Delivery
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-blue-950 mt-0.5">
+                    {activeModalOrder.companyName}
+                  </p>
+                  {activeModalOrder.staffDepartment && (
+                    <p className="text-xs text-blue-800 mt-1">
+                      <span className="font-semibold">Department / Desk:</span> {activeModalOrder.staffDepartment}
+                    </p>
+                  )}
                 </div>
               </div>
             )}

@@ -5,6 +5,7 @@ import { Menu, X, Gift } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
+  { href: "/corporate", label: "Office Portals" },
   { href: "/#waitlist", label: "Join Waitlist" },
   { href: "/#sneak-peek", label: "Sneak Peek Menu" },
   { href: "/#about-launch", label: "Accra Launch" },

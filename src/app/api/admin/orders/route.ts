@@ -35,6 +35,14 @@ export async function GET() {
             },
           },
         },
+        company: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            batchDeliveryTime: true,
+          },
+        },
       },
     });
 
@@ -53,6 +61,9 @@ export async function GET() {
       isScheduled: o.isScheduled,
       scheduledFor: o.scheduledFor ? o.scheduledFor.toISOString() : null,
       scheduledSlot: o.scheduledSlot,
+      companyId: o.companyId,
+      companyName: o.company?.name || null,
+      staffDepartment: o.staffDepartment || null,
       createdAt: o.createdAt.toISOString(),
       items: o.items.map((i) => ({
         id: i.id,

@@ -55,28 +55,56 @@ export async function POST(request: Request) {
       momoNetwork?: unknown;
       momoPhone?: unknown;
       promoCode?: unknown;
+      companyId?: unknown;
+      staffDepartment?: unknown;
     };
 
     const name = text(payload.name, MAX_NAME_LENGTH);
     const phone = text(payload.phone, MAX_PHONE_LENGTH);
     const email = text(payload.email, 150);
-    const address = text(payload.address, MAX_ADDRESS_LENGTH);
-    const city = text(payload.city, MAX_CITY_LENGTH);
-    const region = text(payload.region, MAX_REGION_LENGTH);
     const notes = text(payload.notes, MAX_NOTES_LENGTH);
+    const companyId = typeof payload.companyId === "string" && payload.companyId.trim() ? payload.companyId.trim() : null;
+    const staffDepartment = typeof payload.staffDepartment === "string" ? payload.staffDepartment.trim().slice(0, 100) : null;
 
-    const isScheduled = Boolean(payload.isScheduled);
+    let company = null;
+    if (companyId) {
+      company = await prisma.company.findUnique({
+        where: { id: companyId },
+      });
+      if (!company || !company.isActive) {
+        return NextResponse.json(
+          { error: "Selected corporate portal is inactive or not found." },
+          { status: 400 }
+        );
+      }
+    }
+
+    let address = text(payload.address, MAX_ADDRESS_LENGTH);
+    let city = text(payload.city, MAX_CITY_LENGTH);
+    let region = text(payload.region, MAX_REGION_LENGTH);
+
+    if (company) {
+      if (!address) {
+        address = company.dropoffLocation
+          ? `${company.address} [${company.dropoffLocation}]`
+          : company.address;
+      }
+      if (!city) city = company.city;
+      if (!region) region = company.region || "Greater Accra";
+    }
+
+    const isScheduled = Boolean(payload.isScheduled) || Boolean(company);
     let scheduledFor: Date | null = null;
     let scheduledSlot: string | null = null;
 
     if (isScheduled) {
-      if (typeof payload.scheduledSlot !== "string" || !payload.scheduledSlot.trim()) {
-        return NextResponse.json(
-          { error: "Please select a delivery time slot for your scheduled order." },
-          { status: 400 }
-        );
+      if (typeof payload.scheduledSlot === "string" && payload.scheduledSlot.trim()) {
+        scheduledSlot = payload.scheduledSlot.trim().slice(0, 100);
+      } else if (company?.batchDeliveryTime) {
+        scheduledSlot = `Corporate Lunch Batch (${company.batchDeliveryTime})`;
+      } else {
+        scheduledSlot = "Lunch (12:00 PM - 2:30 PM)";
       }
-      scheduledSlot = payload.scheduledSlot.trim().slice(0, 100);
 
       if (typeof payload.scheduledFor === "string" && payload.scheduledFor) {
         const parsedDate = new Date(payload.scheduledFor);
@@ -86,11 +114,16 @@ export async function POST(request: Request) {
       }
 
       if (!scheduledFor) {
-        // Default to tomorrow
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(12, 0, 0, 0);
-        scheduledFor = tomorrow;
+        const today = new Date();
+        // If ordered before 10:30 AM, can be delivered today, else tomorrow
+        if (today.getHours() < 11) {
+          scheduledFor = today;
+        } else {
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          tomorrow.setHours(12, 0, 0, 0);
+          scheduledFor = tomorrow;
+        }
       }
     }
 
@@ -160,7 +193,9 @@ export async function POST(request: Request) {
       return { item, quantity, unitPrice, totalPrice: unitPrice * quantity };
     });
     const subtotal = orderLines.reduce((sum, line) => sum + line.totalPrice, 0);
-    const fee = deliveryFee();
+    
+    // Corporate batch orders can unlock free delivery
+    let fee = company?.freeDelivery ? 0 : deliveryFee();
 
     const promoCodeRaw = typeof payload.promoCode === "string" ? payload.promoCode.trim().toUpperCase() : null;
 
@@ -172,6 +207,11 @@ export async function POST(request: Request) {
     const order = await prisma.$transaction(async transaction => {
       let discount = 0;
       let validPromoCode: string | null = null;
+
+      // Apply corporate discount percentage if active
+      if (company && Number(company.discountPercent) > 0) {
+        discount += (subtotal * Number(company.discountPercent)) / 100;
+      }
 
       if (promoCodeRaw) {
         const promoEntry = await transaction.waitlistEntry.findUnique({
@@ -185,8 +225,10 @@ export async function POST(request: Request) {
           throw new Error("This early-bird promo code has already been redeemed.");
         }
 
-        // Free delivery perk: discount equals delivery fee
-        discount = fee;
+        // Free delivery perk: discount equals delivery fee if fee > 0
+        if (fee > 0) {
+          discount += fee;
+        }
         validPromoCode = promoEntry.promoCode;
       }
 
@@ -195,6 +237,8 @@ export async function POST(request: Request) {
       const createdOrder = await transaction.order.create({
         data: {
           orderNumber: orderNumber(),
+          companyId: company?.id || null,
+          staffDepartment: staffDepartment || null,
           customerName: name,
           customerPhone: phone,
           customerEmail: email || null,
