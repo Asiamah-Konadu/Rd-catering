@@ -547,10 +547,10 @@ export function OrderTrackerClient({
               <span className="text-xs text-slate-500 block uppercase font-semibold">
                 Payment Status
               </span>
-              <div className="mt-1 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold w-fit">
-                <span>✓ PAID</span>
-                <span className="text-[11px] font-normal text-emerald-700">
-                  via {order.payment?.method === "CARD" ? "Card" : "Mobile Money"}
+              <div className={`mt-1 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold w-fit ${order.payment?.status === "PAID" ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200"}`}>
+                <span>{order.payment?.status ?? "PENDING"}</span>
+                <span className="text-[11px] font-normal">
+                  via {order.payment?.method?.replace(/_/g, " ") ?? "WHATSAPP"}
                 </span>
               </div>
             </div>

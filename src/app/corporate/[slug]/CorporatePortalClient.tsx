@@ -13,7 +13,7 @@ import {
   Minus,
   ChevronRight,
   Utensils,
-  Smartphone,
+  MessageCircle,
   ShieldCheck,
   X,
   Users,
@@ -46,12 +46,6 @@ type Category = {
 };
 
 type CartItem = { id: string; name: string; price: number; quantity: number };
-
-const MOMO_NETWORKS = [
-  { id: "MTN", name: "MTN MoMo", color: "bg-amber-400 text-slate-950 border-amber-500" },
-  { id: "Telecel", name: "Telecel Cash", color: "bg-red-600 text-white border-red-700" },
-  { id: "AT", name: "AT Money", color: "bg-blue-600 text-white border-blue-700" },
-];
 
 function PortalBanner({ company }: { company: Company }) {
   return (
@@ -130,7 +124,7 @@ function PortalBanner({ company }: { company: Company }) {
 function HowItWorksStrip() {
   const steps = [
     { icon: "🍽️", title: "Pick your meal", desc: "Choose from the menu below" },
-    { icon: "💳", title: "Pay individually", desc: "Secure mobile money payment" },
+    { icon: "💬", title: "Confirm on WhatsApp", desc: "We confirm your order in chat" },
     { icon: "🚀", title: "One delivery", desc: "All orders arrive together" },
   ];
   return (
@@ -468,8 +462,6 @@ function CheckoutModal({
     email: "",
     department: "",
   });
-  const [momoNetwork, setMomoNetwork] = useState("MTN");
-  const [momoPhone, setMomoPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -480,9 +472,6 @@ function CheckoutModal({
     setError("");
 
     try {
-      const paymentPhone = (momoPhone || form.phone).trim();
-      if (!paymentPhone) throw new Error("Enter your Mobile Money phone number for payment.");
-
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -498,16 +487,17 @@ function CheckoutModal({
             : company.address,
           city: company.city,
           region: company.region || "Greater Accra",
-          paymentMethod: "MOBILE_MONEY",
-          momoNetwork,
-          momoPhone: paymentPhone,
           items: cart.map((i) => ({ id: i.id, quantity: i.quantity })),
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Order could not be placed.");
+      if (typeof data.orderNumber !== "string" || typeof data.whatsappUrl !== "string") {
+        throw new Error("The order was saved, but WhatsApp checkout could not be opened.");
+      }
       onSuccess(data.orderNumber);
+      window.location.assign(data.whatsappUrl);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Order failed. Please try again.");
     } finally {
@@ -642,37 +632,9 @@ function CheckoutModal({
             </div>
           </div>
 
-          {/* Payment */}
-          <div className="space-y-3">
-            <p className="text-xs font-extrabold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
-              <Smartphone className="w-3.5 h-3.5" /> Mobile Money Payment
-            </p>
-            <div className="flex gap-2">
-              {MOMO_NETWORKS.map((net) => (
-                <button
-                  key={net.id}
-                  type="button"
-                  onClick={() => setMomoNetwork(net.id)}
-                  className={`flex-1 py-2 text-xs font-extrabold rounded-xl border-2 transition ${
-                    momoNetwork === net.id ? net.color + " border-current" : "border-slate-200 text-slate-500 hover:border-slate-300"
-                  }`}
-                >
-                  {net.name}
-                </button>
-              ))}
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-slate-600 block mb-1">
-                MoMo Number (leave blank to use your phone number)
-              </label>
-              <input
-                type="tel"
-                value={momoPhone}
-                onChange={(e) => setMomoPhone(e.target.value)}
-                placeholder={form.phone || "0244000000"}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
-              />
-            </div>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900 flex items-start gap-2">
+            <MessageCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <span>We&apos;ll save the order and open WhatsApp with your items and batch delivery details ready to send. Payment will be confirmed in chat.</span>
           </div>
 
           {/* Order total summary */}
@@ -712,8 +674,8 @@ function CheckoutModal({
             disabled={loading || cart.length === 0}
             className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-slate-950 font-extrabold py-3.5 rounded-xl text-sm transition flex items-center justify-center gap-2"
           >
-            <ShieldCheck className="w-4 h-4" />
-            {loading ? "Placing Order..." : `Pay GH₵${total.toFixed(2)} & Order`}
+            <MessageCircle className="w-4 h-4" />
+            {loading ? "Preparing WhatsApp order..." : "Continue to WhatsApp"}
           </button>
 
           <p className="text-[10px] text-slate-400 text-center">
@@ -743,9 +705,9 @@ function SuccessScreen({
           <CheckCircle2 className="w-8 h-8 text-emerald-600" />
         </div>
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-900">Order Confirmed!</h2>
+          <h2 className="text-2xl font-extrabold text-slate-900">Order Saved</h2>
           <p className="text-sm text-slate-500 mt-1">
-            Your meal has been added to the {company.name} batch.
+            Your request is saved. Send the WhatsApp message to confirm your meal in the {company.name} batch.
           </p>
         </div>
 
@@ -759,7 +721,7 @@ function SuccessScreen({
           <div className="flex items-center gap-2 text-xs text-amber-800">
             <Clock className="w-3.5 h-3.5" />
             <span>
-              Arrives with batch at <strong>{company.batchDeliveryTime}</strong>
+              Batch delivery at <strong>{company.batchDeliveryTime}</strong>
             </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-amber-800">

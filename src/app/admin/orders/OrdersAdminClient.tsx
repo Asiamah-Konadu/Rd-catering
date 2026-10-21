@@ -173,7 +173,7 @@ function printReceipt(order: AdminOrder) {
 
   ${order.payment ? `
   <div style="text-align:center;margin-top:8px">
-    <span class="payment-badge" style="border-color:#059669;color:#065f46;background:#ecfdf5;">PAID &bull; ${order.payment.method.replace(/_/g, " ")}</span>
+    <span class="payment-badge" style="border-color:${order.payment.status === "PAID" ? "#059669" : "#d97706"};color:${order.payment.status === "PAID" ? "#065f46" : "#92400e"};background:${order.payment.status === "PAID" ? "#ecfdf5" : "#fffbeb"};">${order.payment.status} &bull; ${order.payment.method.replace(/_/g, " ")}</span>
     ${order.payment.transactionId ? `<div style="font-size:9px;color:#666;margin-top:3px;font-family:monospace">Ref: ${order.payment.transactionId}</div>` : ""}
   </div>` : ""}
 
@@ -631,8 +631,8 @@ export function OrdersAdminClient({
                         <span className="text-xs text-slate-500">
                           {order.items?.reduce((acc, i) => acc + i.quantity, 0) || 0} items
                         </span>
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded">
-                          ✓ PAID ({order.payment?.method === "CARD" ? "Card" : "MoMo"})
+                        <span className={`text-[10px] font-bold px-1.5 py-0.2 border rounded ${order.payment?.status === "PAID" ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-amber-100 text-amber-800 border-amber-300"}`}>
+                          {order.payment?.status ?? "PENDING"} ({order.payment?.method?.replace(/_/g, " ") ?? "WHATSAPP"})
                         </span>
                       </div>
                     </td>
@@ -821,16 +821,16 @@ export function OrdersAdminClient({
             </div>
 
             {/* Payment Record Section */}
-            <div className="bg-emerald-50/70 border border-emerald-200 p-4 rounded-xl flex items-center justify-between text-xs">
+            <div className={`p-4 rounded-xl flex items-center justify-between text-xs ${activeModalOrder.payment?.status === "PAID" ? "bg-emerald-50/70 border border-emerald-200" : "bg-amber-50 border border-amber-200"}`}>
               <div>
-                <span className="font-bold uppercase tracking-wider text-emerald-900 block mb-0.5">
+                <span className="font-bold uppercase tracking-wider text-slate-800 block mb-0.5">
                   Payment Status
                 </span>
-                <span className="font-bold text-emerald-800 text-sm">
-                  ✓ PAID IN FULL (GH₵ {Number(activeModalOrder.total).toFixed(2)})
+                <span className="font-bold text-slate-900 text-sm">
+                  {activeModalOrder.payment?.status ?? "PENDING"} (GH₵ {Number(activeModalOrder.total).toFixed(2)})
                 </span>
-                <p className="text-emerald-700 text-[11px] mt-0.5">
-                  Method: {activeModalOrder.payment?.method === "CARD" ? "Credit / Debit Card" : "Mobile Money"}
+                <p className="text-slate-600 text-[11px] mt-0.5">
+                  Method: {activeModalOrder.payment?.method?.replace(/_/g, " ") ?? "WHATSAPP"}
                 </p>
               </div>
               {activeModalOrder.payment?.transactionId && (

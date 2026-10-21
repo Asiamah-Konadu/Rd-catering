@@ -41,6 +41,7 @@ npm run dev
 ```
 
 Configure `DATABASE_URL` in `.env.local` before using checkout/order pages.
+Configure `DATABASE_URL` and `WHATSAPP_ORDER_NUMBER` in `.env.local` before using checkout/order pages. Set `WHATSAPP_ORDER_NUMBER` to the restaurant's WhatsApp number with country code and digits only (for example, `233XXXXXXXXX`). Orders are saved as pending and sent to WhatsApp for confirmation and payment coordination. Sync the updated payment enum to the database with `npx prisma db push` before deploying.
 
 For the first database migration:
 

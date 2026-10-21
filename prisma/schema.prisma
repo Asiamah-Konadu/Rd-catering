@@ -37,6 +37,7 @@ enum PaymentMethod {
   CASH
   MOBILE_MONEY
   CARD
+  WHATSAPP
 }
 
 enum DeliveryStatus {

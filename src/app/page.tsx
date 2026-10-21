@@ -1,15 +1,38 @@
-import WaitlistSection from "@/components/WaitlistSection";
+import type { Metadata } from "next";
+import MenuCard from "@/components/MenuCard";
+import { getPublicMenu } from "@/lib/menu";
 
-export const metadata = {
-  title: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra | Launching Soon",
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Fresh Ghanaian Food Delivered in Accra",
   description:
-    "Rich-Dons Catering is launching in Accra, Ghana on November 6, 2026. Join our VIP early list now to claim your unique Free Delivery promo code on Jollof, Banku, Waffles, Waakye, and more.",
+    "Order fresh Ghanaian favourites from Rich-Dons Catering. Browse the menu and place your order for delivery in Accra.",
 };
 
-export default function Home() {
+export default async function Home() {
+  const categories = await getPublicMenu();
+
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
-      <WaitlistSection />
+    <main className="page">
+      <div className="page-heading">
+        <span className="eyebrow">Rich-Dons Catering · Accra</span>
+        <h1>Fresh Ghanaian favourites, made to order</h1>
+        <p>Choose your meal, add it to your bag, and confirm your order with us on WhatsApp.</p>
+      </div>
+      {categories.length ? categories.map((category) => (
+        <section className="section compact" key={category.id}>
+          <div className="section-heading"><h2>{category.name}</h2></div>
+          <div className="menu-grid">
+            {category.items.map((item) => <MenuCard key={item.id} item={item} />)}
+          </div>
+        </section>
+      )) : (
+        <div className="empty">
+          <h2>Today&apos;s menu is being updated</h2>
+          <p>Please check back shortly for available dishes.</p>
+        </div>
+      )}
     </main>
   );
 }

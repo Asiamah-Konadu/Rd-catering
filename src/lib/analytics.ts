@@ -65,6 +65,7 @@ export async function getAdminAnalytics(timeRange: TimeRange = "7d") {
     MOBILE_MONEY: orders.filter((o) => o.payment?.method === PaymentMethod.MOBILE_MONEY).length,
     CARD: orders.filter((o) => o.payment?.method === PaymentMethod.CARD).length,
     CASH: orders.filter((o) => o.payment?.method === PaymentMethod.CASH).length,
+    WHATSAPP: orders.filter((o) => o.payment?.method === PaymentMethod.WHATSAPP).length,
   };
 
   const paymentStatuses = {

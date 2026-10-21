@@ -15,10 +15,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     template: "%s | Rich-Dons Catering",
-    default: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra | Launching Nov 6",
+    default: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra",
   },
   description:
-    "Join the VIP waitlist for Rich-Dons Catering launching in Accra, Ghana on November 6, 2026. Claim your exclusive Free Delivery promo code for launch day on Jollof, Banku, Waffles, Waakye and more.",
+    "Order fresh Ghanaian catering for lunch, office meetings, family gatherings and everyday cravings in Accra.",
   keywords: [
     "catering Accra",
     "Ghanaian food delivery",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     "food delivery Accra",
     "Ghanaian cuisine",
     "family catering Ghana",
-    "Accra food waitlist",
+    "Accra food ordering",
   ],
   authors: [{ name: "Rich-Dons Catering" }],
   creator: "Rich-Dons Catering",
@@ -39,9 +39,8 @@ export const metadata: Metadata = {
     locale: "en_GH",
     url: SITE_URL,
     siteName: "Rich-Dons Catering",
-    title: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra | Launching Nov 6",
-    description:
-      "Join the VIP waitlist for Rich-Dons Catering launching in Accra, Ghana. Claim your exclusive Free Delivery promo code for launch day on Jollof, Banku, Waffles & Waakye.",
+    title: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra",
+    description: "Order fresh Ghanaian favourites for delivery in Accra.",
     images: [
       {
         url: "/og-image.jpg",
@@ -54,9 +53,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra | Launching Nov 6",
-    description:
-      "Join the VIP waitlist for Rich-Dons Catering launching in Accra. Get Free Delivery on your 1st order!",
+    title: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra",
+    description: "Order fresh Ghanaian favourites for delivery in Accra.",
     images: ["/og-image.jpg"],
   },
   icons: {
@@ -82,7 +80,7 @@ const restaurantJsonLd = {
   name: "Rich-Dons Catering",
   url: SITE_URL,
   description:
-    "Fresh Ghanaian catering for lunch, office meetings, family gatherings and everyday cravings. Launching soon in Accra.",
+    "Fresh Ghanaian catering for lunch, office meetings, family gatherings and everyday cravings in Accra.",
   servesCuisine: ["Ghanaian", "African"],
   areaServed: {
     "@type": "City",

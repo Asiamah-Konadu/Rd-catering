@@ -18,6 +18,7 @@ interface AdminAnalyticsProps {
       MOBILE_MONEY: number;
       CARD: number;
       CASH: number;
+      WHATSAPP: number;
     };
     paymentStatuses: {
       PAID: number;
@@ -59,7 +60,8 @@ export function AdminAnalyticsView({
   const totalPayments =
     data.paymentMethods.MOBILE_MONEY +
     data.paymentMethods.CARD +
-    data.paymentMethods.CASH;
+    data.paymentMethods.CASH +
+    data.paymentMethods.WHATSAPP;
 
   return (
     <div className="space-y-6">
@@ -208,6 +210,12 @@ export function AdminAnalyticsView({
                 value={data.paymentMethods.CASH}
                 total={totalPayments}
                 color="emerald"
+              />
+              <ProgressBar
+                label="WhatsApp order"
+                value={data.paymentMethods.WHATSAPP}
+                total={totalPayments}
+                color="blue"
               />
             </div>
           </div>

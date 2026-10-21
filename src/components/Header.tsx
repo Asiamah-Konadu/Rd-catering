@@ -1,14 +1,12 @@
 'use client';
 
 import Link from "next/link";
-import { Menu, X, Gift } from "lucide-react";
+import { Menu, X, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
+  { href: "/menu", label: "Our Menu" },
   { href: "/corporate", label: "Office Portals" },
-  { href: "/#waitlist", label: "Join Waitlist" },
-  { href: "/#sneak-peek", label: "Sneak Peek Menu" },
-  { href: "/#about-launch", label: "Accra Launch" },
 ];
 
 export default function Header() {
@@ -49,12 +47,12 @@ export default function Header() {
 
       <div className="flex items-center gap-3">
         <Link
-          href="/#waitlist"
+          href="/cart"
           onClick={closeNav}
           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-sm transition"
         >
-          <Gift className="w-3.5 h-3.5" />
-          <span>Free Delivery Code</span>
+          <ShoppingBag className="w-3.5 h-3.5" />
+          <span>Your Bag</span>
         </Link>
       </div>
     </header>

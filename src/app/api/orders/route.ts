@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getWhatsAppOrderUrl } from "@/lib/whatsapp";
 
 const MAX_QUANTITY = 50;
 const MAX_NAME_LENGTH = 100;
@@ -51,9 +52,6 @@ export async function POST(request: Request) {
       isScheduled?: unknown;
       scheduledFor?: unknown;
       scheduledSlot?: unknown;
-      paymentMethod?: unknown;
-      momoNetwork?: unknown;
-      momoPhone?: unknown;
       promoCode?: unknown;
       companyId?: unknown;
       staffDepartment?: unknown;
@@ -127,16 +125,10 @@ export async function POST(request: Request) {
       }
     }
 
-    // Payment validation - All orders must be paid upfront
-    const paymentMethodRaw = typeof payload.paymentMethod === "string" ? payload.paymentMethod.toUpperCase() : "MOBILE_MONEY";
-    const paymentMethod = paymentMethodRaw === "CARD" ? "CARD" : "MOBILE_MONEY";
-    const momoNetwork = typeof payload.momoNetwork === "string" ? payload.momoNetwork.trim() : "MTN";
-    const momoPhone = typeof payload.momoPhone === "string" ? payload.momoPhone.trim() : phone;
-
-    if (paymentMethod === "MOBILE_MONEY" && (!momoPhone || !validPhone(momoPhone))) {
+    if (!getWhatsAppOrderUrl("WhatsApp checkout configuration check")) {
       return NextResponse.json(
-        { error: "Enter a valid Mobile Money phone number for payment authorization." },
-        { status: 400 }
+        { error: "WhatsApp ordering is not configured. Please contact the restaurant directly." },
+        { status: 503 }
       );
     }
 
@@ -199,12 +191,7 @@ export async function POST(request: Request) {
 
     const promoCodeRaw = typeof payload.promoCode === "string" ? payload.promoCode.trim().toUpperCase() : null;
 
-    const txnSuffix = crypto.randomUUID().slice(0, 8).toUpperCase();
-    const transactionId = paymentMethod === "CARD"
-      ? `CARD-TXN-${Date.now().toString().slice(-6)}-${txnSuffix}`
-      : `${momoNetwork.toUpperCase()}-MOMO-${Date.now().toString().slice(-6)}-${txnSuffix}`;
-
-    const order = await prisma.$transaction(async transaction => {
+    const result = await prisma.$transaction(async transaction => {
       let discount = 0;
       let validPromoCode: string | null = null;
 
@@ -273,9 +260,8 @@ export async function POST(request: Request) {
           payment: {
             create: {
               amount: finalTotal,
-              method: paymentMethod,
-              status: "PAID",
-              transactionId,
+              method: "WHATSAPP",
+              status: "PENDING",
             },
           },
         },
@@ -293,10 +279,40 @@ export async function POST(request: Request) {
         });
       }
 
-      return createdOrder;
+      return { order: createdOrder, finalTotal, discount };
     });
 
-    return NextResponse.json({ orderNumber: order.orderNumber }, { status: 201 });
+    const message = [
+      "Hello Rich-Dons Catering, I would like to confirm this order:",
+      `Order: ${result.order.orderNumber}`,
+      `Name: ${name}`,
+      `Phone: ${phone}`,
+      "",
+      "Items:",
+      ...orderLines.map(line => `${line.quantity} x ${line.item.name} - GH₵ ${line.totalPrice.toFixed(2)}`),
+      "",
+      `Subtotal: GH₵ ${subtotal.toFixed(2)}`,
+      `Delivery: GH₵ ${fee.toFixed(2)}`,
+      `Discount: GH₵ ${result.discount.toFixed(2)}`,
+      `Total: GH₵ ${result.finalTotal.toFixed(2)}`,
+      `Delivery address: ${address}, ${city}${region ? `, ${region}` : ""}`,
+      `Schedule: ${isScheduled ? `${scheduledSlot || "Scheduled"}${scheduledFor ? ` on ${scheduledFor.toLocaleString("en-GH")}` : ""}` : "ASAP"}`,
+      ...(staffDepartment ? [`Department / desk: ${staffDepartment}`] : []),
+      ...(notes ? [`Notes: ${notes}`] : []),
+    ].join("\n");
+    const whatsappUrl = getWhatsAppOrderUrl(message);
+
+    if (!whatsappUrl) {
+      return NextResponse.json(
+        { error: "WhatsApp ordering is not configured. Please contact the restaurant directly." },
+        { status: 503 }
+      );
+    }
+
+    return NextResponse.json(
+      { orderNumber: result.order.orderNumber, whatsappUrl },
+      { status: 201 }
+    );
   } catch (err: unknown) {
     console.error("Failed to create order:", err);
     const errorMessage = err instanceof Error ? err.message : "Unable to create your order right now. Please try again.";

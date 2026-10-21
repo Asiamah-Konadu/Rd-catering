@@ -2,7 +2,6 @@
 
 import { useCart } from "@/components/cart/CartProvider";
 import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { LocationPicker, type LocationData } from "@/components/LocationPicker";
 import {
   MapPin,
@@ -11,8 +10,7 @@ import {
   Calendar,
   Clock,
   Zap,
-  CreditCard,
-  Smartphone,
+  MessageCircle,
   ShieldCheck,
   CheckCircle2,
   Tag,
@@ -54,30 +52,15 @@ const TIME_SLOTS = [
   },
 ];
 
-const MOMO_NETWORKS = [
-  { id: "MTN", name: "MTN MoMo", color: "bg-amber-400 text-slate-950 border-amber-500" },
-  { id: "Telecel", name: "Telecel Cash", color: "bg-red-600 text-white border-red-700" },
-  { id: "AT", name: "AT Money", color: "bg-blue-600 text-white border-blue-700" },
-];
-
 export default function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const router = useRouter();
 
   // Timing state
   const [timing, setTiming] = useState<DeliveryTiming>("ASAP");
   const [selectedSlot, setSelectedSlot] = useState<string>(TIME_SLOTS[1].id);
-
-  // Payment state - All orders require digital payment upfront
-  const [paymentMethod, setPaymentMethod] = useState<"MOBILE_MONEY" | "CARD">("MOBILE_MONEY");
-  const [momoNetwork, setMomoNetwork] = useState<string>("MTN");
-  const [momoPhone, setMomoPhone] = useState<string>("");
-  const [cardNumber, setCardNumber] = useState<string>("");
-  const [cardExpiry, setCardExpiry] = useState<string>("");
-  const [cardCvv, setCardCvv] = useState<string>("");
 
   const [form, setForm] = useState<{
     name: string;
@@ -250,22 +233,12 @@ export default function CheckoutPage() {
 
     try {
       const isScheduled = timing === "SCHEDULED" || isCorporateOrder;
-      const payloadMomoPhone = (momoPhone || form.phone).trim();
-
       if (isCorporateOrder && !selectedCompanyId) {
         throw new Error("Please select your company for the corporate batch order.");
       }
 
       if (isCorporateOrder && !staffDepartment.trim()) {
         throw new Error("Please specify your department or desk location for labeled delivery.");
-      }
-
-      if (paymentMethod === "MOBILE_MONEY" && !payloadMomoPhone) {
-        throw new Error("Please enter your Mobile Money phone number.");
-      }
-
-      if (paymentMethod === "CARD" && (!cardNumber || cardNumber.length < 12)) {
-        throw new Error("Please enter a valid card number.");
       }
 
       const scheduledSlotVal = isCorporateOrder && selectedCompany
@@ -284,9 +257,6 @@ export default function CheckoutPage() {
           scheduledSlot: scheduledSlotVal,
           companyId: isCorporateOrder && selectedCompany ? selectedCompany.id : null,
           staffDepartment: isCorporateOrder ? staffDepartment.trim() : null,
-          paymentMethod,
-          momoNetwork,
-          momoPhone: payloadMomoPhone,
           promoCode: appliedPromo?.code || null,
           items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
         }),
@@ -304,12 +274,14 @@ export default function CheckoutPage() {
         !data ||
         typeof data !== "object" ||
         !("orderNumber" in data) ||
-        typeof data.orderNumber !== "string"
+        typeof data.orderNumber !== "string" ||
+        !("whatsappUrl" in data) ||
+        typeof data.whatsappUrl !== "string"
       ) {
-        throw new Error("The order was created, but its confirmation could not be opened.");
+        throw new Error("The order was created, but WhatsApp checkout could not be opened.");
       }
       clear();
-      router.push(`/order/${data.orderNumber}`);
+      window.location.assign(data.whatsappUrl);
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
@@ -583,7 +555,6 @@ export default function CheckoutPage() {
                   onChange={(e) => {
                     const newPhone = e.target.value;
                     setForm({ ...form, phone: newPhone });
-                    if (!momoPhone) setMomoPhone(newPhone);
                   }}
                 />
               </label>
@@ -684,155 +655,21 @@ export default function CheckoutPage() {
             </label>
           </section>
 
-          {/* ─── 3. MANDATORY DIGITAL PAYMENT SECTION ─────────────────── */}
+          {/* ─── 3. WHATSAPP ORDER CONFIRMATION ────────────────────────── */}
           <section className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-900 text-base">Payment Method</h3>
+                <MessageCircle className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-bold text-slate-900 text-base">Confirm on WhatsApp</h3>
               </div>
               <span className="text-[11px] font-semibold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full">
-                Step 3 of 3 • Paid First
+                Step 3 of 3
               </span>
             </div>
 
-            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-xs text-emerald-900">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>
-                <strong>100% Pre-paid Assurance:</strong> All orders are freshly prepared in the kitchen upon immediate payment confirmation.
-              </span>
-            </div>
-
-            {/* Payment Method Switcher */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("MOBILE_MONEY")}
-                className={`p-3.5 rounded-xl border-2 text-left transition flex items-center gap-3 ${
-                  paymentMethod === "MOBILE_MONEY"
-                    ? "border-amber-600 bg-amber-50/60 ring-2 ring-amber-500/20"
-                    : "border-slate-200 hover:border-slate-300 bg-white"
-                }`}
-              >
-                <Smartphone className="w-5 h-5 text-amber-600 shrink-0" />
-                <div>
-                  <div className="font-bold text-slate-900 text-xs sm:text-sm">Mobile Money</div>
-                  <div className="text-[10px] text-slate-500">MTN, Telecel, AT</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("CARD")}
-                className={`p-3.5 rounded-xl border-2 text-left transition flex items-center gap-3 ${
-                  paymentMethod === "CARD"
-                    ? "border-amber-600 bg-amber-50/60 ring-2 ring-amber-500/20"
-                    : "border-slate-200 hover:border-slate-300 bg-white"
-                }`}
-              >
-                <CreditCard className="w-5 h-5 text-amber-600 shrink-0" />
-                <div>
-                  <div className="font-bold text-slate-900 text-xs sm:text-sm">Debit / Credit Card</div>
-                  <div className="text-[10px] text-slate-500">Visa & Mastercard</div>
-                </div>
-              </button>
-            </div>
-
-            {/* Mobile Money Details */}
-            {paymentMethod === "MOBILE_MONEY" && (
-              <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 animate-fadeIn">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Select Mobile Network
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {MOMO_NETWORKS.map((net) => (
-                    <button
-                      key={net.id}
-                      type="button"
-                      onClick={() => setMomoNetwork(net.id)}
-                      className={`py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                        momoNetwork === net.id
-                          ? `${net.color} shadow-xs`
-                          : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                      }`}
-                    >
-                      {net.name}
-                    </button>
-                  ))}
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-xs font-semibold text-slate-700">
-                      Mobile Money Wallet Number *
-                    </label>
-                    {form.phone && (
-                      <button
-                        type="button"
-                        onClick={() => setMomoPhone(form.phone)}
-                        className="text-[11px] text-amber-700 hover:underline font-medium"
-                      >
-                        Use recipient phone
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    required
-                    type="tel"
-                    placeholder="e.g. 0244123456"
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-white font-mono"
-                    value={momoPhone || form.phone}
-                    onChange={(e) => setMomoPhone(e.target.value)}
-                  />
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    📲 A prompt will be triggered on this phone to enter your MoMo PIN and authorize <strong>GH₵ {total.toFixed(2)}</strong>.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Card Payment Details */}
-            {paymentMethod === "CARD" && (
-              <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 animate-fadeIn">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Card Number *
-                  <input
-                    type="text"
-                    maxLength={19}
-                    placeholder="4123 •••• •••• 1234"
-                    className="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-white font-mono"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                  />
-                </label>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="block text-xs font-semibold text-slate-700">
-                    Expiry Date *
-                    <input
-                      type="text"
-                      maxLength={5}
-                      placeholder="MM/YY"
-                      className="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white font-mono"
-                      value={cardExpiry}
-                      onChange={(e) => setCardExpiry(e.target.value)}
-                    />
-                  </label>
-
-                  <label className="block text-xs font-semibold text-slate-700">
-                    CVV Security Code *
-                    <input
-                      type="password"
-                      maxLength={4}
-                      placeholder="123"
-                      className="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white font-mono"
-                      value={cardCvv}
-                      onChange={(e) => setCardCvv(e.target.value)}
-                    />
-                  </label>
-                </div>
-              </div>
-            )}
+            <p className="text-sm text-slate-600">
+              We&apos;ll save your order and open WhatsApp with the items, delivery details, and total ready to send. The restaurant will confirm availability and payment with you in chat.
+            </p>
           </section>
 
           {error && (
@@ -846,13 +683,7 @@ export default function CheckoutPage() {
             className="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-2xl text-base shadow-lg hover:shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             disabled={loading}
           >
-            {loading ? (
-              "Processing Payment..."
-            ) : paymentMethod === "MOBILE_MONEY" ? (
-              `Pay GH₵ ${total.toFixed(2)} with ${momoNetwork} MoMo`
-            ) : (
-              `Pay GH₵ ${total.toFixed(2)} with Card`
-            )}
+            {loading ? "Preparing WhatsApp order..." : "Continue to WhatsApp"}
           </button>
         </form>
 
