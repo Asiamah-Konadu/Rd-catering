@@ -1,16 +1,27 @@
 'use client';
 
-import { Plus, Utensils } from "lucide-react";
+import { Check, Plus, Utensils } from "lucide-react";
 import { useCart } from "./cart/CartProvider";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { PublicMenuItem } from "@/lib/menu";
 
 export default function MenuCard({ item }: { item: PublicMenuItem }) {
   const { add } = useCart();
   const [imageFailed, setImageFailed] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+
+  useEffect(() => {
+    if (!justAdded) return;
+    const timeout = window.setTimeout(() => setJustAdded(false), 1300);
+    return () => window.clearTimeout(timeout);
+  }, [justAdded]);
+
   return (
     <article className={item.isAvailable ? "menu-card" : "menu-card unavailable"}>
+      <span className="sr-only" aria-live="polite">
+        {justAdded ? `${item.name} added to your bag` : ""}
+      </span>
       <Link href={`/menu/${item.slug}`} className="food-placeholder" aria-label={`View ${item.name}`}>
         {item.imageUrl && !imageFailed ? (
           <img src={item.imageUrl} alt="" onError={() => setImageFailed(true)} />
@@ -35,9 +46,14 @@ export default function MenuCard({ item }: { item: PublicMenuItem }) {
           <button
             type="button"
             disabled={!item.isAvailable}
-            onClick={() => add({ id: item.id, name: item.name, price: item.price })}
+            className={justAdded ? "just-added" : ""}
+            onClick={() => {
+              add({ id: item.id, name: item.name, price: item.price });
+              setJustAdded(true);
+            }}
           >
-            <Plus size={17} aria-hidden="true" /> {item.isAvailable ? "Add to bag" : "Unavailable"}
+            {justAdded ? <Check size={17} aria-hidden="true" /> : <Plus size={17} aria-hidden="true" />}
+            {item.isAvailable ? (justAdded ? "Added" : "Add to bag") : "Unavailable"}
           </button>
         </div>
       </div>

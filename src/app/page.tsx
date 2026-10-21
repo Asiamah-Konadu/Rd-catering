@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Clock3, MapPin, MessageCircle } from "lucide-react";
 import MenuCard from "@/components/MenuCard";
+import MobileBagBar from "@/components/MobileBagBar";
 import { getPublicMenu } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const categories = await getPublicMenu();
+  const featuredItem = categories.flatMap((category) => category.items).find((item) => item.isFeatured);
 
   return (
     <main className="home-page">
@@ -61,6 +63,41 @@ export default async function Home() {
         <div><MessageCircle size={17} aria-hidden="true" /><span>WhatsApp order confirmation</span></div>
       </section>
 
+      {featuredItem && (
+        <section className="home-pick" aria-label="Featured dish">
+          <div className="home-pick-image">
+            {featuredItem.imageUrl ? (
+              <img src={featuredItem.imageUrl} alt={featuredItem.name} />
+            ) : (
+              <Image
+                src="/coming-soon/jolof.avif"
+                alt="A Rich-Dons Catering Ghanaian dish"
+                fill
+                sizes="112px"
+              />
+            )}
+          </div>
+          <div className="home-pick-copy">
+            <span className="home-kicker">From the kitchen · Featured</span>
+            <h2>{featuredItem.name}</h2>
+            <p>{featuredItem.description || "A Rich-Dons favourite, prepared fresh to order."}</p>
+          </div>
+          <strong className="home-pick-price">GH₵ {featuredItem.price.toFixed(2)}</strong>
+          <Link href={`/menu/${featuredItem.slug}`} aria-label={`View ${featuredItem.name}`}>
+            View dish <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+        </section>
+      )}
+
+      <section className="home-delivery-note" aria-label="Delivery information">
+        <div>
+          <span className="home-kicker">Good to know</span>
+          <h2>Fresh food, delivered around Accra.</h2>
+        </div>
+        <p>Standard delivery is GH₵ 20. Registered office orders may qualify for free delivery and group discounts.</p>
+        <Link href="/corporate">Explore office ordering <ArrowRight size={16} aria-hidden="true" /></Link>
+      </section>
+
       <section className="home-menu" id="today-menu">
         <div className="home-menu-intro">
           <div>
@@ -95,6 +132,30 @@ export default async function Home() {
           </div>
         )}
       </section>
+
+      <section className="home-how" id="how-to-order">
+        <div className="home-how-heading">
+          <span className="home-kicker">Simple from start to finish</span>
+          <h2>Your order, in three steps.</h2>
+        </div>
+        <div className="home-how-steps">
+          <article><span>01</span><h3>Choose your dishes</h3><p>Browse the menu and add your favourites to the bag.</p></article>
+          <article><span>02</span><h3>Review your order</h3><p>Check quantities, delivery details, and the total.</p></article>
+          <article><span>03</span><h3>Confirm in WhatsApp</h3><p>Send the prepared order message and confirm availability and payment with us.</p></article>
+        </div>
+      </section>
+
+      <footer className="home-footer">
+        <Link href="/" className="home-footer-brand">Rich-Dons <span>Catering</span></Link>
+        <p>Fresh Ghanaian favourites, made to order in Accra.</p>
+        <nav aria-label="Footer navigation">
+          <Link href="#today-menu">Menu</Link>
+          <Link href="/corporate">Office catering</Link>
+          <Link href="/cart">Your bag</Link>
+        </nav>
+        <small>© {new Date().getFullYear()} Rich-Dons Catering</small>
+      </footer>
+      <MobileBagBar />
     </main>
   );
 }

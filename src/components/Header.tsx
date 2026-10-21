@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Menu, X, ShoppingBag } from "lucide-react";
 import { useState } from "react";
+import { useCart } from "@/components/cart/CartProvider";
 
 const navItems = [
   { href: "/menu", label: "Our Menu" },
@@ -11,6 +12,7 @@ const navItems = [
 
 export default function Header() {
   const [navOpen, setNavOpen] = useState(false);
+  const { count } = useCart();
 
   function closeNav() {
     setNavOpen(false);
@@ -49,10 +51,12 @@ export default function Header() {
         <Link
           href="/cart"
           onClick={closeNav}
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-sm transition"
+          className="cart-link inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-sm transition"
+          aria-label={`Your bag, ${count} item${count === 1 ? "" : "s"}`}
         >
           <ShoppingBag className="w-3.5 h-3.5" />
           <span>Your Bag</span>
+          <b aria-hidden="true">{count}</b>
         </Link>
       </div>
     </header>
