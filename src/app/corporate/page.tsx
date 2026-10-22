@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getWhatsAppOrderUrl } from "@/lib/whatsapp";
 import type { Metadata } from "next";
 import { CorporateDirectoryClient, type PublicCompanyInfo } from "./CorporateDirectoryClient";
 
@@ -31,5 +32,14 @@ export default async function CorporateDirectoryPage() {
     customPackaging: c.customPackaging,
   }));
 
-  return <CorporateDirectoryClient companies={companies} />;
+  const corporateSignupWhatsAppUrl = getWhatsAppOrderUrl(
+    "Hello Rich-Dons Catering! I'd like to register my company for the Corporate Lunch Portal."
+  );
+
+  return (
+    <CorporateDirectoryClient
+      companies={companies}
+      corporateSignupWhatsAppUrl={corporateSignupWhatsAppUrl}
+    />
+  );
 }

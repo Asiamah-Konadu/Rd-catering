@@ -34,8 +34,10 @@ export type PublicCompanyInfo = {
 
 export function CorporateDirectoryClient({
   companies,
+  corporateSignupWhatsAppUrl,
 }: {
   companies: PublicCompanyInfo[];
+  corporateSignupWhatsAppUrl: string | null;
 }) {
   const [search, setSearch] = useState("");
   const [selectedSlug, setSelectedSlug] = useState<string>("");
@@ -314,15 +316,17 @@ export function CorporateDirectoryClient({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <a
-              href="https://wa.me/233240000000?text=Hello%20Rich-Dons%20Catering!%20I'd%20like%20to%20register%20my%20company%20for%20the%20Corporate%20Lunch%20Portal."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow-md"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>Register via WhatsApp</span>
-            </a>
+            {corporateSignupWhatsAppUrl && (
+              <a
+                href={corporateSignupWhatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow-md"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Register via WhatsApp</span>
+              </a>
+            )}
             <Link
               href="/#about-launch"
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition border border-slate-700"
