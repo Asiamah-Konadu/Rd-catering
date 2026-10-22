@@ -1,0 +1,16 @@
+# Local and generated files
+node_modules
+.next
+.vercel
+.env*
+*.log
+coverage
+tsconfig.tsbuildinfo
+.codex-frontend-backup*
+
+# Repository-only files
+.github
+.vscode
+README.md
+Rich-Dons-Catering-Coming-Soon-Campaign.md
+RD-Catering-application.zip
