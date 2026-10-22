@@ -35,7 +35,7 @@ export default async function Home() {
           </div>
           <div className="home-open-note">
             <span className="home-open-dot" />
-            <span>Taking orders now</span>
+            <span>Orders open 9am · close 10pm</span>
             <span className="home-note-divider" />
             <span>Confirm and pay in WhatsApp</span>
           </div>
@@ -43,15 +43,15 @@ export default async function Home() {
 
         <div className="home-hero-photo">
           <Image
-            src="/coming-soon/banku-and-tilapia.jpg"
-            alt="Charcoal-grilled tilapia served with banku, pepper, onions, and fresh vegetables"
+            src="/coming-soon/jolof.avif"
+            alt="Fresh Ghanaian Jollof rice from Rich-Dons Catering"
             fill
             priority
             sizes="(max-width: 760px) 100vw, 52vw"
           />
           <div className="home-photo-label">
             <span>From our kitchen</span>
-            <strong>Banku &amp; grilled tilapia</strong>
+            <strong>Ghanaian Jollof rice</strong>
           </div>
           <div className="home-photo-index" aria-hidden="true">01 / GH</div>
         </div>
