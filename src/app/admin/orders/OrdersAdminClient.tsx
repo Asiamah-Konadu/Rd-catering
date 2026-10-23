@@ -369,6 +369,40 @@ export function OrdersAdminClient({
     }
   };
 
+  const handleMarkPaid = async (orderId: string) => {
+    setUpdatingId(orderId);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentStatus: "PAID" }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update payment status");
+      }
+
+      const updated = await res.json();
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId ? { ...order, payment: updated.payment } : order
+        )
+      );
+
+      if (activeModalOrder?.id === orderId) {
+        setActiveModalOrder((prev) =>
+          prev ? { ...prev, payment: updated.payment } : null
+        );
+      }
+
+      showToast(`Payment for order #${updated.orderNumber || orderId} marked as paid`);
+    } catch {
+      alert("Failed to mark payment as paid. Please try again.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const handleAssignAgent = async (orderId: string, agentId: string) => {
     setUpdatingId(orderId);
     try {
@@ -675,16 +709,44 @@ export function OrdersAdminClient({
 
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {order.payment?.status !== "PAID" && (
+                          <button
+                            onClick={() => handleMarkPaid(order.id)}
+                            disabled={updatingId === order.id}
+                            className="px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50 rounded-lg transition"
+                          >
+                            Mark Paid
+                          </button>
+                        )}
+                        {order.status !== "CANCELLED" && (
+                          <button
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `Cancel order #${order.orderNumber}?`
+                                )
+                              ) {
+                                handleStatusChange(order.id, "CANCELLED");
+                              }
+                            }}
+                            disabled={updatingId === order.id}
+                            className="px-3 py-1.5 text-xs font-semibold text-rose-800 bg-rose-50 hover:bg-rose-100 disabled:opacity-50 rounded-lg transition"
+                          >
+                            Cancel
+                          </button>
+                        )}
                         <button
                           onClick={() => printReceipt(order)}
+                          disabled={updatingId === order.id}
                           title="Print Receipt"
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+                          className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 rounded-lg transition"
                         >
                           <Printer className="w-3.5 h-3.5" />
                           Receipt
                         </button>
                         <button
                           onClick={() => setActiveModalOrder(order)}
+                          disabled={updatingId === order.id}
                           className="px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-lg transition"
                         >
                           View Details
@@ -832,6 +894,15 @@ export function OrdersAdminClient({
                 <p className="text-slate-600 text-[11px] mt-0.5">
                   Method: {activeModalOrder.payment?.method?.replace(/_/g, " ") ?? "WHATSAPP"}
                 </p>
+                {activeModalOrder.payment?.status !== "PAID" && (
+                  <button
+                    onClick={() => handleMarkPaid(activeModalOrder.id)}
+                    disabled={updatingId === activeModalOrder.id}
+                    className="mt-2 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 disabled:opacity-50 rounded-lg transition"
+                  >
+                    {updatingId === activeModalOrder.id ? "Updating..." : "Mark as Paid"}
+                  </button>
+                )}
               </div>
               {activeModalOrder.payment?.transactionId && (
                 <div className="text-right font-mono text-[10px] text-emerald-800 bg-white/80 border border-emerald-200 px-2.5 py-1.5 rounded-lg">
@@ -903,6 +974,23 @@ export function OrdersAdminClient({
                 <Printer className="w-4 h-4" />
                 Print Receipt
               </button>
+              {activeModalOrder.status !== "CANCELLED" && (
+                <button
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Cancel order #${activeModalOrder.orderNumber}?`
+                      )
+                    ) {
+                      handleStatusChange(activeModalOrder.id, "CANCELLED");
+                    }
+                  }}
+                  disabled={updatingId === activeModalOrder.id}
+                  className="px-4 py-2 bg-rose-50 text-rose-800 border border-rose-200 text-sm font-semibold rounded-lg hover:bg-rose-100 disabled:opacity-50 transition"
+                >
+                  Cancel Order
+                </button>
+              )}
               <button
                 onClick={() => setActiveModalOrder(null)}
                 className="px-4 py-2 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition"

@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/authz";
-import { OrderStatus, DeliveryStatus } from "@prisma/client";
+import {
+  OrderStatus,
+  DeliveryStatus,
+  PaymentStatus,
+  PaymentMethod,
+} from "@prisma/client";
 
 const VALID_ORDER_STATUSES = new Set(Object.values(OrderStatus));
 const VALID_DELIVERY_STATUSES = new Set(Object.values(DeliveryStatus));
+const VALID_PAYMENT_STATUSES = new Set(Object.values(PaymentStatus));
 
 export async function PATCH(
   req: Request,
@@ -21,7 +27,7 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { status, deliveryStatus, agentId } = body;
+    const { status, deliveryStatus, paymentStatus, agentId } = body;
 
     if (status && !VALID_ORDER_STATUSES.has(status)) {
       return NextResponse.json(
@@ -37,7 +43,24 @@ export async function PATCH(
       );
     }
 
+    if (
+      paymentStatus !== undefined &&
+      !VALID_PAYMENT_STATUSES.has(paymentStatus)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid payment status value" },
+        { status: 400 }
+      );
+    }
+
     const updatedOrder = await prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({
+        where: { id },
+        include: { delivery: true },
+      });
+
+      if (!order) return null;
+
       if (status) {
         await tx.order.update({
           where: { id },
@@ -45,55 +68,60 @@ export async function PATCH(
         });
       }
 
-      if (deliveryStatus || agentId !== undefined) {
-        const order = await tx.order.findUnique({
-          where: { id },
-          include: { delivery: true },
+      if (paymentStatus !== undefined) {
+        await tx.payment.upsert({
+          where: { orderId: id },
+          create: {
+            orderId: id,
+            amount: order.total,
+            method: PaymentMethod.WHATSAPP,
+            status: paymentStatus,
+          },
+          update: { status: paymentStatus },
         });
+      }
 
-        if (order) {
-          if (!order.delivery) {
-            // Create delivery record if missing
-            await tx.delivery.create({
-              data: {
-                orderId: id,
-                address: "Customer Address",
-                city: "Accra",
-                agentId: agentId || null,
-                status: agentId ? "ASSIGNED" : (deliveryStatus || "PENDING"),
-                assignedAt: agentId ? new Date() : null,
-              },
-            });
-          } else {
-            const updateDeliveryData: {
-              status?: DeliveryStatus;
-              agentId?: string | null;
-              assignedAt?: Date | null;
-              deliveredAt?: Date | null;
-            } = {};
-
-            if (deliveryStatus) {
-              updateDeliveryData.status = deliveryStatus;
-              if (deliveryStatus === "DELIVERED") {
-                updateDeliveryData.deliveredAt = new Date();
-              }
+      if (deliveryStatus || agentId !== undefined) {
+        if (!order.delivery) {
+          await tx.delivery.create({
+            data: {
+              orderId: id,
+              address: "Customer Address",
+              city: "Accra",
+              agentId: agentId || null,
+              status: agentId ? "ASSIGNED" : (deliveryStatus || "PENDING"),
+              assignedAt: agentId ? new Date() : null,
             }
+          });
+        } else {
+          const updateDeliveryData: {
+            status?: DeliveryStatus;
+            agentId?: string | null;
+            assignedAt?: Date | null;
+            deliveredAt?: Date | null;
+          } = {};
 
-            if (agentId !== undefined) {
-              updateDeliveryData.agentId = agentId || null;
-              if (agentId) {
-                updateDeliveryData.assignedAt = new Date();
-                if (order.delivery.status === "PENDING") {
-                  updateDeliveryData.status = "ASSIGNED";
-                }
-              }
+          if (deliveryStatus) {
+            updateDeliveryData.status = deliveryStatus;
+            if (deliveryStatus === "DELIVERED") {
+              updateDeliveryData.deliveredAt = new Date();
             }
-
-            await tx.delivery.update({
-              where: { orderId: id },
-              data: updateDeliveryData,
-            });
           }
+
+          if (agentId !== undefined) {
+            updateDeliveryData.agentId = agentId || null;
+            if (agentId) {
+              updateDeliveryData.assignedAt = new Date();
+              if (order.delivery.status === "PENDING") {
+                updateDeliveryData.status = "ASSIGNED";
+              }
+            }
+          }
+
+          await tx.delivery.update({
+            where: { orderId: id },
+            data: updateDeliveryData,
+          });
         }
       }
 
