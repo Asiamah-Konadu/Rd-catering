@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Menu, X, ShoppingBag } from "lucide-react";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useCart } from "@/components/cart/CartProvider";
 
 const navItems = [
@@ -12,10 +13,15 @@ const navItems = [
 
 export default function Header() {
   const [navOpen, setNavOpen] = useState(false);
+  const pathname = usePathname();
   const { count } = useCart();
 
   function closeNav() {
     setNavOpen(false);
+  }
+
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    return null;
   }
 
   return (
