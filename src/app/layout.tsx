@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import { CartProvider } from "@/components/cart/CartProvider";
+import SplashScreen from "@/components/SplashScreen";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -100,6 +101,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <head>
+        <link rel="preload" href="/animated-logo.svg" as="image" type="image/svg+xml" />
         <meta property="og:image" content={`${SITE_URL}/og-image.jpg`} />
         <meta property="og:image:secure_url" content={`${SITE_URL}/og-image.jpg`} />
         <meta property="og:image:type" content="image/jpeg" />
@@ -114,6 +116,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body>
+        <SplashScreen />
         <CartProvider>
           <Header />
           {children}
@@ -122,3 +125,4 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
+
