@@ -262,7 +262,11 @@ export default function CheckoutPage() {
           companyId: isCorporateOrder && selectedCompany ? selectedCompany.id : null,
           staffDepartment: isCorporateOrder ? staffDepartment.trim() : null,
           promoCode: appliedPromo?.code || null,
-          items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
+          items: items.map((item) => ({
+            id: item.id,
+            quantity: item.quantity,
+            extras: (item.selectedExtras || []).map((e) => ({ id: e.id })),
+          })),
         }),
       });
 
@@ -718,11 +722,18 @@ export default function CheckoutPage() {
 
           <div className="summary-lines divide-y divide-slate-100 max-h-60 overflow-y-auto">
             {items.map((item) => (
-              <div key={item.id} className="py-2 flex justify-between items-center text-sm">
-                <span className="text-slate-700">
-                  {item.quantity} × {item.name}
-                </span>
-                <b className="text-slate-900 font-semibold">
+              <div key={item.lineId} className="py-2.5 flex justify-between items-start text-sm">
+                <div>
+                  <div className="text-slate-800 font-medium">
+                    {item.quantity} × {item.name}
+                  </div>
+                  {item.selectedExtras && item.selectedExtras.length > 0 && (
+                    <div className="text-[11px] text-amber-800 mt-0.5 font-normal">
+                      Extras: {item.selectedExtras.map((e) => e.name).join(", ")}
+                    </div>
+                  )}
+                </div>
+                <b className="text-slate-900 font-semibold whitespace-nowrap ml-3">
                   GH₵ {(item.price * item.quantity).toFixed(2)}
                 </b>
               </div>

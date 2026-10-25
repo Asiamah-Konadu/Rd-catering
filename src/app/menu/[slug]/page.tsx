@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MenuItemDetail from "@/components/MenuItemDetail";
-import { getPublicMenuItem } from "@/lib/menu";
+import { getPublicMenuItem, getPublicExtras } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +41,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function MenuItemPage({ params }: Props) {
   const { slug } = await params;
-  const item = await getPublicMenuItem(slug);
+  const [item, extras] = await Promise.all([
+    getPublicMenuItem(slug),
+    getPublicExtras(),
+  ]);
 
   if (!item) notFound();
 
@@ -75,7 +78,7 @@ export default async function MenuItemPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(menuItemJsonLd) }}
       />
-      <MenuItemDetail item={item} />
+      <MenuItemDetail item={item} availableExtras={extras} />
     </>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowDown, ArrowRight, Clock3, MapPin } from "lucide-react";
 import MenuCard from "@/components/MenuCard";
-import { getPublicMenu } from "@/lib/menu";
+import { getPublicMenu, getPublicExtras } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,10 @@ export const metadata: Metadata = {
 };
 
 export default async function MenuPage() {
-  const categories = await getPublicMenu();
+  const [categories, extras] = await Promise.all([
+    getPublicMenu(),
+    getPublicExtras(),
+  ]);
   const dishCount = categories.reduce((total, category) => total + category.items.length, 0);
 
   return (
@@ -79,7 +82,13 @@ export default async function MenuPage() {
                 <span>{String(category.items.length).padStart(2, "0")} dishes</span>
               </div>
               <div className="menu-grid">
-                {category.items.map(item => <MenuCard key={item.id} item={item} />)}
+                {category.items.map(item => (
+                  <MenuCard
+                    key={item.id}
+                    item={item}
+                    availableExtras={extras}
+                  />
+                ))}
               </div>
             </section>
           ))}

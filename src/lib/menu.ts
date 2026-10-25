@@ -1,5 +1,12 @@
 import { prisma } from "@/lib/prisma";
 
+export type PublicExtra = {
+  id: string;
+  name: string;
+  price: number;
+  isActive: boolean;
+};
+
 export type PublicMenuItem = {
   id: string;
   name: string;
@@ -141,4 +148,24 @@ export async function getDailyPick(): Promise<PublicMenuItem | null> {
   });
 
   return anyItem ? serializeMenuItem(anyItem) : null;
+}
+
+export async function getPublicExtras(): Promise<PublicExtra[]> {
+  const extras = await prisma.extra.findMany({
+    where: { isActive: true },
+    orderBy: { price: "desc" },
+    select: {
+      id: true,
+      name: true,
+      price: true,
+      isActive: true,
+    },
+  });
+
+  return extras.map((e) => ({
+    id: e.id,
+    name: e.name,
+    price: Number(e.price.toString()),
+    isActive: e.isActive,
+  }));
 }

@@ -164,41 +164,95 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
     }
 
-    const requestedItems: Array<{ id: string; quantity: unknown } | null> = payload.items.map((item: unknown) => {
+    const requestedItems: Array<{
+      id: string;
+      quantity: unknown;
+      extras?: unknown;
+    } | null> = payload.items.map((item: unknown) => {
       if (!item || typeof item !== "object") return null;
-      const candidate = item as { id?: unknown; quantity?: unknown };
+      const candidate = item as { id?: unknown; quantity?: unknown; extras?: unknown };
       return {
         id: typeof candidate.id === "string" ? candidate.id : "",
         quantity: candidate.quantity,
+        extras: Array.isArray(candidate.extras) ? candidate.extras : [],
       };
     });
     if (requestedItems.some(item => !item || !item.id || !Number.isInteger(item.quantity) || Number(item.quantity) < 1 || Number(item.quantity) > MAX_QUANTITY)) {
       return NextResponse.json({ error: `Each item quantity must be a whole number between 1 and ${MAX_QUANTITY}.` }, { status: 400 });
     }
 
-    const quantities = new Map<string, number>();
+    const menuItemIds = new Set<string>();
+    const extraIds = new Set<string>();
+
     for (const item of requestedItems) {
       if (!item) continue;
-      const quantity = (quantities.get(item.id) ?? 0) + Number(item.quantity);
-      if (quantity > MAX_QUANTITY) {
-        return NextResponse.json({ error: `You can order up to ${MAX_QUANTITY} of each item.` }, { status: 400 });
+      menuItemIds.add(item.id);
+      if (Array.isArray(item.extras)) {
+        for (const ex of item.extras) {
+          if (ex && typeof ex === "object" && "id" in ex && typeof ex.id === "string") {
+            extraIds.add(ex.id);
+          }
+        }
       }
-      quantities.set(item.id, quantity);
     }
 
-    const menuItems = await prisma.menuItem.findMany({ where: { id: { in: [...quantities.keys()] } } });
+    const [menuItems, extrasDb] = await Promise.all([
+      prisma.menuItem.findMany({ where: { id: { in: [...menuItemIds] } } }),
+      extraIds.size > 0
+        ? prisma.extra.findMany({ where: { id: { in: [...extraIds] } } })
+        : Promise.resolve([]),
+    ]);
+
     const menuById = new Map(menuItems.map(item => [item.id, item]));
-    const unavailable = [...quantities.keys()].find(id => !menuById.get(id)?.isAvailable);
-    if (unavailable) {
+    const extrasById = new Map(extrasDb.map(ex => [ex.id, ex]));
+
+    const unavailableItem = [...menuItemIds].find(id => !menuById.get(id)?.isAvailable);
+    if (unavailableItem) {
       return NextResponse.json({ error: "One of the items in your cart is no longer available. Please review your cart." }, { status: 409 });
     }
 
-    const orderLines = [...quantities.entries()].map(([id, quantity]) => {
-      const item = menuById.get(id);
+    const unavailableExtra = [...extraIds].find(id => !extrasById.get(id)?.isActive);
+    if (unavailableExtra) {
+      return NextResponse.json({ error: "One of the selected extras is currently unavailable. Please review your order." }, { status: 409 });
+    }
+
+    // Build order lines with accurate prices verified against DB
+    const orderLines = requestedItems.map((req) => {
+      if (!req) throw new Error("Invalid item in list");
+      const item = menuById.get(req.id);
       if (!item) throw new Error("Menu item lookup failed");
-      const unitPrice = Number(item.price);
-      return { item, quantity, unitPrice, totalPrice: unitPrice * quantity };
+
+      const selectedExtras: Array<{ id: string; name: string; price: number }> = [];
+      if (Array.isArray(req.extras)) {
+        for (const ex of req.extras) {
+          if (ex && typeof ex === "object" && "id" in ex && typeof ex.id === "string") {
+            const dbExtra = extrasById.get(ex.id);
+            if (dbExtra) {
+              selectedExtras.push({
+                id: dbExtra.id,
+                name: dbExtra.name,
+                price: Number(dbExtra.price),
+              });
+            }
+          }
+        }
+      }
+
+      const basePrice = Number(item.price);
+      const extrasSum = selectedExtras.reduce((sum, e) => sum + e.price, 0);
+      const unitPrice = basePrice + extrasSum;
+      const quantity = Number(req.quantity);
+      const totalPrice = unitPrice * quantity;
+
+      return {
+        item,
+        quantity,
+        unitPrice,
+        totalPrice,
+        selectedExtras,
+      };
     });
+
     const subtotal = orderLines.reduce((sum, line) => sum + line.totalPrice, 0);
     
     // Corporate batch orders can unlock free delivery
@@ -256,10 +310,21 @@ export async function POST(request: Request) {
           items: {
             create: orderLines.map(line => ({
               menuItemId: line.item.id,
-              name: line.item.name,
+              name: line.selectedExtras.length > 0 ? `${line.item.name} Combo` : line.item.name,
               quantity: line.quantity,
               unitPrice: line.unitPrice,
               totalPrice: line.totalPrice,
+              ...(line.selectedExtras.length > 0
+                ? {
+                    extras: {
+                      create: line.selectedExtras.map(ex => ({
+                        extraId: ex.id,
+                        price: ex.price,
+                        quantity: 1,
+                      })),
+                    },
+                  }
+                : {}),
             })),
           },
           delivery: {
@@ -297,6 +362,13 @@ export async function POST(request: Request) {
       return { order: createdOrder, finalTotal, discount };
     });
 
+    const itemsSummary = orderLines.map(line => {
+      const extrasDetail = line.selectedExtras.length > 0
+        ? `\n   └ Extras: ${line.selectedExtras.map(e => `${e.name} (+GH₵ ${e.price.toFixed(2)})`).join(", ")}`
+        : "";
+      return `${line.quantity} x ${line.item.name} - GH₵ ${line.totalPrice.toFixed(2)}${extrasDetail}`;
+    });
+
     const message = [
       "Hello Rich-Dons Catering, I would like to confirm this order:",
       `Order: ${result.order.orderNumber}`,
@@ -304,7 +376,7 @@ export async function POST(request: Request) {
       `Phone: ${phone}`,
       "",
       "Items:",
-      ...orderLines.map(line => `${line.quantity} x ${line.item.name} - GH₵ ${line.totalPrice.toFixed(2)}`),
+      ...itemsSummary,
       "",
       `Subtotal: GH₵ ${subtotal.toFixed(2)}`,
       `Delivery: GH₵ ${fee.toFixed(2)}`,

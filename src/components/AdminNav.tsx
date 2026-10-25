@@ -44,6 +44,11 @@ export function AdminNav({ user }: AdminNavProps) {
       roles: ["ADMIN", "MENU_MANAGER"],
     },
     {
+      label: "Extras & Combos",
+      href: "/admin/extras",
+      roles: ["ADMIN", "MENU_MANAGER"],
+    },
+    {
       label: "Order Queue",
       href: "/admin/orders",
       roles: ["ADMIN", "ORDER_HANDLER"],
