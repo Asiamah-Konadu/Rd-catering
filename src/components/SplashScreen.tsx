@@ -17,8 +17,8 @@ export default function SplashScreen() {
       return;
     }
 
-    // Minimum display time for logo animation appreciation
-    const minDisplayMs = 1500;
+    // Display time calibrated for the self-drawing animation and color bloom
+    const minDisplayMs = 2200;
     const startTime = Date.now();
 
     const handleDismiss = () => {
@@ -38,7 +38,7 @@ export default function SplashScreen() {
     } else {
       window.addEventListener('load', handleDismiss, { once: true });
       // Fallback timeout in case load event fires late
-      const fallbackTimer = setTimeout(handleDismiss, 2400);
+      const fallbackTimer = setTimeout(handleDismiss, 2800);
       return () => {
         window.removeEventListener('load', handleDismiss);
         clearTimeout(fallbackTimer);
