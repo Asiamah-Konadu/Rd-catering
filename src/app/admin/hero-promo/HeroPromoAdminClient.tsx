@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import {
   Sparkles,
   ToggleLeft,
@@ -158,10 +157,10 @@ export function HeroPromoAdminClient({
           ? "Advertising is now ACTIVE on the homepage!"
           : "Advertising is now OFF. Homepage returned to default photo.",
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatusMessage({
         type: "error",
-        text: err.message || "Failed to toggle status",
+        text: err instanceof Error ? err.message : "Failed to toggle status",
       });
     } finally {
       setToggling(false);
@@ -194,10 +193,10 @@ export function HeroPromoAdminClient({
         type: "success",
         text: "Combo special advertisement saved successfully!",
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatusMessage({
         type: "error",
-        text: err.message || "Failed to save advertisement",
+        text: err instanceof Error ? err.message : "Failed to save advertisement",
       });
     } finally {
       setSaving(false);
