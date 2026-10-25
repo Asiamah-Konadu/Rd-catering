@@ -17,8 +17,8 @@ export default function SplashScreen() {
       return;
     }
 
-    // Display time calibrated for the self-drawing animation and color bloom
-    const minDisplayMs = 2200;
+    // Display time calibrated to 3.3s for the self-drawing animation and full reveal
+    const minDisplayMs = 3300;
     const startTime = Date.now();
 
     const handleDismiss = () => {
@@ -38,7 +38,7 @@ export default function SplashScreen() {
     } else {
       window.addEventListener('load', handleDismiss, { once: true });
       // Fallback timeout in case load event fires late
-      const fallbackTimer = setTimeout(handleDismiss, 2800);
+      const fallbackTimer = setTimeout(handleDismiss, 3900);
       return () => {
         window.removeEventListener('load', handleDismiss);
         clearTimeout(fallbackTimer);
