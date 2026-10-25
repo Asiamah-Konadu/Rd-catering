@@ -1593,7 +1593,7 @@ footer strong { color: var(--ink); }
   min-height: 580px;
   background:
     linear-gradient(180deg, rgba(28, 25, 18, .04), rgba(28, 25, 18, .62)),
-    url("/coming-soon/jolof.avif") center / cover;
+    url("/events-bg.jpg") center right / cover no-repeat;
   animation: home-rise .65s ease .08s both;
 }
 .events-image-mark {
