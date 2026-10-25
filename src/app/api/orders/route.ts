@@ -47,6 +47,8 @@ export async function POST(request: Request) {
       address?: unknown;
       city?: unknown;
       region?: unknown;
+      latitude?: unknown;
+      longitude?: unknown;
       notes?: unknown;
       items?: unknown;
       isScheduled?: unknown;
@@ -132,12 +134,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const latitude = typeof (payload as { latitude?: unknown }).latitude === "number" && !isNaN(Number((payload as { latitude?: unknown }).latitude))
-      ? Number((payload as { latitude?: unknown }).latitude)
+    const latitude = typeof payload.latitude === "number" &&
+      Number.isFinite(payload.latitude) &&
+      payload.latitude >= -90 &&
+      payload.latitude <= 90
+      ? payload.latitude
       : null;
-    const longitude = typeof (payload as { longitude?: unknown }).longitude === "number" && !isNaN(Number((payload as { longitude?: unknown }).longitude))
-      ? Number((payload as { longitude?: unknown }).longitude)
+    const longitude = typeof payload.longitude === "number" &&
+      Number.isFinite(payload.longitude) &&
+      payload.longitude >= -180 &&
+      payload.longitude <= 180
+      ? payload.longitude
       : null;
+
+    if (latitude === null || longitude === null) {
+      return NextResponse.json(
+        { error: "Pin your delivery location on the map using valid GPS coordinates." },
+        { status: 400 }
+      );
+    }
 
     if (!name || name.length < 2 || !phone || !validPhone(phone) || !address || !city) {
       return NextResponse.json({ error: "Enter a valid name, Ghanaian phone number, address, and city." }, { status: 400 });
@@ -296,6 +311,8 @@ export async function POST(request: Request) {
       `Discount: GH₵ ${result.discount.toFixed(2)}`,
       `Total: GH₵ ${result.finalTotal.toFixed(2)}`,
       `Delivery address: ${address}, ${city}${region ? `, ${region}` : ""}`,
+      `Google Maps navigation: https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`,
+      `GPS coordinates: ${latitude}, ${longitude}`,
       `Schedule: ${isScheduled ? `${scheduledSlot || "Scheduled"}${scheduledFor ? ` on ${scheduledFor.toLocaleString("en-GH")}` : ""}` : "ASAP"}`,
       ...(staffDepartment ? [`Department / desk: ${staffDepartment}`] : []),
       ...(notes ? [`Notes: ${notes}`] : []),

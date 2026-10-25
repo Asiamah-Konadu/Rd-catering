@@ -241,6 +241,10 @@ export default function CheckoutPage() {
         throw new Error("Please specify your department or desk location for labeled delivery.");
       }
 
+      if (form.latitude === null || form.longitude === null) {
+        throw new Error("Please pin your delivery location on the map before placing your order.");
+      }
+
       const scheduledSlotVal = isCorporateOrder && selectedCompany
         ? `Corporate Lunch Batch (${selectedCompany.batchDeliveryTime})`
         : isScheduled
@@ -578,7 +582,7 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
                   <MapPin className="w-4 h-4 text-amber-600" />
-                  <span>Pin Map / GPS Coordinates</span>
+                  <span>Pin Map / GPS Coordinates *</span>
                 </div>
                 <button
                   type="button"
@@ -586,10 +590,10 @@ export default function CheckoutPage() {
                   className="flex items-center gap-1 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg shadow-xs transition"
                 >
                   <Crosshair className="w-3.5 h-3.5" />
-                  {form.latitude ? "Change Pin" : "Pick on Map"}
+                  {form.latitude !== null && form.longitude !== null ? "Change Pin" : "Pick on Map"}
                 </button>
               </div>
-              {form.latitude && form.longitude ? (
+              {form.latitude !== null && form.longitude !== null ? (
                 <div className="flex items-center gap-2 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
                   <Navigation className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   <span>
@@ -839,4 +843,3 @@ export default function CheckoutPage() {
     </main>
   );
 }
-

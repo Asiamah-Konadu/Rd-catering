@@ -867,11 +867,14 @@ export function OrdersAdminClient({
                         ? `, ${activeModalOrder.delivery.region}`
                         : ""}
                     </p>
-                    {activeModalOrder.delivery.latitude && activeModalOrder.delivery.longitude && (
-                      <p className="text-[11px] text-emerald-700 font-mono mt-1">
-                        GPS: {activeModalOrder.delivery.latitude.toFixed(5)}, {activeModalOrder.delivery.longitude.toFixed(5)}
-                      </p>
-                    )}
+                    {activeModalOrder.delivery.latitude !== null &&
+                      activeModalOrder.delivery.latitude !== undefined &&
+                      activeModalOrder.delivery.longitude !== null &&
+                      activeModalOrder.delivery.longitude !== undefined && (
+                        <p className="text-[11px] text-emerald-700 font-mono mt-1">
+                          GPS: {activeModalOrder.delivery.latitude.toFixed(5)}, {activeModalOrder.delivery.longitude.toFixed(5)}
+                        </p>
+                      )}
                     <div className="mt-2 text-xs font-bold text-emerald-800">
                       Agent: {activeModalOrder.delivery.agent?.name || "Unassigned"}
                     </div>

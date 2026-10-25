@@ -524,7 +524,10 @@ export function OrderTrackerClient({
                   <span className="text-xs text-slate-500 block uppercase font-semibold">
                     Address
                   </span>
-                  {order.delivery.latitude && order.delivery.longitude && (
+                  {order.delivery.latitude !== null &&
+                    order.delivery.latitude !== undefined &&
+                    order.delivery.longitude !== null &&
+                    order.delivery.longitude !== undefined && (
                     <a
                       href={`https://www.google.com/maps/search/?api=1&query=${order.delivery.latitude},${order.delivery.longitude}`}
                       target="_blank"

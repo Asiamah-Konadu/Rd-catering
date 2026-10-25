@@ -150,6 +150,7 @@ export default async function Home() {
         <p>Fresh Ghanaian favourites, made to order in Accra.</p>
         <nav aria-label="Footer navigation">
           <Link href="#today-menu">Menu</Link>
+          <Link href="/events">Event catering</Link>
           <Link href="/corporate">Office catering</Link>
           <Link href="/cart">Your bag</Link>
         </nav>
