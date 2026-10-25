@@ -308,3 +308,20 @@ model CmsPage {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model HeroPromo {
+  id          String   @id @default(uuid())
+  title       String
+  subtitle    String?  @default("Holiday Special")
+  badgeText   String?  @default("SPECIAL / GH")
+  imageUrl    String
+  description String?
+  price       Decimal? @db.Decimal(10, 2)
+  linkUrl     String?  @default("/menu")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+}
+

@@ -5,6 +5,7 @@ import { ArrowDown, ArrowRight, Clock3, MapPin, MessageCircle } from "lucide-rea
 import MenuCard from "@/components/MenuCard";
 import MobileBagBar from "@/components/MobileBagBar";
 import { getPublicMenu } from "@/lib/menu";
+import { getActiveHeroPromo } from "@/lib/promo";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const categories = await getPublicMenu();
+  const [categories, heroPromo] = await Promise.all([
+    getPublicMenu(),
+    getActiveHeroPromo(),
+  ]);
   const featuredItem = categories.flatMap((category) => category.items).find((item) => item.isFeatured);
 
   return (
@@ -42,18 +46,75 @@ export default async function Home() {
         </div>
 
         <div className="home-hero-photo">
-          <Image
-            src="/coming-soon/jolof.avif"
-            alt="Fresh Ghanaian Jollof rice from Rich-Dons Catering"
-            fill
-            priority
-            sizes="(max-width: 760px) 100vw, 52vw"
-          />
-          <div className="home-photo-label">
-            <span>From our kitchen</span>
-            <strong>Ghanaian Jollof rice</strong>
-          </div>
-          <div className="home-photo-index" aria-hidden="true">01 / GH</div>
+          {heroPromo ? (
+            <>
+              {heroPromo.imageUrl.startsWith("http") ? (
+                <img
+                  src={heroPromo.imageUrl}
+                  alt={heroPromo.title}
+                  className="home-hero-promo-img"
+                />
+              ) : (
+                <Image
+                  src={heroPromo.imageUrl}
+                  alt={heroPromo.title}
+                  fill
+                  priority
+                  sizes="(max-width: 760px) 100vw, 52vw"
+                />
+              )}
+              {heroPromo.linkUrl ? (
+                <Link
+                  href={heroPromo.linkUrl}
+                  className="home-hero-promo-overlay-link"
+                  aria-label={`Order ${heroPromo.title}`}
+                >
+                  <div className="home-photo-label home-photo-label-promo">
+                    <span>{heroPromo.subtitle}</span>
+                    <strong>{heroPromo.title}</strong>
+                    {heroPromo.price ? (
+                      <span className="home-promo-price-tag">
+                        GH₵ {heroPromo.price.toFixed(2)}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="home-photo-index home-photo-index-promo" aria-hidden="true">
+                    {heroPromo.badgeText}
+                  </div>
+                </Link>
+              ) : (
+                <>
+                  <div className="home-photo-label home-photo-label-promo">
+                    <span>{heroPromo.subtitle}</span>
+                    <strong>{heroPromo.title}</strong>
+                    {heroPromo.price ? (
+                      <span className="home-promo-price-tag">
+                        GH₵ {heroPromo.price.toFixed(2)}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="home-photo-index home-photo-index-promo" aria-hidden="true">
+                    {heroPromo.badgeText}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <Image
+                src="/coming-soon/jolof.avif"
+                alt="Fresh Ghanaian Jollof rice from Rich-Dons Catering"
+                fill
+                priority
+                sizes="(max-width: 760px) 100vw, 52vw"
+              />
+              <div className="home-photo-label">
+                <span>From our kitchen</span>
+                <strong>Ghanaian Jollof rice</strong>
+              </div>
+              <div className="home-photo-index" aria-hidden="true">01 / GH</div>
+            </>
+          )}
         </div>
       </section>
 

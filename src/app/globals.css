@@ -1216,6 +1216,54 @@ footer strong { color: var(--ink); }
   letter-spacing: .12em;
   text-shadow: 0 1px 8px rgba(0, 0, 0, .55);
 }
+
+.home-hero-promo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 52%;
+}
+
+.home-hero-promo-overlay-link {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.home-photo-index-promo {
+  background: rgba(247, 67, 38, 0.9);
+  padding: 5px 13px;
+  border-radius: 999px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  text-shadow: none;
+}
+
+.home-promo-price-tag {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fdf3cf;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  margin-top: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 .home-trust {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
