@@ -182,7 +182,7 @@ export default function SandTypographyHero({
 
       // Center the text bounding box within display coordinates
       const textCenterX = w / 2;
-      const textCenterY = h * 0.38;
+      const textCenterY = h * 0.44;
 
       const offsetX = textCenterX - offCanvas.width / 2;
       const offsetY = textCenterY - offCanvas.height / 2;
@@ -464,7 +464,7 @@ export default function SandTypographyHero({
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-[580px] md:min-h-[660px] overflow-hidden flex flex-col justify-between items-center text-center select-none"
+      className="relative w-full min-h-[640px] md:min-h-[720px] overflow-hidden flex flex-col justify-between items-center text-center select-none"
       style={{
         background: "radial-gradient(135% 120% at 50% 25%, #2a190f 0%, #150f0a 82%)",
         touchAction: "pan-y",
@@ -487,7 +487,7 @@ export default function SandTypographyHero({
       </div>
 
       {/* Center Spacer to reserve visual clearance for the sand headline */}
-      <div className="w-full flex-1 min-h-[220px] pointer-events-none" />
+      <div className="w-full flex-1 min-h-[180px] pointer-events-none" />
 
       {/* Bottom Content: Subheading & CTA */}
       <div className="relative z-10 pb-12 px-6 max-w-2xl mx-auto flex flex-col items-center gap-6">
