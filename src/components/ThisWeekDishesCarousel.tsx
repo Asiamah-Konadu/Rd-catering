@@ -114,20 +114,35 @@ export default function ThisWeekDishesCarousel({ items = [] }: ThisWeekDishesPro
   const count = displayDishes.length;
   const angleStep = count > 0 ? 360 / count : 45;
 
-  // 1. Intersection Observer to completely pause rotation when scrolled out of view (zero lag!)
+  // 1. Intersection Observer — pause rotation when scrolled out of view.
+  //    rootMargin gives an extra 120px buffer so the threshold is crossed well
+  //    before the element reaches the viewport edge, preventing rapid toggling.
+  //    "Leave" state is debounced 150ms to absorb any residual oscillation.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
+    let leaveTimer: NodeJS.Timeout | null = null;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsInView(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          // Enter immediately — clear any pending leave
+          if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
+          setIsInView(true);
+        } else {
+          // Debounce the leave so edge-crossing oscillations don't blink
+          leaveTimer = setTimeout(() => setIsInView(false), 150);
+        }
       },
-      { threshold: 0.15 }
+      { threshold: 0, rootMargin: "120px 0px 120px 0px" }
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (leaveTimer) clearTimeout(leaveTimer);
+    };
   }, []);
 
   // Handle manual rotation reset back to auto-spin after 6 seconds of inactivity
