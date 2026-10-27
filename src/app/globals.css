@@ -531,9 +531,17 @@ img { max-width: 100%; }
 .menu-card h3 a {
   color: var(--ink);
   text-decoration: none;
-  transition: color 0.18s ease;
+  background-image: linear-gradient(var(--brand), var(--brand));
+  background-repeat: no-repeat;
+  background-size: 100% 1.5px;
+  background-position: 0 100%;
+  padding-bottom: 1px;
+  transition: color 0.18s ease, background-size 0.22s ease;
 }
-.menu-card h3 a:hover { color: var(--brand); }
+.menu-card h3 a:hover {
+  color: var(--brand);
+  background-size: 100% 1.5px;
+}
 .menu-card p {
   color: #6a6a68;
   line-height: 1.55;
