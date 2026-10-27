@@ -4,8 +4,10 @@ import Link from "next/link";
 import { ArrowDown, ArrowRight, Clock3, MapPin, MessageCircle } from "lucide-react";
 import MenuCard from "@/components/MenuCard";
 import MobileBagBar from "@/components/MobileBagBar";
-import { getPublicMenu } from "@/lib/menu";
+import ThisWeekDishesCarousel from "@/components/ThisWeekDishesCarousel";
+import { getPublicMenu, getWeeklyMenuItems } from "@/lib/menu";
 import { getActiveHeroPromo } from "@/lib/promo";
+import { getSiteSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -45,11 +47,15 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [categories, heroPromo] = await Promise.all([
+  const [categories, heroPromo, siteSettings, weeklyMenuItems] = await Promise.all([
     getPublicMenu(),
     getActiveHeroPromo(),
+    getSiteSettings(),
+    getWeeklyMenuItems(),
   ]);
-  const featuredItem = categories.flatMap((category) => category.items).find((item) => item.isFeatured);
+  const allDishes = categories.flatMap((category) => category.items);
+  const featuredItem = allDishes.find((item) => item.isFeatured);
+  const carouselDishes = weeklyMenuItems && weeklyMenuItems.length > 0 ? weeklyMenuItems : allDishes;
 
   return (
     <main className="home-page">
@@ -68,7 +74,7 @@ export default async function Home() {
           </div>
           <div className="home-open-note">
             <span className="home-open-dot" />
-            <span>Orders open 9am · close 10pm</span>
+            <span>{siteSettings.businessHoursText}</span>
             <span className="home-note-divider" />
             <span>Confirm and pay in WhatsApp</span>
           </div>
@@ -153,6 +159,8 @@ export default async function Home() {
         <div><MessageCircle size={17} aria-hidden="true" /><span>WhatsApp order confirmation</span></div>
       </section>
 
+      <ThisWeekDishesCarousel items={carouselDishes} />
+
       {featuredItem && (
         <section className="home-pick" aria-label="Featured dish">
           <div className="home-pick-image">
@@ -184,7 +192,7 @@ export default async function Home() {
           <span className="home-kicker">Good to know</span>
           <h2>Fresh food, delivered around Accra.</h2>
         </div>
-        <p>Standard delivery is GH₵ 20. Registered office orders may qualify for free delivery and group discounts.</p>
+        <p>{siteSettings.deliveryFeeText}. {siteSettings.deliveryNoteText}</p>
         <Link href="/corporate">Explore office ordering <ArrowRight size={16} aria-hidden="true" /></Link>
       </section>
 

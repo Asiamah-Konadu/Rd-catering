@@ -325,3 +325,13 @@ model HeroPromo {
   @@index([isActive])
 }
 
+/// Singleton table for globally editable storefront text settings.
+/// Only one row should ever exist (id = "singleton").
+model SiteSettings {
+  id                  String   @id @default("singleton")
+  businessHoursText   String   @default("Orders open 9am · close 10pm")
+  deliveryFeeText     String   @default("Standard delivery is GH₵ 20")
+  deliveryNoteText    String   @default("Registered office orders may qualify for free delivery and group discounts.")
+  whatsappPhone       String   @default("+233xxxxxxxxx")
+  updatedAt           DateTime @updatedAt
+}

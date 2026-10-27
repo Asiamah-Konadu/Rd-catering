@@ -40,40 +40,45 @@ function serializeMenuItem(item: {
 }
 
 export async function getPublicMenu() {
-  const categories = await prisma.category.findMany({
-    where: {
-      isActive: true,
-      menuItems: { some: { isAvailable: true } },
-    },
-    orderBy: { sortOrder: "asc" },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      menuItems: {
-        where: { isAvailable: true },
-        orderBy: { createdAt: "asc" },
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          description: true,
-          imageUrl: true,
-          price: true,
-          isAvailable: true,
-          isFeatured: true,
-          category: { select: { name: true, slug: true } },
+  try {
+    const categories = await prisma.category.findMany({
+      where: {
+        isActive: true,
+        menuItems: { some: { isAvailable: true } },
+      },
+      orderBy: { sortOrder: "asc" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        menuItems: {
+          where: { isAvailable: true },
+          orderBy: { createdAt: "asc" },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            imageUrl: true,
+            price: true,
+            isAvailable: true,
+            isFeatured: true,
+            category: { select: { name: true, slug: true } },
+          },
         },
       },
-    },
-  });
+    });
 
-  return categories.map((category) => ({
-    id: category.id,
-    name: category.name,
-    slug: category.slug,
-    items: category.menuItems.map(serializeMenuItem),
-  }));
+    return categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      items: category.menuItems.map(serializeMenuItem),
+    }));
+  } catch (error) {
+    console.error("Error fetching public menu from database:", error);
+    return [];
+  }
 }
 
 export async function getFeaturedMenu() {
@@ -169,3 +174,63 @@ export async function getPublicExtras(): Promise<PublicExtra[]> {
     isActive: e.isActive,
   }));
 }
+
+export async function getWeeklyMenuItems(): Promise<PublicMenuItem[] | null> {
+  try {
+    const now = new Date();
+    // 1. Look for currently published weekly menu whose dates match
+    let weeklyMenu = await prisma.weeklyMenu.findFirst({
+      where: {
+        isPublished: true,
+        weekStart: { lte: now },
+        weekEnd: { gte: now },
+      },
+      include: {
+        items: {
+          orderBy: { sortOrder: "asc" },
+          include: {
+            menuItem: {
+              include: {
+                category: { select: { name: true, slug: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // 2. If no date-matched published menu, fall back to the most recently updated published weekly menu
+    if (!weeklyMenu) {
+      weeklyMenu = await prisma.weeklyMenu.findFirst({
+        where: { isPublished: true },
+        orderBy: { updatedAt: "desc" },
+        include: {
+          items: {
+            orderBy: { sortOrder: "asc" },
+            include: {
+              menuItem: {
+                include: {
+                  category: { select: { name: true, slug: true } },
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    if (!weeklyMenu || !weeklyMenu.items || weeklyMenu.items.length === 0) {
+      return null;
+    }
+
+    const validItems = weeklyMenu.items
+      .map((wi) => wi.menuItem)
+      .filter((m) => m && m.isAvailable)
+      .map(serializeMenuItem);
+
+    return validItems.length > 0 ? validItems : null;
+  } catch (error) {
+    console.error("Error fetching weekly menu items:", error);
+    return null;
+  }
+}
