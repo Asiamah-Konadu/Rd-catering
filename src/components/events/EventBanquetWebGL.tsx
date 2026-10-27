@@ -230,8 +230,8 @@ export default function EventBanquetWebGL() {
     // Interaction & Animation state
     let animationFrameId: number;
     let isVisible = true;
-    let startTime = performance.now();
-    let mouse = { x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 };
+    const startTime = performance.now();
+    const mouse = { x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 };
     let interactionStrength = 0.0;
     let targetInteractionStrength = 0.0;
 
