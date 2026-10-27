@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowDown, ArrowRight, Clock3, MapPin } from "lucide-react";
 import MenuCard from "@/components/MenuCard";
+import MenuSideNav from "@/components/MenuSideNav";
 import { getPublicMenu, getPublicExtras } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
@@ -122,18 +123,7 @@ export default async function MenuPage() {
 
       {categories.length ? (
         <>
-          <nav className="menu-category-nav" id="menu-categories" aria-label="Menu categories">
-            <span className="menu-nav-label">Jump to</span>
-            {categories.map((category, index) => (
-              <a key={category.id} href={`#menu-${category.slug}`}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                {category.name}
-                <ArrowDown size={14} aria-hidden="true" />
-              </a>
-            ))}
-          </nav>
-
-          <div className="menu-results-heading">
+          <div className="menu-results-heading" id="menu-categories">
             <div>
               <span className="menu-eyebrow">Fresh from our kitchen</span>
               <h2>What sounds good?</h2>
@@ -141,24 +131,32 @@ export default async function MenuPage() {
             <span className="menu-dish-count">{String(dishCount).padStart(2, "0")} dishes to choose from</span>
           </div>
 
-          {categories.map((category, index) => (
-            <section className="menu-category-section" id={`menu-${category.slug}`} key={category.id}>
-              <div className="menu-category-heading">
-                <span>{String(index + 1).padStart(2, "0")} / MENU CATEGORY</span>
-                <h2>{category.name}</h2>
-                <span>{String(category.items.length).padStart(2, "0")} dishes</span>
-              </div>
-              <div className="menu-grid">
-                {category.items.map(item => (
-                  <MenuCard
-                    key={item.id}
-                    item={item}
-                    availableExtras={extras}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
+          <div className="menu-body-layout">
+            {/* Sticky left side nav */}
+            <MenuSideNav categories={categories.map(c => ({ id: c.id, name: c.name, slug: c.slug }))} />
+
+            {/* Main scrollable content */}
+            <div className="menu-content-area">
+              {categories.map((category, index) => (
+                <section className="menu-category-section" id={`menu-${category.slug}`} key={category.id}>
+                  <div className="menu-category-heading">
+                    <span>{String(index + 1).padStart(2, "0")} / MENU CATEGORY</span>
+                    <h2>{category.name}</h2>
+                    <span>{String(category.items.length).padStart(2, "0")} dishes</span>
+                  </div>
+                  <div className="menu-grid">
+                    {category.items.map(item => (
+                      <MenuCard
+                        key={item.id}
+                        item={item}
+                        availableExtras={extras}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </div>
         </>
       ) : (
         <div className="menu-empty-state">
