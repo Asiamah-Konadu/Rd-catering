@@ -59,6 +59,11 @@ export function AdminNav({ user }: AdminNavProps) {
       roles: ["ADMIN", "MENU_MANAGER"],
     },
     {
+      label: "Showcase (What's Good)",
+      href: "/admin/showcase",
+      roles: ["ADMIN", "MENU_MANAGER"],
+    },
+    {
       label: "Site Settings",
       href: "/admin/settings",
       roles: ["ADMIN", "MENU_MANAGER"],

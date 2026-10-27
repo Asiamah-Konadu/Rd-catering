@@ -105,38 +105,54 @@ export default function HowToOrderLaunchReveal() {
     setPointer({ x: 0, y: 0 });
   };
 
-  // 3D Card Transform computation for each position (Left, Center, Right)
+  const [spreadDistance, setSpreadDistance] = useState(410);
+
+  useEffect(() => {
+    const updateSpread = () => {
+      const w = window.innerWidth;
+      if (w < 640) setSpreadDistance(180);
+      else if (w < 860) setSpreadDistance(280);
+      else if (w < 1140) setSpreadDistance(350);
+      else setSpreadDistance(410);
+    };
+    updateSpread();
+    window.addEventListener("resize", updateSpread, { passive: true });
+    return () => window.removeEventListener("resize", updateSpread);
+  }, []);
+
+  // 3D Card Transform computation for each position (Far apart separation)
   const getCardTransform = (index: number) => {
-    const tiltX = isHovered ? pointer.y * -8 : 0;
-    const tiltY = isHovered ? pointer.x * 12 : 0;
+    const tiltX = isHovered ? pointer.y * -6 : 0;
+    const tiltY = isHovered ? pointer.x * 8 : 0;
 
     const isCenter = index === 1;
     const isLeft = index === 0;
     const isRight = index === 2;
 
     const isSelected = activeStep === index;
+    const spread = spreadDistance;
 
     if (isSelected) {
       // Highlighted / focused card
       if (isLeft) {
-        return `rotateX(${tiltX}deg) rotateY(${tiltY + 8}deg) rotateZ(-3deg) translateX(-140px) translateY(-14px) translateZ(80px) scale(1.04)`;
+        return `rotateX(${tiltX}deg) rotateY(${tiltY + 12}deg) rotateZ(-1.5deg) translateX(-${spread}px) translateY(-10px) translateZ(80px) scale(1.05)`;
       }
       if (isRight) {
-        return `rotateX(${tiltX}deg) rotateY(${tiltY - 8}deg) rotateZ(3deg) translateX(140px) translateY(-14px) translateZ(80px) scale(1.04)`;
+        return `rotateX(${tiltX}deg) rotateY(${tiltY - 12}deg) rotateZ(1.5deg) translateX(${spread}px) translateY(-10px) translateZ(80px) scale(1.05)`;
       }
       // Center focused
       return `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(90px) scale(1.06)`;
     }
 
-    // Default resting fan configuration
+    // Default resting configuration with wide, clean spacing
     if (isLeft) {
-      return `rotateX(${tiltX}deg) rotateY(${tiltY + 22}deg) rotateZ(-8.5deg) translateX(-210px) translateY(24px) translateZ(10px) scale(0.88)`;
+      return `rotateX(${tiltX}deg) rotateY(${tiltY + 16}deg) rotateZ(-3deg) translateX(-${spread}px) translateY(12px) translateZ(10px) scale(0.95)`;
     }
     if (isRight) {
-      return `rotateX(${tiltX}deg) rotateY(${tiltY - 22}deg) rotateZ(8.5deg) translateX(210px) translateY(24px) translateZ(10px) scale(0.88)`;
+      return `rotateX(${tiltX}deg) rotateY(${tiltY - 16}deg) rotateZ(3deg) translateX(${spread}px) translateY(12px) translateZ(10px) scale(0.95)`;
     }
     // Center resting
-    return `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(40px) scale(0.98)`;
+    return `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(30px) scale(0.98)`;
   };
 
   return (

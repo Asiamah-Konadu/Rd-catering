@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Clock3, MapPin, MessageCircle } from "lucide-react";
-import MenuCard from "@/components/MenuCard";
+import FoodWebGLShowcase from "@/components/FoodWebGLShowcase";
+import HomepageWebGLBackground from "@/components/HomepageWebGLBackground";
 import MobileBagBar from "@/components/MobileBagBar";
 import ThisWeekDishesCarousel from "@/components/ThisWeekDishesCarousel";
 import HowToOrderLaunchReveal from "@/components/HowToOrderLaunchReveal";
 import { getPublicMenu, getWeeklyMenuItems } from "@/lib/menu";
 import { getActiveHeroPromo } from "@/lib/promo";
 import { getSiteSettings } from "@/lib/settings";
+import { getShowcaseConfig } from "@/lib/showcase";
 
 export const dynamic = "force-dynamic";
 
@@ -48,11 +50,12 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [categories, heroPromo, siteSettings, weeklyMenuItems] = await Promise.all([
+  const [categories, heroPromo, siteSettings, weeklyMenuItems, showcaseConfig] = await Promise.all([
     getPublicMenu(),
     getActiveHeroPromo(),
     getSiteSettings(),
     getWeeklyMenuItems(),
+    getShowcaseConfig(),
   ]);
   const allDishes = categories.flatMap((category) => category.items);
   const featuredItem = allDishes.find((item) => item.isFeatured);
@@ -60,6 +63,7 @@ export default async function Home() {
 
   return (
     <main className="home-page">
+      <HomepageWebGLBackground />
       <section className="home-hero">
         <div className="home-hero-copy">
           <span className="home-kicker"><span /> Fresh from our kitchen · Accra</span>
@@ -197,40 +201,7 @@ export default async function Home() {
         <Link href="/corporate">Explore office ordering <ArrowRight size={16} aria-hidden="true" /></Link>
       </section>
 
-      <section className="home-menu" id="today-menu">
-        <div className="home-menu-intro">
-          <div>
-            <span className="home-kicker">Good food, no fuss</span>
-            <h2>What sounds good?</h2>
-          </div>
-          {categories.length > 1 && (
-            <nav className="home-category-nav" aria-label="Jump to a menu category">
-              {categories.map((category) => (
-                <a key={category.id} href={`#category-${category.slug}`}>
-                  {category.name}
-                </a>
-              ))}
-            </nav>
-          )}
-        </div>
-
-        {categories.length ? categories.map((category) => (
-          <section className="home-category" id={`category-${category.slug}`} key={category.id}>
-            <div className="home-category-heading">
-              <h3>{category.name}</h3>
-              <span>{String(category.items.length).padStart(2, "0")} dishes</span>
-            </div>
-            <div className="menu-grid">
-              {category.items.map((item) => <MenuCard key={item.id} item={item} />)}
-            </div>
-          </section>
-        )) : (
-          <div className="home-menu-empty">
-            <h3>Today&apos;s menu is being refreshed</h3>
-            <p>Check back shortly for the dishes available from our kitchen.</p>
-          </div>
-        )}
-      </section>
+      <FoodWebGLShowcase config={showcaseConfig} />
 
       <HowToOrderLaunchReveal />
 
