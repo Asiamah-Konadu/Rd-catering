@@ -93,6 +93,10 @@ const structuredData = {
       url: SITE_URL,
       telephone: "+233540000000",
       email: "orders@richdonscatering.com",
+      sameAs: [
+        "https://www.instagram.com/richdonsofficial",
+        "https://www.tiktok.com/@richdonsofficial",
+      ],
       description:
         "Fresh Ghanaian catering for daily lunch, office meeting portals, family gatherings, and weddings in Accra.",
       servesCuisine: ["Ghanaian", "West African", "African"],

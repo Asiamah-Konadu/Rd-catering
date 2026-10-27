@@ -5,6 +5,7 @@ import { ArrowDown, ArrowRight, Clock3, MapPin, MessageCircle } from "lucide-rea
 import MenuCard from "@/components/MenuCard";
 import MobileBagBar from "@/components/MobileBagBar";
 import ThisWeekDishesCarousel from "@/components/ThisWeekDishesCarousel";
+import HowToOrderLaunchReveal from "@/components/HowToOrderLaunchReveal";
 import { getPublicMenu, getWeeklyMenuItems } from "@/lib/menu";
 import { getActiveHeroPromo } from "@/lib/promo";
 import { getSiteSettings } from "@/lib/settings";
@@ -231,17 +232,7 @@ export default async function Home() {
         )}
       </section>
 
-      <section className="home-how" id="how-to-order">
-        <div className="home-how-heading">
-          <span className="home-kicker">Simple from start to finish</span>
-          <h2>Your order, in three steps.</h2>
-        </div>
-        <div className="home-how-steps">
-          <article><span>01</span><h3>Choose your dishes</h3><p>Browse the menu and add your favourites to the bag.</p></article>
-          <article><span>02</span><h3>Review your order</h3><p>Check quantities, delivery details, and the total.</p></article>
-          <article><span>03</span><h3>Confirm in WhatsApp</h3><p>Send the prepared order message and confirm availability and payment with us.</p></article>
-        </div>
-      </section>
+      <HowToOrderLaunchReveal />
 
       <MobileBagBar />
     </main>

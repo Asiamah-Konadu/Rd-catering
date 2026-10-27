@@ -17,7 +17,24 @@ import {
   Building2,
   CalendarDays,
   ShoppingBag,
+  Instagram,
+  Share2,
 } from "lucide-react";
+
+function TikTokIcon({ size = 16, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.34 6.34 0 0 0 1.95-4.49V8.4a8.28 8.28 0 0 0 4.82 1.54V6.69h-1z" />
+    </svg>
+  );
+}
 
 export default function Footer() {
   const pathname = usePathname();
@@ -108,6 +125,35 @@ export default function Footer() {
               <span className="site-footer-pill">
                 🇬🇭 Proudly Ghanaian
               </span>
+            </div>
+
+            {/* Social Media Channels */}
+            <div className="site-footer-socials" aria-label="Official Social Media">
+              <span className="site-footer-socials-label">Follow Rich-Dons</span>
+              <div className="site-footer-social-links">
+                <a
+                  href="https://www.instagram.com/richdonsofficial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="site-footer-social-pill site-footer-social-instagram"
+                  aria-label="Follow Rich-Dons Catering on Instagram @richdonsofficial"
+                >
+                  <Instagram size={15} className="site-footer-social-icon" aria-hidden="true" />
+                  <span className="site-footer-social-name">Instagram</span>
+                  <span className="site-footer-social-handle">@richdonsofficial</span>
+                </a>
+                <a
+                  href="https://www.tiktok.com/@richdonsofficial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="site-footer-social-pill site-footer-social-tiktok"
+                  aria-label="Follow Rich-Dons Catering on TikTok @richdonsofficial"
+                >
+                  <TikTokIcon size={14} className="site-footer-social-icon" />
+                  <span className="site-footer-social-name">TikTok</span>
+                  <span className="site-footer-social-handle">@richdonsofficial</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -203,6 +249,32 @@ export default function Footer() {
                 </div>
               </li>
               <li>
+                <Share2 size={16} className="site-footer-icon" aria-hidden="true" />
+                <div>
+                  <strong>Social Channels</strong>
+                  <div className="site-footer-contact-social-links">
+                    <a
+                      href="https://www.instagram.com/richdonsofficial"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="site-footer-contact-social-link"
+                    >
+                      <Instagram size={13} aria-hidden="true" />
+                      <span>Instagram: @richdonsofficial</span>
+                    </a>
+                    <a
+                      href="https://www.tiktok.com/@richdonsofficial"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="site-footer-contact-social-link"
+                    >
+                      <TikTokIcon size={13} />
+                      <span>TikTok: @richdonsofficial</span>
+                    </a>
+                  </div>
+                </div>
+              </li>
+              <li>
                 <Clock3 size={16} className="site-footer-icon" aria-hidden="true" />
                 <div>
                   <strong>Kitchen Hours</strong>
@@ -227,6 +299,29 @@ export default function Footer() {
           </div>
 
           <div className="site-footer-bottom-actions">
+            <div className="site-footer-bottom-socials" aria-label="Social media quick links">
+              <a
+                href="https://www.instagram.com/richdonsofficial"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="site-footer-mini-social site-footer-mini-instagram"
+                title="Follow us on Instagram @richdonsofficial"
+                aria-label="Instagram @richdonsofficial"
+              >
+                <Instagram size={14} aria-hidden="true" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@richdonsofficial"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="site-footer-mini-social site-footer-mini-tiktok"
+                title="Follow us on TikTok @richdonsofficial"
+                aria-label="TikTok @richdonsofficial"
+              >
+                <TikTokIcon size={14} />
+              </a>
+            </div>
+
             <div className="site-footer-payment-badges" aria-label="Accepted order payments">
               <span>Mobile Money</span>
               <span>Hubtel</span>
