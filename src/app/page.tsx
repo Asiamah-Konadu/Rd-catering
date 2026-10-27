@@ -206,17 +206,6 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className="home-footer">
-        <Link href="/" className="home-footer-brand">Rich-Dons <span>Catering</span></Link>
-        <p>Fresh Ghanaian favourites, made to order in Accra.</p>
-        <nav aria-label="Footer navigation">
-          <Link href="#today-menu">Menu</Link>
-          <Link href="/events">Event catering</Link>
-          <Link href="/corporate">Office catering</Link>
-          <Link href="/cart">Your bag</Link>
-        </nav>
-        <small>© {new Date().getFullYear()} Rich-Dons Catering</small>
-      </footer>
       <MobileBagBar />
     </main>
   );

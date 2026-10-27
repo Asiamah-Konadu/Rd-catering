@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import { CartProvider } from "@/components/cart/CartProvider";
 import SplashScreen from "@/components/SplashScreen";
+import Footer from "@/components/Footer";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -120,6 +121,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <CartProvider>
           <Header />
           {children}
+          <Footer />
         </CartProvider>
       </body>
     </html>

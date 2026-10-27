@@ -186,7 +186,7 @@ export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
         </div>
       </section>
 
-      <footer className="events-footer">
+      <div className="events-footer events-callout-banner">
         <p>Thoughtful Ghanaian catering, from the first plate to the last guest.</p>
         {whatsappUrl ? (
           <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
@@ -195,7 +195,7 @@ export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
         ) : (
           <span>Event appointments via WhatsApp</span>
         )}
-      </footer>
+      </div>
     </main>
   );
 }
