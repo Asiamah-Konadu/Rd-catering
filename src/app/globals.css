@@ -531,16 +531,31 @@ img { max-width: 100%; }
 .menu-card h3 a {
   color: var(--ink);
   text-decoration: none;
-  background-image: linear-gradient(var(--brand), var(--brand));
-  background-repeat: no-repeat;
-  background-size: 100% 1.5px;
-  background-position: 0 100%;
-  padding-bottom: 1px;
-  transition: color 0.18s ease, background-size 0.22s ease;
+  display: inline;
+  transition: color 0.2s ease;
+}
+/* Always-visible ↗ arrow — the clickable affordance */
+.menu-card h3 a::after {
+  content: ' ↗';
+  display: inline-block;
+  font-size: 0.72em;
+  color: var(--brand);
+  opacity: 0.75;
+  vertical-align: super;
+  margin-left: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  font-weight: 900;
 }
 .menu-card h3 a:hover {
-  color: var(--brand);
-  background-size: 100% 1.5px;
+  background: linear-gradient(90deg, var(--brand) 0%, #e07030 60%, #c85a20 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.menu-card h3 a:hover::after {
+  transform: translate(2px, -2px);
+  opacity: 1;
+  -webkit-text-fill-color: var(--brand);
 }
 .menu-card p {
   color: #6a6a68;
