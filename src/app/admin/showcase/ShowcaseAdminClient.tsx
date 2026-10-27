@@ -45,7 +45,7 @@ export function ShowcaseAdminClient({ initialConfig, menuItems }: Props) {
     setConfig((prev) => ({ ...prev, [field]: val }));
   };
 
-  const handleDishChange = (index: number, field: keyof ShowcaseDishItem, val: any) => {
+  const handleDishChange = (index: number, field: keyof ShowcaseDishItem, val: ShowcaseDishItem[keyof ShowcaseDishItem]) => {
     setConfig((prev) => {
       const items = [...prev.items];
       items[index] = { ...items[index], [field]: val };
@@ -145,8 +145,8 @@ export function ShowcaseAdminClient({ initialConfig, menuItems }: Props) {
       }
 
       setFeedback({ type: "success", message: "Showcase section saved successfully! Check homepage to view." });
-    } catch (err: any) {
-      setFeedback({ type: "error", message: err.message || "Something went wrong saving." });
+    } catch (err: unknown) {
+      setFeedback({ type: "error", message: err instanceof Error ? err.message : "Something went wrong saving." });
     } finally {
       setIsSaving(false);
     }
