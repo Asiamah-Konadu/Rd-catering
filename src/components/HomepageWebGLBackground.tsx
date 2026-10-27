@@ -227,8 +227,8 @@ export default function HomepageWebGLBackground() {
 
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
 
-    // ── Optimal 320 3D Volumetric Ember Particles ───────────────────
-    const N = 320;
+    // ── Optimal 220 3D Volumetric Ember Particles (reduced for perf) ───────
+    const N = 220;
     const STRIDE = 6 * 4;
     const data = new Float32Array(N * 6);
 
@@ -259,7 +259,7 @@ export default function HomepageWebGLBackground() {
     const aSpeed = gl.getAttribLocation(prog, "a_speed");
 
     const handleResize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5); // Cap at 1.5 for buttery 120fps
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.0); // Cap at 1.0 for smooth 60fps
       const w = Math.floor(window.innerWidth * dpr);
       const h = Math.floor(window.innerHeight * dpr);
       if (canvas.width !== w || canvas.height !== h) {
@@ -276,6 +276,7 @@ export default function HomepageWebGLBackground() {
     const t0 = performance.now();
     let lastScroll = 0;
     let lastGlowUpdate = 0;
+    let frameCount = 0;
 
     // ── Continuous 60/120fps Animation Loop (ZERO React State Updates) ──
     const render = () => {
@@ -303,8 +304,10 @@ export default function HomepageWebGLBackground() {
         currentC[2] + (targetC[2] - currentC[2]) * 0.06,
       ];
 
-      // Update grid perspective tilt directly via DOM
-      if (gridRef.current) {
+      frameCount++;
+
+      // Update grid perspective tilt every 3 frames to reduce DOM thrashing
+      if (frameCount % 3 === 0 && gridRef.current) {
         const tiltX = 14 + currentM.y * -5;
         const tiltY = currentM.x * 5;
         const translateY = (nextS * -35).toFixed(1);

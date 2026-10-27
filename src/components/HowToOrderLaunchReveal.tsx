@@ -110,10 +110,10 @@ export default function HowToOrderLaunchReveal() {
   useEffect(() => {
     const updateSpread = () => {
       const w = window.innerWidth;
-      if (w < 640) setSpreadDistance(180);
-      else if (w < 860) setSpreadDistance(280);
-      else if (w < 1140) setSpreadDistance(350);
-      else setSpreadDistance(410);
+      if (w < 640) setSpreadDistance(120);
+      else if (w < 860) setSpreadDistance(180);
+      else if (w < 1140) setSpreadDistance(230);
+      else setSpreadDistance(260);
     };
     updateSpread();
     window.addEventListener("resize", updateSpread, { passive: true });

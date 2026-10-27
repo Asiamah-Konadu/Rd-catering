@@ -128,9 +128,12 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
     if (activeIndex < count - 1) goToDish(activeIndex + 1);
   }, [activeIndex, count, goToDish]);
 
-  // ── Discrete Stepped Scroll Listener (No awkward fractional states) ─
+  // ── Snap-style scroll: only advance on decisive scroll past clear threshold ──
   useEffect(() => {
     let ticking = false;
+    // Hysteresis: advance when > 65% into a zone, retreat when < 35%
+    const ADVANCE_THRESHOLD = 0.65;
+    const RETREAT_THRESHOLD = 0.35;
 
     const handleScroll = () => {
       if (ticking) return;
@@ -153,9 +156,24 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
         }
 
         const progress = Math.max(0, Math.min(1, scrolled / maxScroll));
-        // Stepped mapping: cleanly advances to next dish when reaching each threshold
-        const step = Math.min(count - 1, Math.floor(progress * count));
-        setActiveIndex((prev) => (prev !== step ? step : prev));
+        // Each dish owns an equal portion of the scroll range
+        const zoneSize = 1 / count;
+
+        setActiveIndex((prev) => {
+          // Position within the current dish's zone (0.0 → 1.0)
+          const prevZoneStart = prev * zoneSize;
+          const posInZone = (progress - prevZoneStart) / zoneSize;
+
+          // Advance to next dish only when deeply past the threshold
+          if (posInZone >= ADVANCE_THRESHOLD && prev < count - 1) {
+            return prev + 1;
+          }
+          // Retreat to previous dish only when clearly scrolled back
+          if (posInZone < RETREAT_THRESHOLD - 1 && prev > 0) {
+            return prev - 1;
+          }
+          return prev;
+        });
       });
     };
 

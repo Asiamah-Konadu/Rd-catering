@@ -2981,7 +2981,8 @@ footer strong { color: var(--ink); }
   z-index: 2;
   padding: 88px 6vw 96px;
   background: transparent;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -3112,25 +3113,27 @@ footer strong { color: var(--ink); }
 .launch-reveal-stage {
   position: relative;
   width: 100%;
-  max-width: 1260px;
+  max-width: 1600px;
   margin: 0 auto;
-  height: 580px;
+  height: 640px;
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 1400px;
+  perspective: 1600px;
   perspective-origin: 50% 45%;
   touch-action: pan-y;
+  overflow: visible;
 }
 
 .launch-reveal-fan-wrapper {
   position: relative;
-  width: 300px;
-  height: 520px;
+  width: 340px;
+  height: 540px;
   transform-style: preserve-3d;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
 }
 
 /* Staggered entrance transition */
