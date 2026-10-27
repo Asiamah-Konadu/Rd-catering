@@ -1618,9 +1618,14 @@ footer strong { color: var(--ink); }
 }
 .site-footer-grid {
   display: grid;
-  grid-template-columns: 2.1fr 1.05fr 1.15fr 1.1fr 1.7fr;
-  gap: 36px;
+  grid-template-columns: 2fr 3.3fr 1.7fr;
+  gap: 40px;
   align-items: flex-start;
+}
+.site-footer-nav-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.05fr;
+  gap: 28px;
 }
 .site-footer-col {
   display: flex;
@@ -1882,40 +1887,161 @@ footer strong { color: var(--ink); }
 /* RESPONSIVE BREAKPOINTS */
 @media (max-width: 1120px) {
   .site-footer-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 36px 40px;
+    grid-template-columns: 1fr;
+    gap: 36px;
   }
   .site-footer-brand-col {
-    grid-column: 1 / -1;
-    max-width: 600px;
+    max-width: 650px;
     padding-right: 0;
+  }
+  .site-footer-nav-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
   }
 }
 @media (max-width: 680px) {
+  /* ULTRA-COMPACT MOBILE FOOTER WITH MULTI-COLUMN LINK GRIDS */
   .site-footer-banner-inner {
-    padding: 26px 6vw;
+    padding: 16px 5vw;
+    gap: 12px;
+  }
+  .site-footer-banner-badge {
+    font-size: 0.68rem;
+    margin-bottom: 2px;
+  }
+  .site-footer-banner h3 {
+    font-size: 1.12rem;
+    margin: 2px 0 4px;
+  }
+  .site-footer-banner p {
+    font-size: 0.78rem;
+    line-height: 1.38;
   }
   .site-footer-banner-actions {
     width: 100%;
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
   .site-footer-cta-whatsapp,
   .site-footer-cta-secondary {
     justify-content: center;
     text-align: center;
+    padding: 9px 10px;
+    font-size: 0.76rem;
+    border-radius: 9px;
+    gap: 6px;
   }
   .site-footer-main {
-    padding: 40px 6vw 36px;
+    padding: 22px 5vw 18px;
   }
   .site-footer-grid {
-    grid-template-columns: 1fr;
-    gap: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
   }
+  .site-footer-brand-col {
+    padding-right: 0;
+  }
+  .site-footer-brand-link {
+    margin-bottom: 6px;
+    gap: 9px;
+  }
+  .site-footer-logo {
+    width: 32px;
+    height: 32px;
+  }
+  .site-footer-brand-name {
+    font-size: 1.22rem;
+  }
+  .site-footer-brand-sub {
+    font-size: 0.58rem;
+  }
+  .site-footer-bio {
+    font-size: 0.78rem;
+    line-height: 1.42;
+    margin: 0 0 10px;
+  }
+  .site-footer-badges {
+    gap: 6px;
+  }
+  .site-footer-pill {
+    font-size: 0.66rem;
+    padding: 3px 8px;
+  }
+
+  /* 2-COLUMN SIDE-BY-SIDE NAVIGATION LINKS ON MOBILE */
+  .site-footer-nav-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 16px 0;
+  }
+  .site-footer-col-title {
+    margin: 0 0 9px;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+  .site-footer-nav-list {
+    gap: 7px;
+  }
+  .site-footer-nav-list a {
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+  /* Legal links full width in a 2-column grid */
+  .site-footer-col-legal {
+    grid-column: 1 / -1;
+    padding-top: 6px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.07);
+  }
+  .site-footer-legal-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px 14px;
+  }
+
+  /* 2-COLUMN CONTACT & HOURS GRID ON MOBILE */
+  .site-footer-contact-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 14px;
+  }
+  .site-footer-contact-list li {
+    font-size: 0.75rem;
+    line-height: 1.35;
+    gap: 7px;
+  }
+  .site-footer-icon {
+    width: 14px;
+    height: 14px;
+  }
+  .site-footer-contact-list strong {
+    font-size: 0.74rem;
+  }
+  .site-footer-subtext {
+    font-size: 0.66rem;
+  }
+  .site-footer-phone-link {
+    font-size: 0.78rem;
+  }
+
+  /* COMPACT BOTTOM BAR */
   .site-footer-bottom-inner {
+    padding: 16px 5vw;
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 12px;
+  }
+  .site-footer-copyright {
+    font-size: 0.78rem;
+  }
+  .site-footer-disclaimer {
+    font-size: 0.67rem;
+    line-height: 1.4;
   }
   .site-footer-bottom-actions {
     width: 100%;

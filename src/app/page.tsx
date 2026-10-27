@@ -10,9 +10,38 @@ import { getActiveHeroPromo } from "@/lib/promo";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Fresh Ghanaian Food Delivered in Accra",
+  title: "Rich-Dons Catering | Fresh Ghanaian Food & Office Lunch Delivery Accra",
   description:
-    "Order fresh Ghanaian favourites from Rich-Dons Catering. Browse the menu and place your order for delivery in Accra.",
+    "Order authentic Ghanaian food from Rich-Dons Catering. Smoky jollof rice, waakye, swallows & soups freshly prepared and delivered across Accra. Direct WhatsApp ordering & corporate lunch portals.",
+  alternates: {
+    canonical: "/",
+  },
+  keywords: [
+    "Ghanaian food delivery Accra",
+    "catering Accra",
+    "best jollof rice delivery",
+    "office lunch Accra",
+    "corporate catering Ghana",
+    "Rich-Dons Catering",
+    "waakye delivery",
+    "Accra food ordering",
+    "event catering Accra",
+  ],
+  openGraph: {
+    title: "Rich-Dons Catering | Fresh Ghanaian Food Delivered in Accra",
+    description:
+      "Authentic Ghanaian cuisine cooked fresh to order. Fast doorstep delivery in Accra. Browse the menu and order on WhatsApp.",
+    url: "/",
+    siteName: "Rich-Dons Catering",
+    locale: "en_GH",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rich-Dons Catering | Fresh Ghanaian Food Delivered in Accra",
+    description:
+      "Authentic Ghanaian cuisine cooked fresh to order. Fast doorstep delivery in Accra.",
+  },
 };
 
 export default async function Home() {

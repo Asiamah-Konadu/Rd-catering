@@ -13,8 +13,23 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/menu/"],
-        disallow: ["/admin/", "/api/", "/cart", "/checkout", "/order/"],
+        allow: [
+          "/",
+          "/menu",
+          "/menu/",
+          "/events",
+          "/corporate",
+          "/privacy",
+          "/terms",
+        ],
+        disallow: [
+          "/admin/",
+          "/api/",
+          "/corporate/*/",
+          "/cart",
+          "/checkout",
+          "/order/",
+        ],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

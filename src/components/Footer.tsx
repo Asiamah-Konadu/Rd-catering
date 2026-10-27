@@ -111,76 +111,78 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* 2. KEY NAVIGATION: MENU & DINING */}
-          <div className="site-footer-col">
-            <h4 className="site-footer-col-title">
-              <UtensilsCrossed size={16} aria-hidden="true" />
-              <span>Menu & Dining</span>
-            </h4>
-            <nav aria-label="Menu navigation" className="site-footer-nav-list">
-              <Link href="/menu">Full Kitchen Menu</Link>
-              <Link href="/#today-menu">Today&apos;s Specials</Link>
-              <Link href="/menu">Ghanaian Jollof Rice</Link>
-              <Link href="/menu">Swallows & Soups</Link>
-              <Link href="/menu">Sides & Extras</Link>
-              <Link href="/#how-to-order">How Ordering Works</Link>
-            </nav>
-          </div>
+          {/* 2 & 3. KEY NAVIGATION & LEGAL (ORGANIZED IN RESPONSIVE MULTI-COLUMN GROUP) */}
+          <div className="site-footer-nav-group">
+            {/* 2. KEY NAVIGATION: MENU & DINING */}
+            <div className="site-footer-col">
+              <h4 className="site-footer-col-title">
+                <UtensilsCrossed size={15} aria-hidden="true" />
+                <span>Menu</span>
+              </h4>
+              <nav aria-label="Menu navigation" className="site-footer-nav-list">
+                <Link href="/menu">Full Kitchen Menu</Link>
+                <Link href="/#today-menu">Today&apos;s Specials</Link>
+                <Link href="/menu">Smoky Jollof Rice</Link>
+                <Link href="/menu">Swallows & Soups</Link>
+                <Link href="/menu">Sides & Extras</Link>
+                <Link href="/#how-to-order">How It Works</Link>
+              </nav>
+            </div>
 
-          {/* 2. KEY NAVIGATION: CATERING SERVICES */}
-          <div className="site-footer-col">
-            <h4 className="site-footer-col-title">
-              <Building2 size={16} aria-hidden="true" />
-              <span>Catering Services</span>
-            </h4>
-            <nav aria-label="Catering services navigation" className="site-footer-nav-list">
-              <Link href="/corporate">Corporate Lunch Portals</Link>
-              <Link href="/events">Event & Wedding Catering</Link>
-              <Link href="/corporate">Office Batch Delivery</Link>
-              <Link href="/events">Book Catering Consultation</Link>
-              <Link href="/cart">
-                <span className="inline-flex items-center gap-1.5">
-                  <ShoppingBag size={14} aria-hidden="true" />
-                  <span>Review Your Bag</span>
-                </span>
-              </Link>
-              <Link href="/checkout">Checkout & Confirmation</Link>
-            </nav>
-          </div>
+            {/* 2. KEY NAVIGATION: CATERING SERVICES */}
+            <div className="site-footer-col">
+              <h4 className="site-footer-col-title">
+                <Building2 size={15} aria-hidden="true" />
+                <span>Catering</span>
+              </h4>
+              <nav aria-label="Catering services navigation" className="site-footer-nav-list">
+                <Link href="/corporate">Office Portals</Link>
+                <Link href="/events">Event Catering</Link>
+                <Link href="/corporate">Batch Deliveries</Link>
+                <Link href="/events">Book Consultation</Link>
+                <Link href="/cart">
+                  <span className="inline-flex items-center gap-1.5">
+                    <ShoppingBag size={13} aria-hidden="true" />
+                    <span>Your Bag</span>
+                  </span>
+                </Link>
+                <Link href="/checkout">Checkout</Link>
+              </nav>
+            </div>
 
-          {/* 3. LEGAL & COMPLIANCE (TRUST & SAFETY NET) */}
-          <div className="site-footer-col">
-            <h4 className="site-footer-col-title">
-              <FileText size={16} aria-hidden="true" />
-              <span>Legal & Safety</span>
-            </h4>
-            <nav aria-label="Legal and compliance navigation" className="site-footer-nav-list">
-              <Link href="/privacy">Privacy Policy</Link>
-              <Link href="/terms">Terms of Service</Link>
-              <Link href="/terms#cancellation-refunds">Refund & Cancellation</Link>
-              <Link href="/terms#food-safety">Food Hygiene & Allergens</Link>
-              <Link href="/terms#delivery-policy">Delivery & Coverage Terms</Link>
-              <Link href="/terms#payment-terms">Secure Payment Methods</Link>
-            </nav>
+            {/* 3. LEGAL & COMPLIANCE (TRUST & SAFETY NET) */}
+            <div className="site-footer-col site-footer-col-legal">
+              <h4 className="site-footer-col-title">
+                <FileText size={15} aria-hidden="true" />
+                <span>Legal & Trust</span>
+              </h4>
+              <nav aria-label="Legal and compliance navigation" className="site-footer-nav-list site-footer-legal-links">
+                <Link href="/privacy">Privacy Policy</Link>
+                <Link href="/terms">Terms of Service</Link>
+                <Link href="/terms#cancellation-refunds">Refunds & Returns</Link>
+                <Link href="/terms#food-safety">Food Hygiene & Allergens</Link>
+                <Link href="/terms#delivery-policy">Delivery Zones</Link>
+                <Link href="/terms#payment-terms">Payment Terms</Link>
+              </nav>
+            </div>
           </div>
 
           {/* 4. CONTACT INFORMATION & OPERATING HOURS */}
           <div className="site-footer-col site-footer-contact-col">
             <h4 className="site-footer-col-title">
-              <Clock3 size={16} aria-hidden="true" />
+              <Clock3 size={15} aria-hidden="true" />
               <span>Contact & Hours</span>
             </h4>
             <ul className="site-footer-contact-list">
               <li>
-                <MapPin size={17} className="site-footer-icon" aria-hidden="true" />
+                <MapPin size={16} className="site-footer-icon" aria-hidden="true" />
                 <div>
-                  <strong>Location & Delivery</strong>
-                  <span>Accra, Greater Accra Region, Ghana</span>
-                  <small className="site-footer-subtext">Delivering to East Legon, Cantonments, Airport, Osu, Ridge, Dzorwulu & Greater Accra</small>
+                  <strong>Accra, Ghana</strong>
+                  <span className="site-footer-subtext">East Legon, Cantonments, Airport, Osu, Ridge & Greater Accra</span>
                 </div>
               </li>
               <li>
-                <Phone size={17} className="site-footer-icon" aria-hidden="true" />
+                <Phone size={16} className="site-footer-icon" aria-hidden="true" />
                 <div>
                   <strong>Order Hotline & WhatsApp</strong>
                   <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="site-footer-phone-link">
@@ -192,7 +194,7 @@ export default function Footer() {
                 </div>
               </li>
               <li>
-                <Mail size={17} className="site-footer-icon" aria-hidden="true" />
+                <Mail size={16} className="site-footer-icon" aria-hidden="true" />
                 <div>
                   <strong>Email Inquiries</strong>
                   <a href="mailto:orders@richdonscatering.com" className="site-footer-email-link">
@@ -201,11 +203,10 @@ export default function Footer() {
                 </div>
               </li>
               <li>
-                <Clock3 size={17} className="site-footer-icon" aria-hidden="true" />
+                <Clock3 size={16} className="site-footer-icon" aria-hidden="true" />
                 <div>
                   <strong>Kitchen Hours</strong>
-                  <span>Mon – Sat: 8:00 AM – 10:00 PM</span>
-                  <span>Sunday: 11:00 AM – 8:00 PM</span>
+                  <span>Mon–Sat: 8am–10pm · Sun: 11am–8pm</span>
                 </div>
               </li>
             </ul>

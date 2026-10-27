@@ -7,15 +7,31 @@ import { getPublicMenu, getPublicExtras } from "@/lib/menu";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Our Menu",
+  title: "Our Kitchen Menu | Fresh Ghanaian Food & Office Lunch in Accra",
   description:
-    "Browse Rich-Dons Catering's full menu of fresh Ghanaian dishes. From jollof rice to soups, order your favourites for delivery in Accra.",
+    "Browse Rich-Dons Catering's complete kitchen menu. Smoky Ghanaian jollof rice, waakye, swallows, light soups, chicken, beef & custom combos delivered across Accra.",
   alternates: { canonical: "/menu" },
+  keywords: [
+    "Ghanaian food menu",
+    "jollof rice Accra",
+    "food delivery menu Accra",
+    "lunch menu Accra",
+    "waakye Accra",
+    "Ghana dishes price list",
+    "Rich-Dons menu",
+  ],
   openGraph: {
-    title: "Our Menu | Rich-Dons Catering",
+    title: "Our Kitchen Menu | Rich-Dons Catering Accra",
     description:
-      "Browse fresh Ghanaian dishes and add your favourites to your bag. Delivery available in Accra.",
+      "Browse fresh Ghanaian favourites and custom combos. Delivery available across Accra.",
     url: "/menu",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Our Kitchen Menu | Rich-Dons Catering Accra",
+    description:
+      "Browse fresh Ghanaian favourites and custom combos. Delivery available across Accra.",
   },
 };
 
@@ -26,8 +42,59 @@ export default async function MenuPage() {
   ]);
   const dishCount = categories.reduce((total, category) => total + category.items.length, 0);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://rd-catering.vercel.app";
+
+  const menuSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: siteUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Our Menu",
+            item: `${siteUrl}/menu`,
+          },
+        ],
+      },
+      {
+        "@type": "Menu",
+        "@id": `${siteUrl}/menu#full-menu`,
+        name: "Rich-Dons Catering Kitchen Menu",
+        url: `${siteUrl}/menu`,
+        inLanguage: "en-GH",
+        hasMenuSection: categories.map((cat) => ({
+          "@type": "MenuSection",
+          name: cat.name,
+          hasMenuItem: cat.items.map((item) => ({
+            "@type": "MenuItem",
+            name: item.name,
+            description: item.description ?? undefined,
+            offers: {
+              "@type": "Offer",
+              price: item.price.toFixed(2),
+              priceCurrency: "GHS",
+              availability: item.isAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            },
+          })),
+        })),
+      },
+    ],
+  };
+
   return (
     <main className="page menu-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(menuSchema) }}
+      />
       <section className="menu-hero">
         <div className="menu-hero-copy">
           <span className="menu-eyebrow"><span /> Rich-Dons Catering · Accra</span>

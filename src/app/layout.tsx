@@ -24,15 +24,22 @@ export const metadata: Metadata = {
   keywords: [
     "catering Accra",
     "Ghanaian food delivery",
-    "office catering Ghana",
+    "office lunch catering Accra",
+    "jollof rice delivery Accra",
+    "waakye delivery Ghana",
+    "event catering Accra",
+    "corporate lunch Accra",
+    "food delivery East Legon",
+    "catering services Airport Residential",
     "Rich-Dons Catering",
-    "food delivery Accra",
     "Ghanaian cuisine",
-    "family catering Ghana",
     "Accra food ordering",
+    "wedding catering Accra",
+    "best catering in Accra",
   ],
-  authors: [{ name: "Rich-Dons Catering" }],
+  authors: [{ name: "Rich-Dons Catering", url: SITE_URL }],
   creator: "Rich-Dons Catering",
+  publisher: "Rich-Dons Catering",
   alternates: {
     canonical: "/",
   },
@@ -42,7 +49,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "Rich-Dons Catering",
     title: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra",
-    description: "Order fresh Ghanaian favourites for delivery in Accra.",
+    description: "Order fresh Ghanaian catering, authentic jollof rice, and office lunch portals in Accra. Fast doorstep delivery.",
     images: [
       {
         url: "/og-image.jpg",
@@ -56,7 +63,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra",
-    description: "Order fresh Ghanaian favourites for delivery in Accra.",
+    description: "Order fresh Ghanaian catering, authentic jollof rice, and office lunch portals in Accra. Fast doorstep delivery.",
     images: ["/og-image.jpg"],
   },
   icons: {
@@ -76,26 +83,83 @@ export const metadata: Metadata = {
   },
 };
 
-const restaurantJsonLd = {
+const structuredData = {
   "@context": "https://schema.org",
-  "@type": ["Restaurant", "LocalBusiness"],
-  name: "Rich-Dons Catering",
-  url: SITE_URL,
-  description:
-    "Fresh Ghanaian catering for lunch, office meetings, family gatherings and everyday cravings in Accra.",
-  servesCuisine: ["Ghanaian", "African"],
-  areaServed: {
-    "@type": "City",
-    name: "Accra",
-    addressCountry: "GH",
-  },
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Accra",
-    addressCountry: "GH",
-  },
-  priceRange: "GH₵",
-  image: `${SITE_URL}/og-image.jpg`,
+  "@graph": [
+    {
+      "@type": ["CateringService", "Restaurant", "FoodEstablishment"],
+      "@id": `${SITE_URL}/#restaurant`,
+      name: "Rich-Dons Catering",
+      url: SITE_URL,
+      telephone: "+233540000000",
+      email: "orders@richdonscatering.com",
+      description:
+        "Fresh Ghanaian catering for daily lunch, office meeting portals, family gatherings, and weddings in Accra.",
+      servesCuisine: ["Ghanaian", "West African", "African"],
+      priceRange: "GH₵₵",
+      currenciesAccepted: "GHS",
+      paymentAccepted: ["Cash", "Mobile Money", "Credit Card", "Hubtel"],
+      image: `${SITE_URL}/og-image.jpg`,
+      hasMenu: `${SITE_URL}/menu`,
+      acceptsReservations: "True",
+      areaServed: [
+        { "@type": "City", name: "Accra", addressCountry: "GH" },
+        { "@type": "AdministrativeArea", name: "Greater Accra Region", addressCountry: "GH" },
+      ],
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Accra",
+        addressRegion: "Greater Accra",
+        addressCountry: "GH",
+      },
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: 5.6037,
+        longitude: -0.187,
+      },
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          opens: "08:00",
+          closes: "22:00",
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Sunday"],
+          opens: "11:00",
+          closes: "20:00",
+        },
+      ],
+      potentialAction: {
+        "@type": "OrderAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE_URL}/menu`,
+          actionPlatform: [
+            "http://schema.org/DesktopWebPlatform",
+            "http://schema.org/MobileWebPlatform",
+          ],
+        },
+        deliveryMethod: "http://purl.org/goodrelations/v1#DeliveryModeOwnFleet",
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "Rich-Dons Catering",
+      description: "Authentic Ghanaian food delivery and event catering in Accra.",
+      publisher: {
+        "@id": `${SITE_URL}/#restaurant`,
+      },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/menu?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -113,7 +177,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="twitter:image" content={`${SITE_URL}/og-image.jpg`} />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
       <body>
