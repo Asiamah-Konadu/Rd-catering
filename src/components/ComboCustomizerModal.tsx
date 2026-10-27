@@ -149,7 +149,7 @@ export function ComboCustomizerModal({
       aria-labelledby="combo-modal-title"
     >
       <div
-        className="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl border border-amber-100 overflow-hidden animate-in zoom-in-95 duration-200"
+        className="bg-white rounded-3xl max-w-lg md:max-w-2xl lg:max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-amber-100 overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Dish Banner */}
@@ -157,7 +157,7 @@ export function ComboCustomizerModal({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/30 text-white transition focus:outline-none focus:ring-2 focus:ring-white"
+            className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/30 text-white transition focus:outline-none focus:ring-2 focus:ring-white cursor-pointer"
             aria-label="Close customizer"
           >
             <X size={18} />
@@ -183,11 +183,11 @@ export function ComboCustomizerModal({
               </span>
               <h2
                 id="combo-modal-title"
-                className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1 line-clamp-1"
+                className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1"
               >
                 {item.name}
               </h2>
-              <p className="text-amber-100 text-xs sm:text-sm mt-0.5 line-clamp-2">
+              <p className="text-amber-100 text-xs sm:text-sm mt-1 leading-relaxed">
                 {item.description || "Prepared fresh by Rich-Dons Catering."}
               </p>
               <div className="mt-2 text-white font-black text-base">
@@ -215,7 +215,7 @@ export function ComboCustomizerModal({
             Pick your favorite proteins, sides, or salads to complete your meal:
           </p>
 
-          <div className="grid grid-cols-1 gap-2.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             {extras.map((extra) => {
               const isSelected = selectedExtraIds.has(extra.id);
               return (

@@ -1103,11 +1103,18 @@ footer strong { color: var(--ink); }
   text-decoration: none;
   margin-bottom: 28px;
 }
+.detail-page.narrow {
+  max-width: 1140px;
+}
 .detail-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 42px;
   align-items: center;
+}
+.detail-layout .combo-builder-card {
+  grid-column: 1 / -1;
+  width: 100%;
 }
 .detail-image {
   height: 420px;
