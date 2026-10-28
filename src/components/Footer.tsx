@@ -56,7 +56,7 @@ export default function Footer() {
   const whatsappMessage = encodeURIComponent(
     "Hello Rich-Dons Catering! I have an inquiry about your food and catering services."
   );
-  const whatsappUrl = `https://wa.me/233540000000?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/233248179348?text=${whatsappMessage}`;
 
   return (
     <footer className="site-footer" aria-label="Site footer">
@@ -230,10 +230,21 @@ export default function Footer() {
               <li>
                 <Phone size={16} className="site-footer-icon" aria-hidden="true" />
                 <div>
-                  <strong>Order Hotline & WhatsApp</strong>
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="site-footer-phone-link">
-                    +233 (0) 54 000 0000
-                  </a>
+                  <strong>Customer Service & WhatsApp Hotline</strong>
+                  <div className="flex flex-col gap-0.5">
+                    <a href="tel:+233248179348" className="site-footer-phone-link" title="Call customer service">
+                      024 817 9348 / +233 (0) 24 817 9348
+                    </a>
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-emerald-600 font-semibold hover:underline inline-flex items-center gap-1"
+                    >
+                      <MessageCircle size={12} aria-hidden="true" />
+                      <span>Chat on WhatsApp</span>
+                    </a>
+                  </div>
                   <span className="site-footer-live-status">
                     <span className="site-footer-live-dot" /> Kitchen open now
                   </span>

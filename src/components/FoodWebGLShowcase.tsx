@@ -217,7 +217,7 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
     const msg = `Hello Rich-Dons Kitchen! I'd like to order:\n\n*${activeDish.name}*\nPrice: GH₵ ${activeDish.price.toFixed(
       2
     )}\nCategory: ${activeDish.category}\n\nPlease confirm availability and estimated delivery time.`;
-    return `https://wa.me/233540000000?text=${encodeURIComponent(msg)}`;
+    return `https://wa.me/233248179348?text=${encodeURIComponent(msg)}`;
   }, [activeDish]);
 
   return (

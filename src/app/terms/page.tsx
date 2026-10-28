@@ -133,7 +133,7 @@ export default function TermsOfServicePage() {
             <a href="mailto:rdadmin@richdonscatering.com" className="text-amber-700 font-bold underline">
               rdadmin@richdonscatering.com
             </a>{" "}
-            or speak with us directly on WhatsApp at <strong>+233 (0) 54 000 0000</strong>.
+            or speak with us directly on WhatsApp or call customer service at <strong>024 817 9348</strong> (+233 24 817 9348).
           </p>
         </section>
       </div>

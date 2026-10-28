@@ -153,7 +153,7 @@ export function SettingsAdminClient({ initialSettings }: Props) {
                 type="text"
                 value={formData.whatsappPhone}
                 onChange={(e) => setFormData({ ...formData, whatsappPhone: e.target.value })}
-                placeholder="e.g. +233241234567"
+                placeholder="e.g. +233248179348"
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-medium"
               />
             </div>

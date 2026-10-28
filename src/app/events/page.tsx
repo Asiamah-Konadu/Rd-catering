@@ -66,7 +66,7 @@ export default function EventCateringPage() {
           "@type": "CateringService",
           name: "Rich-Dons Catering",
           url: siteUrl,
-          telephone: "+233540000000",
+          telephone: "+233248179348",
         },
         areaServed: {
           "@type": "City",

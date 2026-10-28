@@ -678,6 +678,10 @@ export default function CheckoutPage() {
             <p className="text-sm text-slate-600">
               We&apos;ll save your order and open WhatsApp with the items, delivery details, and total ready to send. The restaurant will confirm availability and payment with you in chat.
             </p>
+            <div className="text-xs text-slate-600 bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex items-center justify-between flex-wrap gap-2">
+              <span>Checkout WhatsApp: <strong className="text-slate-900 font-bold">024 817 9348</strong></span>
+              <span>Customer Service Call Line: <a href="tel:+233248179348" className="text-amber-700 font-bold hover:underline">024 817 9348</a></span>
+            </div>
           </section>
 
           {error && (

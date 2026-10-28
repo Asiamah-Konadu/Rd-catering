@@ -91,7 +91,7 @@ const structuredData = {
       "@id": `${SITE_URL}/#restaurant`,
       name: "Rich-Dons Catering",
       url: SITE_URL,
-      telephone: "+233540000000",
+      telephone: "+233248179348",
       email: "rdadmin@richdonscatering.com",
       sameAs: [
         "https://www.instagram.com/richdonsofficial",
