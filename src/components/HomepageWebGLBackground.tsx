@@ -276,7 +276,6 @@ export default function HomepageWebGLBackground() {
     const t0 = performance.now();
     let lastScroll = 0;
     let lastGlowUpdate = 0;
-    let frameCount = 0;
 
     // ── Continuous 60/120fps Animation Loop (Zero Layout Thrashing) ──
     const render = () => {

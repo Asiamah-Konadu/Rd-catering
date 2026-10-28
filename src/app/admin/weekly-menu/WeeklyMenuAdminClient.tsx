@@ -14,7 +14,6 @@ import {
   AlertCircle,
   RefreshCw,
   Search,
-  Eye,
 } from "lucide-react";
 
 interface DishItem {

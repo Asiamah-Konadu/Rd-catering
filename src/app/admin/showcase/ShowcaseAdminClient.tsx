@@ -1,14 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowDown,
   ArrowUp,
-  Check,
   ExternalLink,
-  Flame,
   Plus,
   RefreshCw,
   Save,

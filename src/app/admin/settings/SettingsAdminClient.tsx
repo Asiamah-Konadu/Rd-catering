@@ -10,7 +10,7 @@ interface Props {
   userRole: string;
 }
 
-export function SettingsAdminClient({ initialSettings, userRole }: Props) {
+export function SettingsAdminClient({ initialSettings }: Props) {
   const router = useRouter();
   const [formData, setFormData] = useState<SiteSettingsData>(initialSettings);
   const [isSaving, setIsSaving] = useState(false);

@@ -192,7 +192,6 @@ export default function HowToOrderLaunchReveal() {
     const tiltX = isHovered ? pointer.y * -6 : 0;
     const tiltY = isHovered ? pointer.x * 8 : 0;
 
-    const isCenter = index === 1;
     const isLeft = index === 0;
     const isRight = index === 2;
 
