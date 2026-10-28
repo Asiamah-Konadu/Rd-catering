@@ -38,7 +38,13 @@ export async function PATCH(req: Request) {
       deliveryFeeText,
       deliveryNoteText,
       whatsappPhone,
+      openingTime,
+      closingTime,
     } = body;
+
+    const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
+    const validOpeningTime = typeof openingTime === "string" && timeRegex.test(openingTime.trim()) ? openingTime.trim() : undefined;
+    const validClosingTime = typeof closingTime === "string" && timeRegex.test(closingTime.trim()) ? closingTime.trim() : undefined;
 
     const updated = await prisma.siteSettings.upsert({
       where: { id: "singleton" },
@@ -47,6 +53,8 @@ export async function PATCH(req: Request) {
         ...(typeof deliveryFeeText === "string" ? { deliveryFeeText: deliveryFeeText.trim() } : {}),
         ...(typeof deliveryNoteText === "string" ? { deliveryNoteText: deliveryNoteText.trim() } : {}),
         ...(typeof whatsappPhone === "string" ? { whatsappPhone: whatsappPhone.trim() } : {}),
+        ...(validOpeningTime ? { openingTime: validOpeningTime } : {}),
+        ...(validClosingTime ? { closingTime: validClosingTime } : {}),
       },
       create: {
         id: "singleton",
@@ -54,6 +62,8 @@ export async function PATCH(req: Request) {
         deliveryFeeText: deliveryFeeText?.trim() || DEFAULT_SITE_SETTINGS.deliveryFeeText,
         deliveryNoteText: deliveryNoteText?.trim() || DEFAULT_SITE_SETTINGS.deliveryNoteText,
         whatsappPhone: whatsappPhone?.trim() || DEFAULT_SITE_SETTINGS.whatsappPhone,
+        openingTime: validOpeningTime || DEFAULT_SITE_SETTINGS.openingTime,
+        closingTime: validClosingTime || DEFAULT_SITE_SETTINGS.closingTime,
       },
     });
 

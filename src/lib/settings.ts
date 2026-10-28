@@ -5,13 +5,17 @@ export type SiteSettingsData = {
   deliveryFeeText: string;
   deliveryNoteText: string;
   whatsappPhone: string;
+  openingTime: string;
+  closingTime: string;
 };
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsData = {
-  businessHoursText: "Orders open 9am · close 10pm",
+  businessHoursText: "Orders open 8am · close 10pm",
   deliveryFeeText: "Standard delivery is GH₵ 20",
   deliveryNoteText: "Registered office orders may qualify for free delivery and group discounts.",
   whatsappPhone: "+233248179348",
+  openingTime: "08:00",
+  closingTime: "22:00",
 };
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {
@@ -33,6 +37,8 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
         settings.whatsappPhone && !settings.whatsappPhone.includes("xxxxxxxxx")
           ? settings.whatsappPhone
           : DEFAULT_SITE_SETTINGS.whatsappPhone,
+      openingTime: settings.openingTime || DEFAULT_SITE_SETTINGS.openingTime,
+      closingTime: settings.closingTime || DEFAULT_SITE_SETTINGS.closingTime,
     };
   } catch (error) {
     console.error("Failed to fetch site settings:", error);

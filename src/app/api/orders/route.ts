@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getWhatsAppOrderUrl } from "@/lib/whatsapp";
+import { getSiteSettings } from "@/lib/settings";
+import { checkIsKitchenOpen } from "@/lib/kitchen-hours";
 
 const MAX_QUANTITY = 50;
 const MAX_NAME_LENGTH = 100;
@@ -94,6 +96,18 @@ export async function POST(request: Request) {
     }
 
     const isScheduled = Boolean(payload.isScheduled) || Boolean(company);
+
+    const siteSettings = await getSiteSettings();
+    const kitchenStatus = checkIsKitchenOpen(siteSettings.openingTime, siteSettings.closingTime);
+
+    if (!isScheduled && !kitchenStatus.isOpen) {
+      return NextResponse.json(
+        {
+          error: `Our kitchen is currently closed (${kitchenStatus.openingTimeDisplay} – ${kitchenStatus.closingTimeDisplay}). ASAP delivery is not available right now. Please choose a scheduled delivery slot for tomorrow.`,
+        },
+        { status: 400 }
+      );
+    }
     let scheduledFor: Date | null = null;
     let scheduledSlot: string | null = null;
 

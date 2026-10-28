@@ -19,6 +19,8 @@ import {
   Building2,
 } from "lucide-react";
 
+import { checkIsKitchenOpen, type KitchenStatus } from "@/lib/kitchen-hours";
+
 type DeliveryTiming = "ASAP" | "SCHEDULED";
 
 const TIME_SLOTS = [
@@ -59,7 +61,12 @@ export default function CheckoutPage() {
   const [showLocationPicker, setShowLocationPicker] = useState(false);
 
   // Timing state
-  const [timing, setTiming] = useState<DeliveryTiming>("ASAP");
+  const [kitchenStatus, setKitchenStatus] = useState<KitchenStatus>(() =>
+    checkIsKitchenOpen("08:00", "22:00")
+  );
+  const [timing, setTiming] = useState<DeliveryTiming>(() =>
+    checkIsKitchenOpen("08:00", "22:00").isOpen ? "ASAP" : "SCHEDULED"
+  );
   const [selectedSlot, setSelectedSlot] = useState<string>(TIME_SLOTS[1].id);
 
   const [form, setForm] = useState<{
@@ -133,6 +140,18 @@ export default function CheckoutPage() {
   const [staffDepartment, setStaffDepartment] = useState("");
 
   useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.kitchenStatus) {
+          setKitchenStatus(data.kitchenStatus);
+          if (!data.kitchenStatus.isOpen) {
+            setTiming("SCHEDULED");
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to load settings", err));
+
     fetch("/api/companies")
       .then((res) => res.json())
       .then((data) => {
@@ -233,6 +252,12 @@ export default function CheckoutPage() {
 
     try {
       const isScheduled = timing === "SCHEDULED" || isCorporateOrder;
+
+      if (!isScheduled && !kitchenStatus.isOpen) {
+        throw new Error(
+          `Our kitchen is currently closed (${kitchenStatus.openingTimeDisplay} – ${kitchenStatus.closingTimeDisplay}). ASAP delivery is unavailable right now. Please choose a scheduled delivery slot for tomorrow.`
+        );
+      }
       if (isCorporateOrder && !selectedCompanyId) {
         throw new Error("Please select your company for the corporate batch order.");
       }
@@ -333,30 +358,71 @@ export default function CheckoutPage() {
               </span>
             </div>
 
+            {/* Closed kitchen banner */}
+            {!kitchenStatus.isOpen && (
+              <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3">
+                <div className="w-7 h-7 rounded-full bg-rose-100 flex items-center justify-center shrink-0 mt-0.5">
+                  <Clock className="w-4 h-4 text-rose-600" />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-200 uppercase tracking-wide">
+                      🔴 Kitchen Closed
+                    </span>
+                    <span className="font-bold text-slate-900 text-xs">
+                      {kitchenStatus.openingTimeDisplay} – {kitchenStatus.closingTimeDisplay}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    &quot;Deliver Today (ASAP)&quot; is unavailable while the kitchen is closed. Pre-order for tomorrow below.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* ASAP option — disabled when kitchen is closed */}
               <button
                 type="button"
-                onClick={() => setTiming("ASAP")}
+                onClick={() => { if (kitchenStatus.isOpen) setTiming("ASAP"); }}
+                disabled={!kitchenStatus.isOpen}
                 className={`p-3.5 rounded-xl border-2 text-left transition flex items-start gap-3 ${
-                  timing === "ASAP"
+                  !kitchenStatus.isOpen
+                    ? "opacity-50 cursor-not-allowed bg-slate-50 border-slate-200"
+                    : timing === "ASAP"
                     ? "border-amber-600 bg-amber-50/60 ring-2 ring-amber-500/20"
                     : "border-slate-200 hover:border-slate-300 bg-white"
                 }`}
               >
                 <div
                   className={`w-5 h-5 rounded-full border-2 mt-0.5 flex items-center justify-center ${
-                    timing === "ASAP" ? "border-amber-600 bg-amber-600 text-white" : "border-slate-300"
+                    !kitchenStatus.isOpen
+                      ? "border-slate-300 bg-slate-100"
+                      : timing === "ASAP"
+                      ? "border-amber-600 bg-amber-600 text-white"
+                      : "border-slate-300"
                   }`}
                 >
-                  {timing === "ASAP" && <div className="w-2 h-2 rounded-full bg-white" />}
+                  {timing === "ASAP" && kitchenStatus.isOpen && <div className="w-2 h-2 rounded-full bg-white" />}
                 </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <Zap className="w-4 h-4 text-amber-600" />
-                    <span className="font-bold text-slate-900 text-sm">Deliver Today (ASAP)</span>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <Zap className={`w-4 h-4 ${kitchenStatus.isOpen ? "text-amber-600" : "text-slate-400"}`} />
+                      <span className={`font-bold text-sm ${kitchenStatus.isOpen ? "text-slate-900" : "text-slate-400 line-through"}`}>
+                        Deliver Today (ASAP)
+                      </span>
+                    </div>
+                    {!kitchenStatus.isOpen && (
+                      <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded">
+                        Closed
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Freshly prepared now & dispatched in ~30–45 mins.
+                    {kitchenStatus.isOpen
+                      ? "Freshly prepared now & dispatched in ~30–45 mins."
+                      : `Opens at ${kitchenStatus.openingTimeDisplay} · ASAP orders locked`}
                   </p>
                 </div>
               </button>
