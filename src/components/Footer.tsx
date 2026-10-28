@@ -243,8 +243,8 @@ export default function Footer() {
                 <Mail size={16} className="site-footer-icon" aria-hidden="true" />
                 <div>
                   <strong>Email Inquiries</strong>
-                  <a href="mailto:orders@richdonscatering.com" className="site-footer-email-link">
-                    orders@richdonscatering.com
+                  <a href="mailto:rdadmin@richdonscatering.com" className="site-footer-email-link">
+                    rdadmin@richdonscatering.com
                   </a>
                 </div>
               </li>

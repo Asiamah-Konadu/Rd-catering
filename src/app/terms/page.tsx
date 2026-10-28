@@ -130,8 +130,8 @@ export default function TermsOfServicePage() {
           </h2>
           <p>
             Have a question regarding our policies or your order? We are here to help. Reach us at{" "}
-            <a href="mailto:orders@richdonscatering.com" className="text-amber-700 font-bold underline">
-              orders@richdonscatering.com
+            <a href="mailto:rdadmin@richdonscatering.com" className="text-amber-700 font-bold underline">
+              rdadmin@richdonscatering.com
             </a>{" "}
             or speak with us directly on WhatsApp at <strong>+233 (0) 54 000 0000</strong>.
           </p>

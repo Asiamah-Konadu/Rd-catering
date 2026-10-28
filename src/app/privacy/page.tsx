@@ -114,8 +114,8 @@ export default function PrivacyPolicyPage() {
           </p>
           <p>
             To exercise these rights, please contact our team via email at{" "}
-            <a href="mailto:orders@richdonscatering.com" className="text-amber-700 font-bold underline">
-              orders@richdonscatering.com
+            <a href="mailto:rdadmin@richdonscatering.com" className="text-amber-700 font-bold underline">
+              rdadmin@richdonscatering.com
             </a>{" "}
             or message our team on WhatsApp.
           </p>
