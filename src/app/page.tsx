@@ -70,7 +70,7 @@ export default async function Home() {
           <h1>Ghanaian food<br />with <em>heart.</em></h1>
           <p>Slow down for the food you love. Order a Ghanaian favourite, made fresh and delivered to your door.</p>
           <div className="home-actions">
-            <a className="home-primary" href="#today-menu">
+            <a className="home-primary" href="/menu">
               Explore the menu <ArrowDown size={17} aria-hidden="true" />
             </a>
             <Link className="home-secondary" href="/corporate">
