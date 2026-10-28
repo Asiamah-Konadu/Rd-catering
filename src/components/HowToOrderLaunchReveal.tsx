@@ -105,11 +105,16 @@ export default function HowToOrderLaunchReveal() {
     setPointer({ x: 0, y: 0 });
   };
 
-  const [spreadDistance, setSpreadDistance] = useState(410);
+  const [isMobile, setIsMobile] = useState(false);
+  const [spreadDistance, setSpreadDistance] = useState(260);
+
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
     const updateSpread = () => {
       const w = window.innerWidth;
+      setIsMobile(w < 768);
       if (w < 640) setSpreadDistance(120);
       else if (w < 860) setSpreadDistance(180);
       else if (w < 1140) setSpreadDistance(230);
@@ -120,8 +125,70 @@ export default function HowToOrderLaunchReveal() {
     return () => window.removeEventListener("resize", updateSpread);
   }, []);
 
-  // 3D Card Transform computation for each position (Far apart separation)
+  // Touch swipe handlers for fluid mobile gestures
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const diffX = e.changedTouches[0].clientX - touchStartXRef.current;
+    const diffY = e.changedTouches[0].clientY - touchStartYRef.current;
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+
+    if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX < 0) {
+        // Swiped left -> advance to next step
+        setActiveStep((prev) => Math.min(2, prev + 1));
+      } else {
+        // Swiped right -> retreat to previous step
+        setActiveStep((prev) => Math.max(0, prev - 1));
+      }
+    }
+  };
+
+  // 3D Card Transform computation:
+  // On mobile: centers whichever card is "up", with clean 3D peeking to sides
+  // On desktop: maintains the signature wide 3-phone stage arrangement
   const getCardTransform = (index: number) => {
+    if (isMobile) {
+      const isSelected = activeStep === index;
+      if (isSelected) {
+        return "translateX(0px) translateY(-8px) translateZ(60px) rotateY(0deg) rotateZ(0deg) scale(1.04)";
+      }
+
+      if (activeStep === 0) {
+        // Step 1 is UP: Step 2 peeks to the right, Step 3 peeks further right
+        if (index === 1) {
+          return "translateX(68px) translateY(8px) translateZ(-25px) rotateY(-12deg) rotateZ(2deg) scale(0.91)";
+        }
+        if (index === 2) {
+          return "translateX(118px) translateY(18px) translateZ(-55px) rotateY(-18deg) rotateZ(4deg) scale(0.84)";
+        }
+      } else if (activeStep === 1) {
+        // Step 2 is UP: Step 1 peeks left, Step 3 peeks right
+        if (index === 0) {
+          return "translateX(-68px) translateY(8px) translateZ(-25px) rotateY(12deg) rotateZ(-2deg) scale(0.91)";
+        }
+        if (index === 2) {
+          return "translateX(68px) translateY(8px) translateZ(-25px) rotateY(-12deg) rotateZ(2deg) scale(0.91)";
+        }
+      } else if (activeStep === 2) {
+        // Step 3 is UP: Step 2 peeks left, Step 1 peeks further left
+        if (index === 1) {
+          return "translateX(-68px) translateY(8px) translateZ(-25px) rotateY(12deg) rotateZ(-2deg) scale(0.91)";
+        }
+        if (index === 0) {
+          return "translateX(-118px) translateY(18px) translateZ(-55px) rotateY(18deg) rotateZ(-4deg) scale(0.84)";
+        }
+      }
+
+      return "translateX(0px) translateZ(0px) scale(0.9)";
+    }
+
+    // ── Desktop (Preserved exactly as is) ──
     const tiltX = isHovered ? pointer.y * -6 : 0;
     const tiltY = isHovered ? pointer.x * 8 : 0;
 
@@ -133,26 +200,40 @@ export default function HowToOrderLaunchReveal() {
     const spread = spreadDistance;
 
     if (isSelected) {
-      // Highlighted / focused card
       if (isLeft) {
         return `rotateX(${tiltX}deg) rotateY(${tiltY + 12}deg) rotateZ(-1.5deg) translateX(-${spread}px) translateY(-10px) translateZ(80px) scale(1.05)`;
       }
       if (isRight) {
         return `rotateX(${tiltX}deg) rotateY(${tiltY - 12}deg) rotateZ(1.5deg) translateX(${spread}px) translateY(-10px) translateZ(80px) scale(1.05)`;
       }
-      // Center focused
       return `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(90px) scale(1.06)`;
     }
 
-    // Default resting configuration with wide, clean spacing
     if (isLeft) {
       return `rotateX(${tiltX}deg) rotateY(${tiltY + 16}deg) rotateZ(-3deg) translateX(-${spread}px) translateY(12px) translateZ(10px) scale(0.95)`;
     }
     if (isRight) {
       return `rotateX(${tiltX}deg) rotateY(${tiltY - 16}deg) rotateZ(3deg) translateX(${spread}px) translateY(12px) translateZ(10px) scale(0.95)`;
     }
-    // Center resting
     return `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(30px) scale(0.98)`;
+  };
+
+  const getCardZIndex = (index: number) => {
+    if (isMobile) {
+      if (activeStep === index) return 40;
+      const dist = Math.abs(index - activeStep);
+      return dist === 1 ? 30 : 20;
+    }
+    return activeStep === index ? 40 : index === 1 ? 30 : 20;
+  };
+
+  const getCardOpacity = (index: number) => {
+    if (isMobile) {
+      if (activeStep === index) return 1;
+      const dist = Math.abs(index - activeStep);
+      return dist === 1 ? 0.8 : 0.55;
+    }
+    return 1;
   };
 
   return (
@@ -197,6 +278,8 @@ export default function HowToOrderLaunchReveal() {
         onPointerMove={handlePointerMove}
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         aria-label="Interactive 3D Phone Mockup Showcase"
       >
         <div className="launch-reveal-fan-wrapper">
@@ -213,10 +296,13 @@ export default function HowToOrderLaunchReveal() {
                 style={{
                   transform: getCardTransform(index),
                   transitionDelay: !isInView ? `${staggerDelay}s` : undefined,
-                  zIndex: isSelected ? 40 : index === 1 ? 30 : 20,
+                  zIndex: getCardZIndex(index),
+                  opacity: getCardOpacity(index),
                 }}
                 onClick={() => setActiveStep(index)}
-                onMouseEnter={() => setActiveStep(index)}
+                onMouseEnter={() => {
+                  if (!isMobile) setActiveStep(index);
+                }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -263,6 +349,19 @@ export default function HowToOrderLaunchReveal() {
             );
           })}
         </div>
+      </div>
+
+      {/* ─── MOBILE STEP INDICATOR PILLS ─────────────────────────── */}
+      <div className="launch-reveal-mobile-dots" aria-label="Step navigation">
+        {ORDER_STEPS.map((stepItem, idx) => (
+          <button
+            key={stepItem.id}
+            type="button"
+            className={`launch-mobile-dot ${activeStep === idx ? "is-active" : ""}`}
+            onClick={() => setActiveStep(idx)}
+            aria-label={`Jump to Step 0${idx + 1}`}
+          />
+        ))}
       </div>
 
       {/* ─── INTERACTIVE STEP CONTROLLERS / CARDS ────────────────────── */}

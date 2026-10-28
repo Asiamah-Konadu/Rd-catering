@@ -227,8 +227,8 @@ export default function HomepageWebGLBackground() {
 
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
 
-    // ── Optimal 220 3D Volumetric Ember Particles (reduced for perf) ───────
-    const N = 220;
+    // ── Optimal 120 3D Volumetric Ember Particles for buttery 60fps scrolling ──
+    const N = 120;
     const STRIDE = 6 * 4;
     const data = new Float32Array(N * 6);
 
@@ -278,8 +278,14 @@ export default function HomepageWebGLBackground() {
     let lastGlowUpdate = 0;
     let frameCount = 0;
 
-    // ── Continuous 60/120fps Animation Loop (ZERO React State Updates) ──
+    // ── Continuous 60/120fps Animation Loop (Zero Layout Thrashing) ──
     const render = () => {
+      // Pause drawing when tab is backgrounded to preserve device battery and CPU
+      if (typeof document !== "undefined" && document.hidden) {
+        animFrame = requestAnimationFrame(render);
+        return;
+      }
+
       const targetS = targetScrollRef.current;
       const currentS = currentScrollRef.current;
       const nextS = currentS + (targetS - currentS) * 0.16;
@@ -304,19 +310,9 @@ export default function HomepageWebGLBackground() {
         currentC[2] + (targetC[2] - currentC[2]) * 0.06,
       ];
 
-      frameCount++;
-
-      // Update grid perspective tilt every 3 frames to reduce DOM thrashing
-      if (frameCount % 3 === 0 && gridRef.current) {
-        const tiltX = 14 + currentM.y * -5;
-        const tiltY = currentM.x * 5;
-        const translateY = (nextS * -35).toFixed(1);
-        gridRef.current.style.transform = `perspective(900px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(${translateY}px) scale(1.12)`;
-      }
-
-      // Update glow positions via DOM style without triggering React renders (every ~100ms)
+      // Update ambient glow positions smoothly at lower frequency (every ~250ms)
       const now = performance.now();
-      if (now - lastGlowUpdate > 100 && rootRef.current) {
+      if (now - lastGlowUpdate > 250 && rootRef.current) {
         lastGlowUpdate = now;
         const elapsed = (now - t0) / 1000;
         const glowX1 = Math.round(65 + Math.sin(elapsed * 0.4) * 12 + currentM.x * 8);

@@ -131,9 +131,19 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
   // ── Snap-style scroll: only advance on decisive scroll past clear threshold ──
   useEffect(() => {
     let ticking = false;
-    // Hysteresis: advance when > 65% into a zone, retreat when < 35%
+    let cachedTop = 0;
+    let cachedMaxScroll = 1;
+
     const ADVANCE_THRESHOLD = 0.65;
     const RETREAT_THRESHOLD = 0.35;
+
+    const updateDimensions = () => {
+      const outer = outerRef.current;
+      if (!outer) return;
+      const rect = outer.getBoundingClientRect();
+      cachedTop = window.scrollY + rect.top;
+      cachedMaxScroll = Math.max(1, outer.offsetHeight - window.innerHeight);
+    };
 
     const handleScroll = () => {
       if (ticking) return;
@@ -141,21 +151,13 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
 
       requestAnimationFrame(() => {
         ticking = false;
-        const outer = outerRef.current;
-        if (!outer) return;
-        const rect = outer.getBoundingClientRect();
-        const totalH = outer.offsetHeight;
-        const viewH = window.innerHeight;
-        const maxScroll = totalH - viewH;
-        if (maxScroll <= 0) return;
-
-        const scrolled = -rect.top;
+        const scrolled = window.scrollY - cachedTop;
         if (scrolled <= 0) {
           setActiveIndex((prev) => (prev !== 0 ? 0 : prev));
           return;
         }
 
-        const progress = Math.max(0, Math.min(1, scrolled / maxScroll));
+        const progress = Math.max(0, Math.min(1, scrolled / cachedMaxScroll));
         // Each dish owns an equal portion of the scroll range
         const zoneSize = 1 / count;
 
@@ -177,13 +179,17 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
       });
     };
 
+    updateDimensions();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
+    window.addEventListener("resize", () => {
+      updateDimensions();
+      handleScroll();
+    }, { passive: true });
     handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener("resize", updateDimensions);
     };
   }, [count]);
 
@@ -225,7 +231,7 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
         className="wgs-outer"
         id="today-menu"
         aria-label="What sounds good? Food Showcase"
-        style={{ height: `${Math.max(3, count) * 85}vh` }}
+        style={{ height: `${Math.max(3, count) * 70}vh` }}
       >
         {/* ── Sticky Viewport Frame ───────────────────────────────────── */}
         <div ref={stickyRef} className="wgs-sticky">
@@ -411,15 +417,14 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
                     className={`wgs-3d-card ${isCurrent ? "is-current" : ""}`}
                     style={{
                       transform: isCurrent
-                        ? "perspective(1200px) translate3d(0, 0, 0) rotateX(0deg) scale(1)"
+                        ? "translate3d(0, 0, 0) rotateX(0deg) scale(1)"
                         : isPast
-                        ? "perspective(1200px) translate3d(0, -60px, -140px) rotateX(-12deg) scale(0.9)"
-                        : "perspective(1200px) translate3d(0, 60px, -140px) rotateX(12deg) scale(0.9)",
+                        ? "translate3d(0, -50px, -100px) rotateX(-8deg) scale(0.92)"
+                        : "translate3d(0, 50px, -100px) rotateX(8deg) scale(0.92)",
                       opacity: isCurrent ? 1 : 0,
                       pointerEvents: isCurrent ? "auto" : "none",
                       zIndex: isCurrent ? 30 : 1,
-                      filter: isCurrent ? "none" : "blur(4px)",
-                      transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, filter 0.4s ease",
+                      transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease",
                     }}
                   >
                     {/* Glowing aura frame */}
