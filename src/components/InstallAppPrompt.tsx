@@ -23,9 +23,8 @@ export default function InstallAppPrompt() {
     if (dismissedUntil > Date.now() || window.sessionStorage.getItem(SHOWN_KEY)) return;
 
     let eligible = false;
-    let dismissed = false;
     const showTimer = window.setTimeout(() => {
-      if (eligible && !dismissed) {
+      if (eligible) {
         setVisible(true);
         window.sessionStorage.setItem(SHOWN_KEY, "1");
       }
