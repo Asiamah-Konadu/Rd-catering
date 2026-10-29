@@ -14,6 +14,68 @@
 }
 
 * { box-sizing: border-box; }
+
+.install-app-prompt {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 14px 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 12px 36px rgba(47, 22, 17, 0.16);
+  animation: install-prompt-enter 220ms ease-out both;
+}
+.install-app-prompt-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+}
+.install-app-prompt-copy { display: grid; gap: 3px; min-width: 0; flex: 1; }
+.install-app-prompt-copy strong { font-size: 0.9rem; }
+.install-app-prompt-copy span { color: var(--muted); font-size: 0.76rem; line-height: 1.35; }
+.install-app-prompt-action {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 13px;
+  color: white;
+  background: var(--brand);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.install-app-prompt-action:hover { background: var(--brand-dark); }
+.install-app-prompt-close {
+  display: grid;
+  place-items: center;
+  align-self: flex-start;
+  margin: -5px -5px 0 0;
+  padding: 4px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+.install-app-prompt-close:hover { color: var(--ink); background: #f4eeeb; }
+@keyframes install-prompt-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .install-app-prompt { animation: none; }
+}
 /* Use native responsive hardware scrolling for wheel/trackpad. Smooth scroll only for anchor navigation if preferred */
 @media (prefers-reduced-motion: no-preference) {
   :root:has(:target) {

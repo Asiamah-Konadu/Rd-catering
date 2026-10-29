@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import { CartProvider } from "@/components/cart/CartProvider";
 import SplashScreen from "@/components/SplashScreen";
 import Footer from "@/components/Footer";
+import InstallAppPrompt from "@/components/InstallAppPrompt";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -191,6 +192,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           {children}
           <Footer />
         </CartProvider>
+        <InstallAppPrompt />
       </body>
     </html>
   );
