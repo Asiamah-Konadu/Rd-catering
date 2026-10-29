@@ -403,15 +403,33 @@ img { max-width: 100%; }
     min-height: 58px;
   }
   .mobile-nav-title {
-    display: block;
+    display: inline-flex;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border: 1px solid rgba(232, 223, 218, 0.7);
+    border-radius: 9999px;
+    background: rgba(246, 241, 238, 0.65);
     color: var(--ink);
     font-size: 0.9rem;
     font-weight: 800;
     letter-spacing: 0.02em;
-    pointer-events: none;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .mobile-nav-title:hover {
+    background: #fff;
+    border-color: rgba(247, 67, 38, 0.25);
+    box-shadow: 0 3px 10px rgba(47, 22, 17, 0.08);
+  }
+  .mobile-nav-title:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
   }
   .cart-link.pillflow-bag-btn {
     padding: 6px 12px 6px 10px;
