@@ -351,6 +351,10 @@ img { max-width: 100%; }
 }
 
 /* Nav Toggle (Mobile) */
+.mobile-nav-title {
+  display: none;
+}
+
 .nav-toggle.pillflow-toggle {
   display: none;
   border: 1px solid rgba(232, 223, 218, 0.9);
@@ -397,6 +401,17 @@ img { max-width: 100%; }
     padding: 6px 12px 6px 14px;
     height: 58px;
     min-height: 58px;
+  }
+  .mobile-nav-title {
+    display: block;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    pointer-events: none;
   }
   .cart-link.pillflow-bag-btn {
     padding: 6px 12px 6px 10px;

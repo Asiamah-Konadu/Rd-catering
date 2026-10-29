@@ -185,6 +185,8 @@ export default function Header() {
           })}
         </nav>
 
+        <span className="mobile-nav-title" aria-hidden="true">Menu</span>
+
         {/* Action Area: Magnetic Bag Button & Mobile Nav Toggle */}
         <div className="pillflow-actions">
           <Link
@@ -227,7 +229,6 @@ export default function Header() {
             <span className="live-status-ping" aria-hidden="true" />
             <span>Accra Kitchen · Live Dispatch</span>
           </div>
-          <span className="mobile-drawer-tag">Menu</span>
         </div>
 
         <div className="mobile-drawer-links">
