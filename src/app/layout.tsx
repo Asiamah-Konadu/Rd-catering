@@ -178,7 +178,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <head>
-        <!-- Google tag (gtag.js) -->
+      <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-K9K46SSV4D"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
