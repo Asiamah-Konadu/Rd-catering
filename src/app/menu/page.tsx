@@ -5,6 +5,7 @@ import MenuCard from "@/components/MenuCard";
 import { BUSINESS_HOURS } from "@/lib/business";
 import MenuSideNav from "@/components/MenuSideNav";
 import { getPublicMenu, getPublicExtras } from "@/lib/menu";
+import { SITE_URL } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -44,8 +45,6 @@ export default async function MenuPage() {
   ]);
   const dishCount = categories.reduce((total, category) => total + category.items.length, 0);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://rd-catering.vercel.app";
-
   const menuSchema = {
     "@context": "https://schema.org",
     "@graph": [
@@ -56,21 +55,21 @@ export default async function MenuPage() {
             "@type": "ListItem",
             position: 1,
             name: "Home",
-            item: siteUrl,
+            item: SITE_URL,
           },
           {
             "@type": "ListItem",
             position: 2,
             name: "Our Menu",
-            item: `${siteUrl}/menu`,
+            item: `${SITE_URL}/menu`,
           },
         ],
       },
       {
         "@type": "Menu",
-        "@id": `${siteUrl}/menu#full-menu`,
+        "@id": `${SITE_URL}/menu#full-menu`,
         name: "Rich-Dons Catering Kitchen Menu",
-        url: `${siteUrl}/menu`,
+        url: `${SITE_URL}/menu`,
         inLanguage: "en-GH",
         hasMenuSection: categories.map((cat) => ({
           "@type": "MenuSection",

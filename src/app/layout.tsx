@@ -6,16 +6,9 @@ import { CartProvider } from "@/components/cart/CartProvider";
 import SplashScreen from "@/components/SplashScreen";
 import Footer from "@/components/Footer";
 import InstallAppPrompt from "@/components/InstallAppPrompt";
+import { SITE_URL } from "@/lib/site-url";
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || "G-K9K46SSV4D";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "https://rd-catering.vercel.app");
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

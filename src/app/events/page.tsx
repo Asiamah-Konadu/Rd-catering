@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import BusinessContactLinks from "@/components/BusinessContactLinks";
 import { BUSINESS_CONTACT } from "@/lib/business";
 import { getWhatsAppOrderUrl } from "@/lib/whatsapp";
+import { SITE_URL } from "@/lib/site-url";
 import { EventInquiryClient } from "./EventInquiryClient";
 
 const eventFaqs = [
@@ -31,14 +32,6 @@ const eventFaqs = [
       "Rich-Dons provides event catering in Accra and across Greater Accra. Include your venue or area when requesting availability.",
   },
 ];
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "https://rd-catering.vercel.app");
 
 export const metadata: Metadata = {
   title: "Event Catering Accra | Weddings, Parties & Corporate Celebrations",
@@ -79,12 +72,12 @@ export default function EventCateringPage() {
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
           {
             "@type": "ListItem",
             position: 2,
             name: "Event Catering",
-            item: `${siteUrl}/events`,
+            item: `${SITE_URL}/events`,
           },
         ],
       },
@@ -95,7 +88,7 @@ export default function EventCateringPage() {
         provider: {
           "@type": "CateringService",
           name: "Rich-Dons Catering",
-          url: siteUrl,
+          url: SITE_URL,
           telephone: BUSINESS_CONTACT.whatsappInternational,
         },
         areaServed: {

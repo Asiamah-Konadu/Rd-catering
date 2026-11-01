@@ -1,0 +1,15 @@
+# Rich-Dons Catering
+
+> Fresh Ghanaian food delivery and catering in Accra, Ghana.
+
+Official website: https://richdonscatering.com
+
+## Public pages
+
+- [Menu and online ordering](https://richdonscatering.com/menu): Browse Ghanaian dishes, descriptions, and prices.
+- [Event catering](https://richdonscatering.com/events): Make an event catering inquiry.
+- [Corporate catering](https://richdonscatering.com/corporate): Information and ordering for office lunch service.
+
+## Service area
+
+Accra and the Greater Accra Region, Ghana.

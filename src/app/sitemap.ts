@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { SITE_URL } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // Cache and revalidate at most once every hour
@@ -14,18 +15,6 @@ const KNOWN_DISH_FALLBACKS = [
   "ghanaian-salad",
   "packed-pastries",
 ];
-
-function getBaseUrl(): string {
-  const raw =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "https://rd-catering.vercel.app");
-
-  return raw.replace(/\/+$/, "");
-}
 
 function toAbsoluteImageUrl(baseUrl: string, imageUrl: string | null): string | null {
   if (!imageUrl) return null;
@@ -42,7 +31,7 @@ function toAbsoluteImageUrl(baseUrl: string, imageUrl: string | null): string | 
  * Includes all public indexable landing pages and dynamically fetched menu items.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = getBaseUrl();
+  const siteUrl = SITE_URL;
   const now = new Date();
 
   // Core public indexable landing pages

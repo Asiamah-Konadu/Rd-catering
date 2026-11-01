@@ -1,16 +1,7 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site-url";
 
 export default function robots(): MetadataRoute.Robots {
-  const rawUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "https://rd-catering.vercel.app");
-
-  const siteUrl = rawUrl.replace(/\/+$/, "");
-
   return {
     rules: [
       {
@@ -28,7 +19,6 @@ export default function robots(): MetadataRoute.Robots {
           "/admin/",
           "/api",
           "/api/",
-          "/corporate/*",
           "/cart",
           "/checkout",
           "/order",
@@ -36,6 +26,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

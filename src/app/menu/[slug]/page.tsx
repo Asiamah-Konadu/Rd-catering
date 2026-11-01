@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MenuItemDetail from "@/components/MenuItemDetail";
 import { getPublicMenuItem, getPublicExtras } from "@/lib/menu";
+import { SITE_URL } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -48,14 +49,12 @@ export default async function MenuItemPage({ params }: Props) {
 
   if (!item) notFound();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://richdonscatering.com";
-
   const menuItemJsonLd = {
     "@context": "https://schema.org",
     "@type": "MenuItem",
     name: item.name,
     description: item.description ?? undefined,
-    url: `${siteUrl}/menu/${item.slug}`,
+    url: `${SITE_URL}/menu/${item.slug}`,
     ...(item.imageUrl && { image: item.imageUrl }),
     offers: {
       "@type": "Offer",
@@ -69,7 +68,6 @@ export default async function MenuItemPage({ params }: Props) {
         name: "Rich-Dons Catering",
       },
     },
-    suitableForDiet: "https://schema.org/HalalDiet",
   };
 
   return (
@@ -81,4 +79,4 @@ export default async function MenuItemPage({ params }: Props) {
       <MenuItemDetail item={item} availableExtras={extras} />
     </>
   );
-}
+}

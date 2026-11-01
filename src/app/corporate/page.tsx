@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getWhatsAppOrderUrl } from "@/lib/whatsapp";
+import { SITE_URL } from "@/lib/site-url";
 import type { Metadata } from "next";
 import {
   CorporateDirectoryClient,
@@ -86,8 +87,6 @@ export default async function CorporateDirectoryPage() {
     "Hello Rich-Dons Catering! I'd like to register my company for the Corporate Lunch Portal."
   );
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://rd-catering.vercel.app";
-
   const corporateSchema = {
     "@context": "https://schema.org",
     "@graph": [
@@ -98,13 +97,13 @@ export default async function CorporateDirectoryPage() {
             "@type": "ListItem",
             position: 1,
             name: "Home",
-            item: siteUrl,
+            item: SITE_URL,
           },
           {
             "@type": "ListItem",
             position: 2,
             name: "Corporate Lunch Portals",
-            item: `${siteUrl}/corporate`,
+            item: `${SITE_URL}/corporate`,
           },
         ],
       },
@@ -115,7 +114,7 @@ export default async function CorporateDirectoryPage() {
         provider: {
           "@type": "CateringService",
           name: "Rich-Dons Catering",
-          url: siteUrl,
+          url: SITE_URL,
           telephone: "+233248179348",
         },
         areaServed: {
