@@ -32,12 +32,19 @@ export type PublicCompanyInfo = {
   orderCount?: number;
 };
 
+export type CorporateFaq = {
+  question: string;
+  answer: string;
+};
+
 export function CorporateDirectoryClient({
   companies,
   corporateSignupWhatsAppUrl,
+  faqs,
 }: {
   companies: PublicCompanyInfo[];
   corporateSignupWhatsAppUrl: string | null;
+  faqs: CorporateFaq[];
 }) {
   const [search, setSearch] = useState("");
   const [selectedSlug, setSelectedSlug] = useState<string>("");
@@ -97,7 +104,7 @@ export function CorporateDirectoryClient({
             <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl">
               <Users className="w-5 h-5 text-amber-400 mb-1.5" />
               <div className="font-bold text-white text-xs sm:text-sm">No Group Debt</div>
-              <div className="text-[11px] text-slate-400">Individual Mobile Money/Card</div>
+              <div className="text-[11px] text-slate-400">WhatsApp order confirmation</div>
             </div>
             <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl">
               <Sparkles className="w-5 h-5 text-amber-400 mb-1.5" />
@@ -354,9 +361,9 @@ export function CorporateDirectoryClient({
               <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 font-black flex items-center justify-center text-sm">
                 2
               </div>
-              <h4 className="font-bold text-white text-sm">Pay Individually</h4>
+              <h4 className="font-bold text-white text-sm">Confirm Individually</h4>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Check out directly using MTN MoMo, Telecel Cash, or Card. No office spreadsheets, no chasing colleagues for cash.
+                Each staff member submits their own order. Rich-Dons confirms meal availability and payment in WhatsApp.
               </p>
             </div>
 
@@ -369,6 +376,25 @@ export function CorporateDirectoryClient({
                 All office meals arrive in one warm batch delivery to your front desk with personal names and departments clearly labeled.
               </p>
             </div>
+          </div>
+        </section>
+
+        <section className="space-y-5 pb-8" aria-labelledby="corporate-faq-heading">
+          <div className="text-center">
+            <h3 id="corporate-faq-heading" className="text-xl font-extrabold text-white">
+              Office Catering FAQs
+            </h3>
+            <p className="mt-1 text-sm text-slate-400">
+              Answers about company setup, ordering, and delivery in Accra.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {faqs.map((faq) => (
+              <article key={faq.question} className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                <h4 className="font-bold text-white">{faq.question}</h4>
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">{faq.answer}</p>
+              </article>
+            ))}
           </div>
         </section>
       </main>

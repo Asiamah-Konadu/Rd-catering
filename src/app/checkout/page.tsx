@@ -25,9 +25,9 @@ type DeliveryTiming = "ASAP" | "SCHEDULED";
 
 const TIME_SLOTS = [
   {
-    id: "Morning (9:00 AM - 11:30 AM)",
+    id: "Morning (10:00 AM - 11:30 AM)",
     title: "Morning",
-    time: "9:00 AM – 11:30 AM",
+    time: "10:00 AM – 11:30 AM",
     icon: "☀️",
     description: "Fresh morning batch & breakfast",
   },
@@ -117,6 +117,35 @@ export default function CheckoutPage() {
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState("");
   const [promoSuccess, setPromoSuccess] = useState("");
+
+  const isSundayDelivery = useMemo(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.getDay() === 0;
+  }, []);
+
+  const timeSlots = useMemo(
+    () =>
+      TIME_SLOTS.map((slot) => {
+        if (!isSundayDelivery) return slot;
+        if (slot.title === "Morning") {
+          return {
+            ...slot,
+            id: "Morning (11:00 AM - 12:00 PM)",
+            time: "11:00 AM – 12:00 PM",
+          };
+        }
+        if (slot.title === "Dinner") {
+          return {
+            ...slot,
+            id: "Dinner (6:00 PM - 8:00 PM)",
+            time: "6:00 PM – 8:00 PM",
+          };
+        }
+        return slot;
+      }),
+    [isSundayDelivery]
+  );
 
   // Corporate office order state
   type CompanyOption = {
@@ -466,7 +495,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {TIME_SLOTS.map((slot) => {
+                  {timeSlots.map((slot) => {
                     const isSelected = selectedSlot === slot.id;
                     return (
                       <button

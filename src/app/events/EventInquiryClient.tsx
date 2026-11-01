@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent } from "react";
 import {
   CalendarDays,
   Check,
@@ -18,12 +18,13 @@ type EventInquiryProps = {
 
 export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   function submitInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!whatsappUrl) {
-      alert("WhatsApp is not configured yet. Please try again later.");
+      setError("WhatsApp booking is unavailable right now. Please call Rich-Dons Catering.");
       return;
     }
 
@@ -50,11 +51,10 @@ export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
       "Please help me schedule an appointment to plan this event.",
     ].join("\n");
 
-    window.open(
-      `${whatsappUrl.split("?text=")[0]}?text=${encodeURIComponent(message)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
+    const destination = new URL(whatsappUrl);
+    destination.searchParams.set("text", message);
+    window.open(destination.toString(), "_blank", "noopener,noreferrer");
+    setError("");
     setSubmitted(true);
   }
 
@@ -198,7 +198,7 @@ export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
               </div>
               <div className="events-field">
                 <label htmlFor="event-time">Start time</label>
-                <input id="event-time" name="eventTime" type="time" required />
+                <input id="event-time" name="eventTime" type="time" />
               </div>
               <div className="events-field">
                 <label htmlFor="event-guests">Estimated guests</label>
@@ -206,7 +206,7 @@ export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
               </div>
               <div className="events-field">
                 <label htmlFor="event-budget">Estimated budget</label>
-                <select id="event-budget" name="budget" required defaultValue="">
+                <select id="event-budget" name="budget" defaultValue="">
                   <option value="" disabled>Select a range</option>
                   <option>Under GH₵ 5,000</option>
                   <option>GH₵ 5,000 – 10,000</option>
@@ -233,6 +233,7 @@ export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
                 Request appointment on WhatsApp
               </button>
             </form>
+            {error && <p className="events-config-note" role="alert">{error}</p>}
             {!whatsappUrl && (
               <p className="events-config-note">WhatsApp booking is temporarily unavailable.</p>
             )}

@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Clock3, MapPin, MessageCircle } from "lucide-react";
+import MenuCard from "@/components/MenuCard";
+import MobileBagBar from "@/components/MobileBagBar";
+import { BUSINESS_HOURS } from "@/lib/business";
 import FoodWebGLShowcase from "@/components/FoodWebGLShowcase";
 import HomepageWebGLBackground from "@/components/HomepageWebGLBackground";
-import MobileBagBar from "@/components/MobileBagBar";
 import ThisWeekDishesCarousel from "@/components/ThisWeekDishesCarousel";
 import HowToOrderLaunchReveal from "@/components/HowToOrderLaunchReveal";
 import { getPublicMenu, getWeeklyMenuItems } from "@/lib/menu";
@@ -79,7 +81,7 @@ export default async function Home() {
           </div>
           <div className="home-open-note">
             <span className="home-open-dot" />
-            <span>{siteSettings.businessHoursText}</span>
+            <span>{siteSettings.businessHoursText || BUSINESS_HOURS.label}</span>
             <span className="home-note-divider" />
             <span>Confirm and pay in WhatsApp</span>
           </div>
@@ -202,6 +204,42 @@ export default async function Home() {
       </section>
 
       <FoodWebGLShowcase config={showcaseConfig} />
+
+      <section className="home-menu" id="today-menu">
+        <div className="home-menu-intro">
+          <div>
+            <span className="home-kicker">Good food, no fuss</span>
+            <h2>What sounds good?</h2>
+          </div>
+          {categories.length > 1 && (
+            <nav className="home-category-nav" aria-label="Jump to a menu category">
+              {categories.map((category) => (
+                <a key={category.id} href={`#category-${category.slug}`}>
+                  {category.name}
+                </a>
+              ))}
+            </nav>
+          )}
+        </div>
+        {categories.length ? categories.map((category) => (
+          <section className="home-category" id={`category-${category.slug}`} key={category.id}>
+            <div className="home-category-heading">
+              <h3>{category.name}</h3>
+              <span>{String(category.items.length).padStart(2, "0")} dishes</span>
+            </div>
+            <div className="menu-grid">
+              {category.items.map((item) => (
+                <MenuCard key={item.id} item={item} showAddToBag={false} />
+              ))}
+            </div>
+          </section>
+        )) : (
+          <div className="home-menu-empty">
+            <h3>Today&apos;s menu is being refreshed</h3>
+            <p>Check back shortly for the dishes available from our kitchen.</p>
+          </div>
+        )}
+      </section>
 
       <HowToOrderLaunchReveal />
 

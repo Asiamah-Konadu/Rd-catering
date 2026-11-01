@@ -1,19 +1,25 @@
 'use client';
 
-import { Sparkles, Utensils } from "lucide-react";
+import { ArrowRight, Check, Plus, Sparkles, Utensils } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import type { PublicMenuItem, PublicExtra } from "@/lib/menu";
 import { ComboCustomizerModal } from "./ComboCustomizerModal";
+import { useCart } from "./cart/CartProvider";
 
-interface MenuCardProps {
+export default function MenuCard({
+  item,
+  showAddToBag = true,
+  availableExtras,
+}: {
   item: PublicMenuItem;
+  showAddToBag?: boolean;
   availableExtras?: PublicExtra[];
-}
-
-export default function MenuCard({ item, availableExtras }: MenuCardProps) {
+}) {
+  const { add } = useCart();
   const [imageFailed, setImageFailed] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
 
   return (
     <>
@@ -51,6 +57,24 @@ export default function MenuCard({ item, availableExtras }: MenuCardProps) {
               <span>{item.isAvailable ? "Add / Combo" : "Unavailable"}</span>
             </button>
           </div>
+          {showAddToBag ? (
+            <button
+              type="button"
+              disabled={!item.isAvailable}
+              className={justAdded ? "just-added" : ""}
+              onClick={() => {
+                add({ id: item.id, name: item.name, price: item.price });
+                setJustAdded(true);
+              }}
+            >
+              {justAdded ? <Check size={17} aria-hidden="true" /> : <Plus size={17} aria-hidden="true" />}
+              {item.isAvailable ? (justAdded ? "Added" : "Add to bag") : "Unavailable"}
+            </button>
+          ) : (
+            <Link className="menu-card-view-link" href={`/menu/${item.slug}`}>
+              View dish <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          )}
         </div>
       </article>
 

@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
+import { BUSINESS_CONTACT, BUSINESS_HOURS } from "@/lib/business";
 import "./globals.css";
 import Header from "@/components/Header";
 import { CartProvider } from "@/components/cart/CartProvider";
 import SplashScreen from "@/components/SplashScreen";
 import Footer from "@/components/Footer";
 import InstallAppPrompt from "@/components/InstallAppPrompt";
+import { SITE_URL } from "@/lib/site-url";
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || "G-K9K46SSV4D";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "https://rd-catering.vercel.app");
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -99,7 +93,13 @@ const structuredData = {
       "@id": `${SITE_URL}/#restaurant`,
       name: "Rich-Dons Catering",
       url: SITE_URL,
-      telephone: "+233248179348",
+      telephone: BUSINESS_CONTACT.whatsappInternational,
+      contactPoint: BUSINESS_CONTACT.phones.map((telephone) => ({
+        "@type": "ContactPoint",
+        telephone: `+233${telephone.slice(1)}`,
+        contactType: "customer service",
+        areaServed: "GH",
+      })),
       email: "rdadmin@richdonscatering.com",
       sameAs: [
         "https://www.instagram.com/richdonsofficial",
@@ -130,18 +130,7 @@ const structuredData = {
         longitude: -0.187,
       },
       openingHoursSpecification: [
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-          opens: "08:00",
-          closes: "22:00",
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: ["Sunday"],
-          opens: "11:00",
-          closes: "20:00",
-        },
+        ...BUSINESS_HOURS.openingHoursSpecification,
       ],
       potentialAction: {
         "@type": "OrderAction",
@@ -219,4 +208,3 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
-
