@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Clock3, MapPin, MessageCircle } from "lucide-react";
+import BusinessContactLinks from "@/components/BusinessContactLinks";
 import MenuCard from "@/components/MenuCard";
 import MobileBagBar from "@/components/MobileBagBar";
+import { BUSINESS_HOURS } from "@/lib/business";
 import { getPublicMenu } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +37,7 @@ export default async function Home() {
           </div>
           <div className="home-open-note">
             <span className="home-open-dot" />
-            <span>Orders open 9am · close 10pm</span>
+            <span>{BUSINESS_HOURS.label}</span>
             <span className="home-note-divider" />
             <span>Confirm and pay in WhatsApp</span>
           </div>
@@ -122,7 +124,9 @@ export default async function Home() {
               <span>{String(category.items.length).padStart(2, "0")} dishes</span>
             </div>
             <div className="menu-grid">
-              {category.items.map((item) => <MenuCard key={item.id} item={item} />)}
+              {category.items.map((item) => (
+                <MenuCard key={item.id} item={item} showAddToBag={false} />
+              ))}
             </div>
           </section>
         )) : (
@@ -153,6 +157,7 @@ export default async function Home() {
           <Link href="/corporate">Office catering</Link>
           <Link href="/cart">Your bag</Link>
         </nav>
+        <BusinessContactLinks className="home-contact" />
         <small>© {new Date().getFullYear()} Rich-Dons Catering</small>
       </footer>
       <MobileBagBar />

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BUSINESS_CONTACT, BUSINESS_HOURS } from "@/lib/business";
 import "./globals.css";
 import Header from "@/components/Header";
 import { CartProvider } from "@/components/cart/CartProvider";
@@ -92,6 +93,14 @@ const restaurantJsonLd = {
     addressLocality: "Accra",
     addressCountry: "GH",
   },
+  telephone: BUSINESS_CONTACT.whatsappInternational,
+  contactPoint: BUSINESS_CONTACT.phones.map((telephone) => ({
+    "@type": "ContactPoint",
+    telephone: `+233${telephone.slice(1)}`,
+    contactType: "customer service",
+    areaServed: "GH",
+  })),
+  openingHoursSpecification: BUSINESS_HOURS.openingHoursSpecification,
   priceRange: "GH₵",
   image: `${SITE_URL}/og-image.jpg`,
 };

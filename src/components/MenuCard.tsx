@@ -1,12 +1,18 @@
 'use client';
 
-import { Check, Plus, Utensils } from "lucide-react";
+import { ArrowRight, Check, Plus, Utensils } from "lucide-react";
 import { useCart } from "./cart/CartProvider";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { PublicMenuItem } from "@/lib/menu";
 
-export default function MenuCard({ item }: { item: PublicMenuItem }) {
+export default function MenuCard({
+  item,
+  showAddToBag = true,
+}: {
+  item: PublicMenuItem;
+  showAddToBag?: boolean;
+}) {
   const { add } = useCart();
   const [imageFailed, setImageFailed] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
@@ -43,18 +49,24 @@ export default function MenuCard({ item }: { item: PublicMenuItem }) {
             <span>Price</span>
             <strong>GH₵ {item.price.toFixed(2)}</strong>
           </div>
-          <button
-            type="button"
-            disabled={!item.isAvailable}
-            className={justAdded ? "just-added" : ""}
-            onClick={() => {
-              add({ id: item.id, name: item.name, price: item.price });
-              setJustAdded(true);
-            }}
-          >
-            {justAdded ? <Check size={17} aria-hidden="true" /> : <Plus size={17} aria-hidden="true" />}
-            {item.isAvailable ? (justAdded ? "Added" : "Add to bag") : "Unavailable"}
-          </button>
+          {showAddToBag ? (
+            <button
+              type="button"
+              disabled={!item.isAvailable}
+              className={justAdded ? "just-added" : ""}
+              onClick={() => {
+                add({ id: item.id, name: item.name, price: item.price });
+                setJustAdded(true);
+              }}
+            >
+              {justAdded ? <Check size={17} aria-hidden="true" /> : <Plus size={17} aria-hidden="true" />}
+              {item.isAvailable ? (justAdded ? "Added" : "Add to bag") : "Unavailable"}
+            </button>
+          ) : (
+            <Link className="menu-card-view-link" href={`/menu/${item.slug}`}>
+              View dish <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          )}
         </div>
       </div>
     </article>

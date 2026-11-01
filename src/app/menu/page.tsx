@@ -2,17 +2,18 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowDown, ArrowRight, Clock3, MapPin } from "lucide-react";
 import MenuCard from "@/components/MenuCard";
+import { BUSINESS_HOURS } from "@/lib/business";
 import { getPublicMenu } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Our Menu",
+  title: "Ghanaian Food Menu in Accra",
   description:
     "Browse Rich-Dons Catering's full menu of fresh Ghanaian dishes. From jollof rice to soups, order your favourites for delivery in Accra.",
   alternates: { canonical: "/menu" },
   openGraph: {
-    title: "Our Menu | Rich-Dons Catering",
+    title: "Ghanaian Food Menu in Accra | Rich-Dons Catering",
     description:
       "Browse fresh Ghanaian dishes and add your favourites to your bag. Delivery available in Accra.",
     url: "/menu",
@@ -34,7 +35,7 @@ export default async function MenuPage() {
             Find your next favourite <ArrowDown size={17} aria-hidden="true" />
           </a>
           <div className="menu-service-details">
-            <span><Clock3 size={16} aria-hidden="true" /> Orders 9am–10pm</span>
+            <span><Clock3 size={16} aria-hidden="true" /> {BUSINESS_HOURS.label}</span>
             <span><MapPin size={16} aria-hidden="true" /> Delivered around Accra</span>
           </div>
         </div>

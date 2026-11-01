@@ -534,6 +534,25 @@ img { max-width: 100%; }
   white-space: nowrap;
   transition: background .18s ease, transform .18s ease;
 }
+.menu-card-view-link {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .18s ease, transform .18s ease;
+}
+.menu-card-view-link:hover {
+  background: var(--brand-dark);
+  transform: translateY(-1px);
+}
 .menu-card-footer button:hover {
   background: var(--brand-dark);
   transform: translateY(-1px);
@@ -1370,6 +1389,7 @@ footer strong { color: var(--ink); }
 .home-menu .menu-card p { color: var(--home-muted); }
 .home-menu .menu-card-price strong { font-size: 1.2rem; }
 .home-menu .menu-card-footer button { min-height: 44px; }
+.home-menu .menu-card-footer .menu-card-view-link { min-height: 44px; }
 .home-menu-empty {
   padding: 48px 24px;
   border-top: 1px solid var(--home-line);
@@ -1463,7 +1483,7 @@ footer strong { color: var(--ink); }
 }
 .home-footer {
   display: grid;
-  grid-template-columns: 1fr 1.2fr auto;
+  grid-template-columns: 1fr 1.2fr auto auto;
   align-items: center;
   gap: 12px 30px;
   padding: 30px 8vw;
@@ -1492,6 +1512,17 @@ footer strong { color: var(--ink); }
   color: #c5c9bd;
   font-size: .8rem;
 }
+.home-contact {
+  display: grid;
+  gap: 5px;
+  font-size: .75rem;
+  font-style: normal;
+}
+.home-contact a {
+  color: #f3f2eb;
+  text-decoration: none;
+}
+.home-contact a:hover { color: #e7ad54; }
 .home-footer nav {
   display: flex;
   flex-wrap: wrap;
@@ -1600,7 +1631,8 @@ footer strong { color: var(--ink); }
   }
   .home-footer p { grid-column: 1 / -1; grid-row: 2; }
   .home-footer nav { grid-column: 1 / -1; grid-row: 3; gap: 18px; }
-  .home-footer small { grid-row: 4; }
+  .home-contact { grid-column: 1 / -1; grid-row: 4; }
+  .home-footer small { grid-row: 5; }
   .home-page:has(.mobile-bag-bar) { padding-bottom: 80px; }
   .mobile-bag-bar {
     position: fixed;
@@ -1752,7 +1784,8 @@ footer strong { color: var(--ink); }
     align-items: stretch;
     flex-direction: column;
   }
-  .menu-card-footer button { justify-content: center; }
+  .menu-card-footer button,
+  .menu-card-view-link { justify-content: center; }
   .empty { padding: 42px 20px; }
 }
 

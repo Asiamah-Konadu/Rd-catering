@@ -8,6 +8,7 @@ import { useCart } from "@/components/cart/CartProvider";
 
 const navItems = [
   { href: "/menu", label: "Our Menu" },
+  { href: "/events", label: "Event Catering" },
   { href: "/corporate", label: "Office Portals" },
 ];
 
