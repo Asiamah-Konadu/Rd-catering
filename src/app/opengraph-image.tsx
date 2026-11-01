@@ -61,14 +61,14 @@ export default function OGImage() {
             border: "1px solid rgba(245, 158, 11, 0.35)",
             borderRadius: "9999px",
             color: "#fbbf24",
-            fontSize: "15px",
-            fontWeight: "700",
+            fontSize: "14px",
+            fontWeight: "800",
             letterSpacing: "2px",
             textTransform: "uppercase",
-            marginBottom: "24px",
+            marginBottom: "20px",
           }}
         >
-          🇬🇭 ACCRA PRE-LAUNCH • VIP EARLY ACCESS
+          🇬🇭 FRESH GHANAIAN CATERING • DELIVERED IN ACCRA
         </div>
 
         {/* Brand Name */}
@@ -89,7 +89,7 @@ export default function OGImage() {
         {/* Tagline */}
         <div
           style={{
-            fontSize: "32px",
+            fontSize: "30px",
             fontWeight: "600",
             color: "#f59e0b",
             textAlign: "center",
@@ -97,7 +97,7 @@ export default function OGImage() {
             display: "flex",
           }}
         >
-          Fresh Ghanaian Food, Coming to Your Doorstep.
+          Authentic Ghanaian Food, Cooked Fresh to Order.
         </div>
 
         {/* Sub-bullet items */}
@@ -105,20 +105,20 @@ export default function OGImage() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "24px",
-            marginTop: "32px",
+            gap: "20px",
+            marginTop: "28px",
             color: "#e2e8f0",
-            fontSize: "18px",
-            fontWeight: "500",
+            fontSize: "17px",
+            fontWeight: "600",
           }}
         >
           <span>🍚 Smoky Jollof</span>
           <span>•</span>
-          <span>🧇 Fresh Waffles</span>
+          <span>🥘 Special Waakye</span>
           <span>•</span>
           <span>🐟 Banku & Tilapia</span>
           <span>•</span>
-          <span>🥘 Special Waakye</span>
+          <span>💼 Office Lunch Portals</span>
         </div>
 
         {/* Perk highlight pill */}
@@ -126,17 +126,17 @@ export default function OGImage() {
           style={{
             display: "flex",
             alignItems: "center",
-            marginTop: "36px",
+            marginTop: "32px",
             padding: "12px 28px",
             background: "linear-gradient(90deg, #d97706, #b45309)",
             borderRadius: "16px",
             color: "#ffffff",
-            fontSize: "18px",
+            fontSize: "17px",
             fontWeight: "700",
             boxShadow: "0 10px 25px -5px rgba(217, 119, 6, 0.4)",
           }}
         >
-          🎁 Claim Free Delivery on Your 1st Order (Launch Code)
+          ⚡ Doorstep Delivery & Instant WhatsApp Ordering Across Accra
         </div>
       </div>
     ),

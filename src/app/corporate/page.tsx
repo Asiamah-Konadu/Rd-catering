@@ -10,9 +10,32 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Office Catering in Accra",
+  title: "Corporate Lunch Portals & Office Catering Accra | Rich-Dons",
   description:
-    "Set up office lunch ordering in Accra with individual staff orders and synchronized batch delivery. Eligible company portals may receive discounts or free delivery.",
+    "Streamline daily office lunches in Accra with Rich-Dons Catering. Individual employee ordering with synchronized office batch delivery, group discounts, and individually labeled packaging.",
+  alternates: { canonical: "/corporate" },
+  keywords: [
+    "office lunch catering Accra",
+    "corporate catering Ghana",
+    "office food delivery Accra",
+    "staff lunch service Accra",
+    "company catering portal",
+    "batch office lunch delivery",
+    "Rich-Dons corporate",
+  ],
+  openGraph: {
+    title: "Corporate Lunch Portals & Office Catering Accra | Rich-Dons",
+    description:
+      "Individual staff meal ordering with synchronized batch delivery. Free delivery, corporate discounts, and labeled packaging for offices across Accra.",
+    url: "/corporate",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Corporate Lunch Portals & Office Catering Accra | Rich-Dons",
+    description:
+      "Individual staff meal ordering with synchronized batch delivery for offices across Accra.",
+  },
 };
 
 const corporateFaqs: CorporateFaq[] = [
@@ -63,21 +86,62 @@ export default async function CorporateDirectoryPage() {
     "Hello Rich-Dons Catering! I'd like to register my company for the Corporate Lunch Portal."
   );
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://rd-catering.vercel.app";
+
+  const corporateSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: siteUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Corporate Lunch Portals",
+            item: `${siteUrl}/corporate`,
+          },
+        ],
+      },
+      {
+        "@type": "Service",
+        name: "Corporate Lunch Catering & Office Batch Delivery",
+        serviceType: "Corporate Catering",
+        provider: {
+          "@type": "CateringService",
+          name: "Rich-Dons Catering",
+          url: siteUrl,
+          telephone: "+233248179348",
+        },
+        areaServed: {
+          "@type": "City",
+          name: "Accra",
+          addressCountry: "GH",
+        },
+        description:
+          "Synchronized daily office batch delivery with custom company portals, employee dish customization, and volume discounts across Accra.",
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: corporateFaqs.map(({ question, answer }) => ({
+          "@type": "Question",
+          name: question,
+          acceptedAnswer: { "@type": "Answer", text: answer },
+        })),
+      },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: corporateFaqs.map(({ question, answer }) => ({
-              "@type": "Question",
-              name: question,
-              acceptedAnswer: { "@type": "Answer", text: answer },
-            })),
-          }),
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(corporateSchema) }}
       />
       <CorporateDirectoryClient
         companies={companies}

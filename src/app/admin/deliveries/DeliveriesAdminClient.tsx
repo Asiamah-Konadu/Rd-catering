@@ -66,15 +66,17 @@ const STATUS_BADGE: Record<string, string> = {
   FAILED: "bg-rose-100 text-rose-800 border-rose-300",
 };
 
-/**
- * Format a single delivery stop location for Google Maps (lat,lng or full address)
- */
-function getStopLocationString(delivery: DeliveryRecord): string {
-  if (delivery.latitude && delivery.longitude) {
-    return `${delivery.latitude},${delivery.longitude}`;
-  }
-  const parts = [delivery.address, delivery.city, delivery.region].filter(Boolean);
-  return parts.join(", ");
+function hasGpsCoordinates(delivery: DeliveryRecord): boolean {
+  return (
+    typeof delivery.latitude === "number" &&
+    Number.isFinite(delivery.latitude) &&
+    delivery.latitude >= -90 &&
+    delivery.latitude <= 90 &&
+    typeof delivery.longitude === "number" &&
+    Number.isFinite(delivery.longitude) &&
+    delivery.longitude >= -180 &&
+    delivery.longitude <= 180
+  );
 }
 
 /**
@@ -82,10 +84,14 @@ function getStopLocationString(delivery: DeliveryRecord): string {
  * - Waypoints: Stops 1 to N-1
  * - Destination: Stop N (the final stop)
  */
-function getMultiStopGoogleMapsUrl(deliveries: DeliveryRecord[]): string {
-  if (deliveries.length === 0) return "";
+function getMultiStopGoogleMapsUrl(deliveries: DeliveryRecord[]): string | null {
+  if (deliveries.length === 0 || deliveries.some((delivery) => !hasGpsCoordinates(delivery))) {
+    return null;
+  }
 
-  const stops = deliveries.map(getStopLocationString);
+  const stops = deliveries.map(
+    (delivery) => `${delivery.latitude},${delivery.longitude}`
+  );
 
   if (stops.length === 1) {
     return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
@@ -227,7 +233,9 @@ export function DeliveriesAdminClient({
               Ready for Dispatch Navigation
             </h2>
             <p className="text-amber-100 text-xs md:text-sm max-w-xl">
-              All {enRouteDeliveries.length} orders marked &quot;En Route&quot; are grouped into a multi-stop itinerary. Click &quot;Start Ride&quot; to open real-time turn-by-turn directions in Google Maps.
+              {multiStopMapsUrl
+                ? `All ${enRouteDeliveries.length} orders marked "En Route" are grouped into a multi-stop itinerary using their GPS coordinates.`
+                : "Add valid GPS coordinates to every en-route delivery before opening the Google Maps route."}
             </p>
           </div>
 
@@ -240,16 +248,18 @@ export function DeliveriesAdminClient({
               View {enRouteDeliveries.length} Stops
             </button>
 
-            <a
-              href={multiStopMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-amber-50 text-amber-900 font-extrabold text-sm rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5"
-            >
-              <Navigation className="w-4 h-4 text-amber-600 fill-amber-600" />
-              Start Ride in Google Maps
-              <ExternalLink className="w-3.5 h-3.5 opacity-70" />
-            </a>
+            {multiStopMapsUrl && (
+              <a
+                href={multiStopMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-amber-50 text-amber-900 font-extrabold text-sm rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5"
+              >
+                <Navigation className="w-4 h-4 text-amber-600 fill-amber-600" />
+                Start Ride in Google Maps
+                <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+              </a>
+            )}
           </div>
         </div>
       )}
@@ -293,9 +303,9 @@ export function DeliveriesAdminClient({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDeliveries.map((delivery) => {
             const isUpdating = updatingId === delivery.id;
-            const singleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-              getStopLocationString(delivery)
-            )}&travelmode=driving`;
+            const singleMapsUrl = hasGpsCoordinates(delivery)
+              ? `https://www.google.com/maps/dir/?api=1&destination=${delivery.latitude},${delivery.longitude}&travelmode=driving`
+              : null;
 
             const isEnRoute = delivery.status === "IN_TRANSIT";
 
@@ -365,7 +375,7 @@ export function DeliveriesAdminClient({
                       <span className="text-[10px] uppercase text-slate-400 font-bold block">
                         Destination Address
                       </span>
-                      {delivery.latitude && delivery.longitude && (
+                      {hasGpsCoordinates(delivery) && (
                         <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
                           <MapPin className="w-2.5 h-2.5" /> GPS Pinned
                         </span>
@@ -380,14 +390,20 @@ export function DeliveriesAdminClient({
                     </p>
 
                     <div className="pt-1">
-                      <a
-                        href={singleMapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800 hover:underline"
-                      >
-                        <Navigation className="w-3 h-3" /> Navigate to this stop
-                      </a>
+                      {singleMapsUrl ? (
+                        <a
+                          href={singleMapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800 hover:underline"
+                        >
+                          <Navigation className="w-3 h-3" /> Navigate to this stop
+                        </a>
+                      ) : (
+                        <p className="text-xs text-amber-700">
+                          GPS coordinates are required for Google Maps navigation.
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -487,8 +503,13 @@ export function DeliveriesAdminClient({
             </div>
 
             <p className="text-xs text-slate-600">
-              Deliveries will be navigated in sequence. The last delivery stop is set as the final destination on Google Maps, with prior stops routed as intermediate waypoints.
+              Google Maps uses each delivery&apos;s GPS coordinates. The last delivery stop is the final destination, with prior stops routed as intermediate waypoints.
             </p>
+            {!multiStopMapsUrl && (
+              <p className="text-xs font-semibold text-amber-700">
+                This route is unavailable until every stop has valid GPS coordinates.
+              </p>
+            )}
 
             <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
               {enRouteDeliveries.map((del, idx) => {
@@ -540,16 +561,18 @@ export function DeliveriesAdminClient({
               >
                 Close
               </button>
-              <a
-                href={multiStopMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-md transition"
-              >
-                <Navigation className="w-3.5 h-3.5" />
-                Launch in Google Maps
-                <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-              </a>
+              {multiStopMapsUrl && (
+                <a
+                  href={multiStopMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-md transition"
+                >
+                  <Navigation className="w-3.5 h-3.5" />
+                  Launch in Google Maps
+                  <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                </a>
+              )}
             </div>
           </div>
         </div>

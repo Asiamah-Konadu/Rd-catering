@@ -3,6 +3,11 @@ import { BUSINESS_CONTACT, BUSINESS_HOURS } from "@/lib/business";
 import "./globals.css";
 import Header from "@/components/Header";
 import { CartProvider } from "@/components/cart/CartProvider";
+import SplashScreen from "@/components/SplashScreen";
+import Footer from "@/components/Footer";
+import InstallAppPrompt from "@/components/InstallAppPrompt";
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || "G-K9K46SSV4D";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -23,15 +28,22 @@ export const metadata: Metadata = {
   keywords: [
     "catering Accra",
     "Ghanaian food delivery",
-    "office catering Ghana",
+    "office lunch catering Accra",
+    "jollof rice delivery Accra",
+    "waakye delivery Ghana",
+    "event catering Accra",
+    "corporate lunch Accra",
+    "food delivery East Legon",
+    "catering services Airport Residential",
     "Rich-Dons Catering",
-    "food delivery Accra",
     "Ghanaian cuisine",
-    "family catering Ghana",
     "Accra food ordering",
+    "wedding catering Accra",
+    "best catering in Accra",
   ],
-  authors: [{ name: "Rich-Dons Catering" }],
+  authors: [{ name: "Rich-Dons Catering", url: SITE_URL }],
   creator: "Rich-Dons Catering",
+  publisher: "Rich-Dons Catering",
   alternates: {
     canonical: "/",
   },
@@ -41,7 +53,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "Rich-Dons Catering",
     title: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra",
-    description: "Order fresh Ghanaian favourites for delivery in Accra.",
+    description: "Order fresh Ghanaian catering, authentic jollof rice, and office lunch portals in Accra. Fast doorstep delivery.",
     images: [
       {
         url: "/og-image.jpg",
@@ -55,7 +67,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra",
-    description: "Order fresh Ghanaian favourites for delivery in Accra.",
+    description: "Order fresh Ghanaian catering, authentic jollof rice, and office lunch portals in Accra. Fast doorstep delivery.",
     images: ["/og-image.jpg"],
   },
   icons: {
@@ -73,42 +85,111 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  verification: {
+    google:
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+      process.env.GOOGLE_SITE_VERIFICATION,
+  },
 };
 
-const restaurantJsonLd = {
+const structuredData = {
   "@context": "https://schema.org",
-  "@type": ["Restaurant", "LocalBusiness"],
-  name: "Rich-Dons Catering",
-  url: SITE_URL,
-  description:
-    "Fresh Ghanaian catering for lunch, office meetings, family gatherings and everyday cravings in Accra.",
-  servesCuisine: ["Ghanaian", "African"],
-  areaServed: {
-    "@type": "City",
-    name: "Accra",
-    addressCountry: "GH",
-  },
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Accra",
-    addressCountry: "GH",
-  },
-  telephone: BUSINESS_CONTACT.whatsappInternational,
-  contactPoint: BUSINESS_CONTACT.phones.map((telephone) => ({
-    "@type": "ContactPoint",
-    telephone: `+233${telephone.slice(1)}`,
-    contactType: "customer service",
-    areaServed: "GH",
-  })),
-  openingHoursSpecification: BUSINESS_HOURS.openingHoursSpecification,
-  priceRange: "GH₵",
-  image: `${SITE_URL}/og-image.jpg`,
+  "@graph": [
+    {
+      "@type": ["CateringService", "Restaurant", "FoodEstablishment"],
+      "@id": `${SITE_URL}/#restaurant`,
+      name: "Rich-Dons Catering",
+      url: SITE_URL,
+      telephone: BUSINESS_CONTACT.whatsappInternational,
+      contactPoint: BUSINESS_CONTACT.phones.map((telephone) => ({
+        "@type": "ContactPoint",
+        telephone: `+233${telephone.slice(1)}`,
+        contactType: "customer service",
+        areaServed: "GH",
+      })),
+      email: "rdadmin@richdonscatering.com",
+      sameAs: [
+        "https://www.instagram.com/richdonsofficial",
+        "https://www.tiktok.com/@richdonsofficial",
+      ],
+      description:
+        "Fresh Ghanaian catering for daily lunch, office meeting portals, family gatherings, and weddings in Accra.",
+      servesCuisine: ["Ghanaian", "West African", "African"],
+      priceRange: "GH₵₵",
+      currenciesAccepted: "GHS",
+      paymentAccepted: ["Cash", "Mobile Money", "Credit Card", "Hubtel"],
+      image: `${SITE_URL}/og-image.jpg`,
+      hasMenu: `${SITE_URL}/menu`,
+      acceptsReservations: "True",
+      areaServed: [
+        { "@type": "City", name: "Accra", addressCountry: "GH" },
+        { "@type": "AdministrativeArea", name: "Greater Accra Region", addressCountry: "GH" },
+      ],
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Accra",
+        addressRegion: "Greater Accra",
+        addressCountry: "GH",
+      },
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: 5.6037,
+        longitude: -0.187,
+      },
+      openingHoursSpecification: [
+        ...BUSINESS_HOURS.openingHoursSpecification,
+      ],
+      potentialAction: {
+        "@type": "OrderAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE_URL}/menu`,
+          actionPlatform: [
+            "http://schema.org/DesktopWebPlatform",
+            "http://schema.org/MobileWebPlatform",
+          ],
+        },
+        deliveryMethod: "http://purl.org/goodrelations/v1#DeliveryModeOwnFleet",
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "Rich-Dons Catering",
+      description: "Authentic Ghanaian food delivery and event catering in Accra.",
+      publisher: {
+        "@id": `${SITE_URL}/#restaurant`,
+      },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/menu?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <head>
+        {/* Google tag (gtag.js) */}
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_MEASUREMENT_ID}');
+            `,
+          }}
+        />
+        <link rel="preload" href="/animated-logo.svg" as="image" type="image/svg+xml" />
         <meta property="og:image" content={`${SITE_URL}/og-image.jpg`} />
         <meta property="og:image:secure_url" content={`${SITE_URL}/og-image.jpg`} />
         <meta property="og:image:type" content="image/jpeg" />
@@ -119,14 +200,17 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="twitter:image" content={`${SITE_URL}/og-image.jpg`} />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
       <body>
+        <SplashScreen />
         <CartProvider>
           <Header />
           {children}
+          <Footer />
         </CartProvider>
+        <InstallAppPrompt />
       </body>
     </html>
   );

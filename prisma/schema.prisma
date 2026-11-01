@@ -308,3 +308,32 @@ model CmsPage {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model HeroPromo {
+  id          String   @id @default(uuid())
+  title       String
+  subtitle    String?  @default("Holiday Special")
+  badgeText   String?  @default("SPECIAL / GH")
+  imageUrl    String
+  description String?
+  price       Decimal? @db.Decimal(10, 2)
+  linkUrl     String?  @default("/menu")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+/// Singleton table for globally editable storefront text settings.
+/// Only one row should ever exist (id = "singleton").
+model SiteSettings {
+  id                  String   @id @default("singleton")
+  businessHoursText   String   @default("Orders open 9am · close 10pm")
+  deliveryFeeText     String   @default("Standard delivery is GH₵ 20")
+  deliveryNoteText    String   @default("Registered office orders may qualify for free delivery and group discounts.")
+  whatsappPhone       String   @default("+233248179348")
+  openingTime         String   @default("08:00")
+  closingTime         String   @default("22:00")
+  updatedAt           DateTime @updatedAt
+}

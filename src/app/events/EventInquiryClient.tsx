@@ -1,93 +1,256 @@
-"use client";
+'use client';
 
 import { useState, type FormEvent } from "react";
+import {
+  CalendarDays,
+  Check,
+  ChefHat,
+  MessageCircle,
+  PartyPopper,
+  UsersRound,
+  UtensilsCrossed,
+} from "lucide-react";
+import SandTypographyHero from "@/components/events/SandTypography";
 
-export function EventInquiryClient({ whatsappUrl }: { whatsappUrl: string | null }) {
+type EventInquiryProps = {
+  whatsappUrl: string | null;
+};
+
+export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
+  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
   function submitInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     if (!whatsappUrl) {
       setError("WhatsApp booking is unavailable right now. Please call Rich-Dons Catering.");
       return;
     }
 
-    const formData = new FormData(event.currentTarget);
+    const form = new FormData(event.currentTarget);
     const fields = [
-      ["Name", formData.get("name")],
-      ["Phone", formData.get("phone")],
-      ["Event", formData.get("eventType")],
-      ["Date", formData.get("eventDate")],
-      ["Guests", formData.get("guests")],
-      ["Venue", formData.get("location")],
-      ["Budget", formData.get("budget")],
-      ["Details", formData.get("details")],
-    ].filter(([, value]) => String(value ?? "").trim());
+      ["Name", form.get("name")],
+      ["Phone", form.get("phone")],
+      ["Event", form.get("eventType")],
+      ["Date", form.get("eventDate")],
+      ["Time", form.get("eventTime")],
+      ["Guests", form.get("guests")],
+      ["Location", form.get("location")],
+      ["Budget", form.get("budget")],
+      ["Details", form.get("details")],
+    ] as const;
+
     const message = [
-      "Hello Rich-Dons Catering! I'd like to enquire about event catering.",
+      "Hello Rich-Dons Catering! I would like to discuss event catering.",
       "",
-      ...fields.map(([label, value]) => `${label}: ${String(value).trim()}`),
+      ...fields
+        .filter(([, value]) => String(value || "").trim())
+        .map(([label, value]) => `${label}: ${String(value).trim()}`),
       "",
-      "Please confirm availability and discuss menu options.",
+      "Please help me schedule an appointment to plan this event.",
     ].join("\n");
+
     const destination = new URL(whatsappUrl);
     destination.searchParams.set("text", message);
-    window.location.assign(destination.toString());
+    window.open(destination.toString(), "_blank", "noopener,noreferrer");
+    setError("");
+    setSubmitted(true);
   }
 
+  const today = new Date().toISOString().split("T")[0];
+
   return (
-    <form
-      onSubmit={submitInquiry}
-      className="mx-auto grid max-w-3xl gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2"
-    >
-      <label className="grid gap-1 text-sm font-semibold text-slate-800">
-        Your name
-        <input name="name" autoComplete="name" required className="rounded-lg border border-slate-300 p-2.5" />
-      </label>
-      <label className="grid gap-1 text-sm font-semibold text-slate-800">
-        Phone number
-        <input name="phone" type="tel" autoComplete="tel" required className="rounded-lg border border-slate-300 p-2.5" />
-      </label>
-      <label className="grid gap-1 text-sm font-semibold text-slate-800">
-        Type of event
-        <select name="eventType" defaultValue="" required className="rounded-lg border border-slate-300 p-2.5">
-          <option value="" disabled>Select an event</option>
-          <option>Wedding or ceremony</option>
-          <option>Corporate function</option>
-          <option>Birthday or reunion</option>
-          <option>Private dining</option>
-          <option>Other celebration</option>
-        </select>
-      </label>
-      <label className="grid gap-1 text-sm font-semibold text-slate-800">
-        Event date
-        <input name="eventDate" type="date" required className="rounded-lg border border-slate-300 p-2.5" />
-      </label>
-      <label className="grid gap-1 text-sm font-semibold text-slate-800">
-        Estimated guest count
-        <input name="guests" type="number" min="1" required className="rounded-lg border border-slate-300 p-2.5" />
-      </label>
-      <label className="grid gap-1 text-sm font-semibold text-slate-800">
-        Venue or area
-        <input name="location" required className="rounded-lg border border-slate-300 p-2.5" />
-      </label>
-      <label className="grid gap-1 text-sm font-semibold text-slate-800 sm:col-span-2">
-        Dietary needs or other details (optional)
-        <textarea name="details" rows={3} className="rounded-lg border border-slate-300 p-2.5" />
-      </label>
-      <label className="grid gap-1 text-sm font-semibold text-slate-800">
-        Estimated budget (optional)
-        <input name="budget" inputMode="decimal" className="rounded-lg border border-slate-300 p-2.5" />
-      </label>
-      <div className="flex flex-col justify-end gap-2">
-        <button
-          type="submit"
-          className="rounded-lg bg-amber-500 px-5 py-3 font-bold text-slate-950 hover:bg-amber-400"
+    <main className="events-page">
+      <SandTypographyHero
+        heading="Make your gathering worth gathering for."
+        subheading="From intimate dinners to milestone celebrations in Accra, we plan a menu that feels generous, considered, and unmistakably Ghanaian."
+        ctaLabel="Plan your event ↓"
+        onCTAClick="#appointment"
+      />
+
+      {/* ── Types strip ── */}
+      <section className="events-types" aria-label="Event catering types">
+        {[
+          { icon: PartyPopper, label: "Weddings & ceremonies" },
+          { icon: UtensilsCrossed, label: "Corporate functions" },
+          { icon: UsersRound, label: "Birthdays & reunions" },
+          { icon: ChefHat, label: "Private dining" },
+        ].map(({ icon: Icon, label }) => (
+          <div key={label}><Icon size={20} aria-hidden="true" /><span>{label}</span></div>
+        ))}
+      </section>
+
+      {/* ── Landscape scene section ── */}
+      <section className="events-landscape" aria-label="Event planning and appointment">
+        {/* sky + horizon gradient lives in CSS; SVG landscape silhouette */}
+        <svg
+          className="events-landscape-svg"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+          aria-hidden="true"
         >
-          Request event availability on WhatsApp
-        </button>
-        {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+          {/* Far hills */}
+          <path
+            d="M0,220 C120,180 200,200 320,195 C440,190 500,210 600,205 C700,200 780,185 900,192 C1020,199 1100,215 1200,205 C1300,195 1380,210 1440,208 L1440,320 L0,320 Z"
+            fill="#2d4a22"
+            opacity="0.55"
+          />
+          {/* Mid hills – tree silhouettes */}
+          <path
+            d="M0,255 C60,240 90,242 130,238 C160,234 170,228 200,235 C230,242 250,250 290,244 C330,238 360,232 400,238 C440,244 460,252 510,248 C560,244 590,236 640,240 C690,244 720,252 780,248 C840,244 880,234 940,238 C1000,242 1040,254 1100,250 C1160,246 1200,238 1260,242 C1320,246 1380,255 1440,252 L1440,320 L0,320 Z"
+            fill="#1e3a14"
+            opacity="0.75"
+          />
+          {/* Tree tops row */}
+          <path
+            d="M0,275 C20,262 38,258 55,264 C72,270 80,276 100,268 C120,260 135,252 158,258 C181,264 195,272 220,266 C245,260 262,250 290,256 C318,262 335,272 365,266 C395,260 415,250 445,255 C475,260 495,268 525,263 C555,258 572,248 600,254 C628,260 645,270 675,265 C705,260 725,250 755,255 C785,260 800,270 830,265 C860,260 880,250 912,255 C944,260 960,270 992,265 C1024,260 1044,248 1076,254 C1108,260 1125,272 1155,266 C1185,260 1205,250 1235,256 C1265,262 1285,272 1315,267 C1345,262 1400,254 1440,260 L1440,320 L0,320 Z"
+            fill="#142a0d"
+          />
+          {/* Foreground ground */}
+          <path
+            d="M0,300 C200,290 400,296 600,292 C800,288 1000,295 1200,291 C1350,288 1400,296 1440,294 L1440,320 L0,320 Z"
+            fill="#0d1e08"
+          />
+        </svg>
+
+        {/* content grid */}
+        <div className="events-landscape-inner">
+          {/* LEFT – open sky copy */}
+          <div className="events-landscape-copy">
+            <span className="events-landscape-kicker">
+              <CalendarDays size={14} aria-hidden="true" /> Your event, thoughtfully planned
+            </span>
+            <h2 className="events-landscape-h2">
+              One conversation.<br />One memorable table.
+            </h2>
+            <p className="events-landscape-lead">
+              Tell us the occasion, guest count, date and location.
+              We&apos;ll shape the menu, serving format and timing around
+              what you need — from first bite to final course.
+            </p>
+
+            <ol className="events-landscape-steps">
+              <li>
+                <span aria-hidden="true">01</span>
+                <div>
+                  <strong>Share the essentials</strong>
+                  <p>Your date, place, guests and occasion.</p>
+                </div>
+              </li>
+              <li>
+                <span aria-hidden="true">02</span>
+                <div>
+                  <strong>Meet with our team</strong>
+                  <p>We confirm availability and refine the menu.</p>
+                </div>
+              </li>
+              <li>
+                <span aria-hidden="true">03</span>
+                <div>
+                  <strong>Be a guest at your event</strong>
+                  <p>We handle the food while you enjoy the moment.</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          {/* RIGHT – floating glass appointment card */}
+          <div className="events-glass-card" id="appointment">
+            <div className="events-glass-heading">
+              <span>Appointment request</span>
+              <h3>Tell us what you&apos;re planning</h3>
+              <p>We&apos;ll prepare your details as a WhatsApp message.</p>
+            </div>
+
+            {submitted && (
+              <div className="events-success" role="status">
+                <Check size={18} aria-hidden="true" />
+                <span>Message ready in WhatsApp — send it to confirm your request.</span>
+              </div>
+            )}
+
+            <form className="events-form" onSubmit={submitInquiry}>
+              <div className="events-field events-field-wide">
+                <label htmlFor="event-name">Your name</label>
+                <input id="event-name" name="name" autoComplete="name" required placeholder="Full name" />
+              </div>
+              <div className="events-field">
+                <label htmlFor="event-phone">Phone number</label>
+                <input id="event-phone" name="phone" type="tel" autoComplete="tel" required placeholder="e.g. 024 000 0000" />
+              </div>
+              <div className="events-field">
+                <label htmlFor="event-type">Type of event</label>
+                <select id="event-type" name="eventType" required defaultValue="">
+                  <option value="" disabled>Select event</option>
+                  <option>Wedding</option>
+                  <option>Corporate event</option>
+                  <option>Birthday</option>
+                  <option>Anniversary</option>
+                  <option>Private dinner</option>
+                  <option>Other celebration</option>
+                </select>
+              </div>
+              <div className="events-field">
+                <label htmlFor="event-date">Event date</label>
+                <input id="event-date" name="eventDate" type="date" min={today} required />
+              </div>
+              <div className="events-field">
+                <label htmlFor="event-time">Start time</label>
+                <input id="event-time" name="eventTime" type="time" />
+              </div>
+              <div className="events-field">
+                <label htmlFor="event-guests">Estimated guests</label>
+                <input id="event-guests" name="guests" type="number" min="1" required placeholder="No. of guests" />
+              </div>
+              <div className="events-field">
+                <label htmlFor="event-budget">Estimated budget</label>
+                <select id="event-budget" name="budget" defaultValue="">
+                  <option value="" disabled>Select a range</option>
+                  <option>Under GH₵ 5,000</option>
+                  <option>GH₵ 5,000 – 10,000</option>
+                  <option>GH₵ 10,000 – 20,000</option>
+                  <option>GH₵ 20,000 – 50,000</option>
+                  <option>Over GH₵ 50,000</option>
+                </select>
+              </div>
+              <div className="events-field events-field-wide">
+                <label htmlFor="event-location">Venue or location</label>
+                <input id="event-location" name="location" required placeholder="Venue name and area" />
+              </div>
+              <div className="events-field events-field-wide">
+                <label htmlFor="event-details">What would make the meal special?</label>
+                <textarea
+                  id="event-details"
+                  name="details"
+                  rows={3}
+                  placeholder="Preferred dishes, dietary needs, serving style, or anything else"
+                />
+              </div>
+              <button className="events-submit events-field-wide" type="submit" disabled={!whatsappUrl}>
+                <MessageCircle size={19} aria-hidden="true" />
+                Request appointment on WhatsApp
+              </button>
+            </form>
+            {error && <p className="events-config-note" role="alert">{error}</p>}
+            {!whatsappUrl && (
+              <p className="events-config-note">WhatsApp booking is temporarily unavailable.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <div className="events-footer events-callout-banner">
+        <p>Thoughtful Ghanaian catering, from the first plate to the last guest.</p>
+        {whatsappUrl ? (
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+            <MessageCircle size={17} aria-hidden="true" /> Discuss your event
+          </a>
+        ) : (
+          <span>Event appointments via WhatsApp</span>
+        )}
       </div>
-    </form>
+    </main>
   );
 }

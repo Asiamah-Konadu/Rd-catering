@@ -44,8 +44,8 @@ export function LocationPicker({
   const mapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [currentLat, setCurrentLat] = useState<number>(initialLat || DEFAULT_CENTER.lat);
-  const [currentLng, setCurrentLng] = useState<number>(initialLng || DEFAULT_CENTER.lng);
+  const [currentLat, setCurrentLat] = useState<number>(initialLat ?? DEFAULT_CENTER.lat);
+  const [currentLng, setCurrentLng] = useState<number>(initialLng ?? DEFAULT_CENTER.lng);
   const [address, setAddress] = useState<string>(initialAddress);
   const [city, setCity] = useState<string>(initialCity || "Accra");
   const [region, setRegion] = useState<string>(initialRegion || "Greater Accra");

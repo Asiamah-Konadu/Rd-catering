@@ -182,6 +182,54 @@ export default async function AdminPage() {
               </div>
             </Link>
           )}
+
+          {/* ADMIN & MENU_MANAGER: Weekly Dishes Carousel module */}
+          {(role === "ADMIN" || role === "MENU_MANAGER") && (
+            <Link
+              href="/admin/weekly-menu"
+              className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between"
+            >
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-lg mb-4 group-hover:scale-105 transition-transform">
+                  ✨
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 group-hover:text-amber-600 transition-colors">
+                  Weekly Dishes Carousel
+                </h3>
+                <p className="text-slate-600 text-sm mt-1">
+                  Control which dishes rotate in the 3D cylinder carousel on the homepage, and reorder their positions.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center gap-2 text-xs font-bold text-amber-700 uppercase">
+                <span>Configure Weekly Carousel</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+            </Link>
+          )}
+
+          {/* ADMIN & MENU_MANAGER: Site Settings & Notices module */}
+          {(role === "ADMIN" || role === "MENU_MANAGER") && (
+            <Link
+              href="/admin/settings"
+              className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-rose-400 transition-all flex flex-col justify-between"
+            >
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-800 flex items-center justify-center font-bold text-lg mb-4 group-hover:scale-105 transition-transform">
+                  ⚙️
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 group-hover:text-rose-600 transition-colors">
+                  Site Settings & Notices
+                </h3>
+                <p className="text-slate-600 text-sm mt-1">
+                  Update customer business hours, delivery fee notices, and WhatsApp ordering support line.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center gap-2 text-xs font-bold text-rose-700 uppercase">
+                <span>Edit Storefront Settings</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+            </Link>
+          )}
         </div>
       </section>
     </main>
