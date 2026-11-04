@@ -13,6 +13,8 @@ import { getActiveHeroPromo } from "@/lib/promo";
 import { getSiteSettings } from "@/lib/settings";
 import { getShowcaseConfig } from "@/lib/showcase";
 import { prisma } from "@/lib/prisma";
+import SectionLineArt from "@/components/SectionLineArt";
+import JourneyRope from "@/components/JourneyRope";
 
 export const dynamic = "force-dynamic";
 
@@ -172,12 +174,14 @@ export default async function Home() {
       </section>
 
       <section className="home-trust" aria-label="Ordering details">
+        <SectionLineArt kind="route" label="Delivery route illustration" />
         <div><MapPin size={17} aria-hidden="true" /><span>Accra delivery</span></div>
         <div><Clock3 size={17} aria-hidden="true" /><span>Made fresh to order</span></div>
         <div><MessageCircle size={17} aria-hidden="true" /><span>WhatsApp order confirmation</span></div>
       </section>
 
       <section className="home-trust-section" aria-labelledby="home-trust-heading">
+        <SectionLineArt kind="community" label="Customer conversation illustration" />
         <div className="home-trust-intro">
           <span className="home-kicker">From our customers</span>
           <h2 id="home-trust-heading">Kind words from happy customers.</h2>
@@ -217,6 +221,7 @@ export default async function Home() {
 
       {featuredItem && (
         <section className="home-pick" aria-label="Featured dish">
+          <SectionLineArt kind="featured" label="Featured dish illustration" />
           <div className="home-pick-image">
             {featuredItem.imageUrl ? (
               <img src={featuredItem.imageUrl} alt={featuredItem.name} />
@@ -242,6 +247,7 @@ export default async function Home() {
       )}
 
       <section className="home-delivery-note" aria-label="Delivery information">
+        <SectionLineArt kind="delivery" label="Delivery vehicle illustration" />
         <div>
           <span className="home-kicker">Good to know</span>
           <h2>Fresh food, delivered around Accra.</h2>
@@ -254,6 +260,7 @@ export default async function Home() {
 
       <HowToOrderLaunchReveal />
 
+      <JourneyRope />
       <MobileBagBar />
     </main>
   );

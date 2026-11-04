@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Sparkles, Utensils, SlidersHorizontal, MessageCircle, ChevronRight } from "lucide-react";
+import SectionLineArt from "@/components/SectionLineArt";
 
 interface OrderStep {
   id: string;
@@ -242,6 +243,7 @@ export default function HowToOrderLaunchReveal() {
       id="how-to-order"
       aria-label="How To Order Step-by-Step Guide"
     >
+      <SectionLineArt kind="steps" label="Three steps from browsing to delivery" />
       {/* ─── EDITORIAL HEADER ────────────────────────────────────────── */}
       <div className="launch-reveal-header">
         <div className="launch-reveal-badge" aria-hidden="true">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import type { PublicMenuItem } from "@/lib/menu";
+import SectionLineArt from "@/components/SectionLineArt";
 
 export interface ThisWeekDishesProps {
   items?: PublicMenuItem[];
@@ -195,6 +196,7 @@ export default function ThisWeekDishesCarousel({ items = [] }: ThisWeekDishesPro
       className="dishes-showcase-section"
       aria-label="This Week's Dishes Showcase"
     >
+      <SectionLineArt kind="plate" label="A steaming plate illustration" />
       <div className="dishes-showcase-header">
         <span className="dishes-badge">
           <Sparkles size={14} aria-hidden="true" />

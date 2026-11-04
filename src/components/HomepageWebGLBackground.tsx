@@ -228,7 +228,7 @@ export default function HomepageWebGLBackground() {
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
 
     // ── Optimal 120 3D Volumetric Ember Particles for buttery 60fps scrolling ──
-    const N = 120;
+    const N = 44;
     const STRIDE = 6 * 4;
     const data = new Float32Array(N * 6);
 
@@ -259,9 +259,9 @@ export default function HomepageWebGLBackground() {
     const aSpeed = gl.getAttribLocation(prog, "a_speed");
 
     const handleResize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.0); // Cap at 1.0 for smooth 60fps
-      const w = Math.floor(window.innerWidth * dpr);
-      const h = Math.floor(window.innerHeight * dpr);
+      const dpr = Math.min(window.devicePixelRatio || 1, 0.75);
+      const w = Math.floor(canvas.clientWidth * dpr);
+      const h = Math.floor(canvas.clientHeight * dpr);
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
@@ -273,12 +273,22 @@ export default function HomepageWebGLBackground() {
     handleResize();
 
     let animFrame = 0;
+    let inView = false;
+    let lastFrame = 0;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const t0 = performance.now();
     let lastScroll = 0;
     let lastGlowUpdate = 0;
 
     // ── Continuous 60/120fps Animation Loop (Zero Layout Thrashing) ──
     const render = () => {
+      if (!inView) return;
+      const now = performance.now();
+      if (now - lastFrame < 33 && !reducedMotion.matches) {
+        animFrame = requestAnimationFrame(render);
+        return;
+      }
+      lastFrame = now;
       // Pause drawing when tab is backgrounded to preserve device battery and CPU
       if (typeof document !== "undefined" && document.hidden) {
         animFrame = requestAnimationFrame(render);
@@ -310,7 +320,6 @@ export default function HomepageWebGLBackground() {
       ];
 
       // Update ambient glow positions smoothly at lower frequency (every ~250ms)
-      const now = performance.now();
       if (now - lastGlowUpdate > 250 && rootRef.current) {
         lastGlowUpdate = now;
         const elapsed = (now - t0) / 1000;
@@ -353,13 +362,19 @@ export default function HomepageWebGLBackground() {
 
       gl.drawArrays(gl.POINTS, 0, N);
 
-      animFrame = requestAnimationFrame(render);
+      if (!reducedMotion.matches) animFrame = requestAnimationFrame(render);
     };
 
-    animFrame = requestAnimationFrame(render);
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      cancelAnimationFrame(animFrame);
+      if (inView) animFrame = requestAnimationFrame(render);
+    }, { threshold: 0 });
+    observer.observe(rootRef.current ?? canvas);
 
     return () => {
       cancelAnimationFrame(animFrame);
+      observer.disconnect();
       window.removeEventListener("resize", handleResize);
       if (prog) gl.deleteProgram(prog);
       if (buf) gl.deleteBuffer(buf);
