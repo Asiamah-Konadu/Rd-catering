@@ -167,7 +167,7 @@ export default function Footer() {
               </h4>
               <nav aria-label="Menu navigation" className="site-footer-nav-list">
                 <Link href="/menu">Full Kitchen Menu</Link>
-                <Link href="/#today-menu">Today&apos;s Specials</Link>
+                <Link href="/#home-trust-heading">Customer feedback</Link>
                 <Link href="/menu">Smoky Jollof Rice</Link>
                 <Link href="/menu">Swallows & Soups</Link>
                 <Link href="/menu">Sides & Extras</Link>

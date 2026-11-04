@@ -50,7 +50,7 @@ type CartItem = { id: string; name: string; price: number; quantity: number };
 function PortalBanner({ company }: { company: Company }) {
   return (
     <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="corporate-order-portal max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {/* Company initial avatar */}
@@ -817,7 +817,7 @@ export function CorporatePortalClient({
   }
 
   return (
-    <>
+    <div className="office-portal">
       <PortalBanner company={company} />
       <HowItWorksStrip />
 
@@ -880,6 +880,6 @@ export function CorporatePortalClient({
           }}
         />
       )}
-    </>
+    </div>
   );
 }

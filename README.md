@@ -42,6 +42,8 @@ npm run dev
 
 Configure `DATABASE_URL` and `WHATSAPP_ORDER_NUMBER` in `.env.local` before using checkout/order pages. Set `WHATSAPP_ORDER_NUMBER` to `233248179348` (WhatsApp checkout and customer service line is `0248179348`). Add the same variable in your Vercel project's Environment Variables for each deployment environment. Orders are saved as pending and sent to WhatsApp for confirmation and payment coordination. Sync the updated payment enum to the database with `npx prisma db push` before deploying.
 
+To show Google reviews on the homepage without a review aggregator, configure a Google Cloud project with approved Business Profile API access and OAuth credentials. Set the following server-only values in `.env.local` and in the deployment environment: `GOOGLE_BUSINESS_CLIENT_ID`, `GOOGLE_BUSINESS_CLIENT_SECRET`, `GOOGLE_BUSINESS_REFRESH_TOKEN`, `GOOGLE_BUSINESS_ACCOUNT_ID`, and `GOOGLE_BUSINESS_LOCATION_ID`. Optionally set `GOOGLE_BUSINESS_MIN_REVIEW_RATING` to a value from 1 to 5 (defaults to 4). Keep these values private and never prefix them with `NEXT_PUBLIC_`. The homepage reads reviews directly from the Google Business Profile API and temporarily caches the unmodified API response for ten minutes; it filters reviews in memory and does not save them to the application database. Until the credentials are configured, the homepage shows visible reviews from delivered Rich-Dons orders.
+
 For the first database migration:
 
 ```bash

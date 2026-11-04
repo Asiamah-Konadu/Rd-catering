@@ -186,7 +186,7 @@ export function ShowcaseAdminClient({ initialConfig, menuItems }: Props) {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/#today-menu"
+            href="/#featured-dishes"
             target="_blank"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition"
           >

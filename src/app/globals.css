@@ -76,6 +76,7 @@
 @media (prefers-reduced-motion: reduce) {
   .install-app-prompt { animation: none; }
 }
+
 /* Use native responsive hardware scrolling for wheel/trackpad. Smooth scroll only for anchor navigation if preferred */
 @media (prefers-reduced-motion: no-preference) {
   :root:has(:target) {
@@ -5468,4 +5469,174 @@ footer strong { color: var(--ink); }
   .dishes-3d-cylinder {
     animation: none !important;
   }
+}
+
+/* Shared storefront interaction defaults */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid rgba(247, 67, 38, .72);
+  outline-offset: 3px;
+}
+html { scroll-padding-top: 100px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* One visual language across daily orders, events and office lunch */
+.menu-page, .home-page, .events-page, .corporate-directory {
+  --brand: #c74325;
+  --brand-dark: #96351e;
+  --brand-soft: #fff0e9;
+  --ink: #27221e;
+  --muted: #625b54;
+  --line: #e8ddd3;
+  --page: #fffaf5;
+}
+.home-page, .menu-page { color: var(--ink); }
+.home-kicker, .menu-eyebrow { color: #9e3b22; }
+.home-primary, .menu-hero-cta, .events-submit { background: #c74325; }
+.home-primary:hover, .menu-hero-cta:hover, .events-submit:hover:not(:disabled) { background: #96351e; }
+.home-secondary, .home-primary, .menu-hero-cta, .home-pick > a, .home-delivery-note > a,
+.menu-side-nav-link, .events-submit, .events-callout-banner a { min-height: 44px; }
+.menu-side-nav-link { padding-top: 10px; padding-bottom: 10px; }
+.menu-category-section, .home-category { scroll-margin-top: 104px; }
+.home-hero-photo, .menu-hero-image { border-radius: 24px; }
+.home-trust { border-color: var(--line); }
+.home-page .menu-card, .menu-page .menu-card { box-shadow: 0 10px 28px rgba(62, 39, 25, .06); }
+.cart-link.pillflow-bag-btn, .mobile-cart-cta { background: #c74325; color: #fff; box-shadow: 0 4px 18px rgba(199, 67, 37, .2); }
+.cart-link.pillflow-bag-btn:hover, .mobile-cart-cta:hover { background: #96351e; }
+.cart-link.pillflow-bag-btn b { background: #fff; color: #96351e; }
+
+/* Event planning keeps the inquiry easy to scan and the form comfortable to use */
+.events-page { background: #fffaf5; color: #27221e; }
+.events-types { background: #2d241e; }
+.events-landscape { background: linear-gradient(135deg, #fff4e8, #f7e5d0 64%, #eed7bd); }
+.events-landscape::before { opacity: .08; }
+.events-landscape-svg { opacity: .45; }
+.events-landscape-kicker { color: #96351e; }
+.events-landscape-h2 { color: #27221e; }
+.events-landscape-lead, .events-landscape-steps li p { color: #625b54; }
+.events-landscape-steps li { border-color: rgba(88, 57, 37, .2); }
+.events-landscape-steps li > span { background: #c74325; color: #fff; }
+.events-glass-card, .events-glass-heading, .events-form { color: #27221e; }
+.events-glass-card { background: #fff !important; border: 1px solid #e8ddd3; box-shadow: 0 22px 60px rgba(62, 39, 25, .13); }
+.events-glass-heading > span { color: #9e3b22; }
+.events-field input, .events-field select, .events-field textarea { min-height: 48px; border-radius: 11px; font-size: 1rem; }
+.events-field textarea { min-height: 96px; }
+.events-submit { border-radius: 12px; }
+.events-callout-banner { background: #2d241e; }
+
+/* Office directory: warm, high contrast cards that match the consumer storefront */
+.corporate-directory { background: #fffaf5 !important; color: #27221e !important; }
+.corporate-directory > section:first-child {
+  background: linear-gradient(120deg, #fff2e8, #fffaf5 70%) !important;
+  border-color: #eaded3 !important;
+  padding-top: clamp(48px, 7vw, 84px) !important;
+  padding-bottom: clamp(40px, 6vw, 72px) !important;
+}
+.corporate-directory > section:first-child h1 { color: #27221e !important; }
+.corporate-directory > section:first-child h1 span { color: #a33d22 !important; background: none !important; }
+.corporate-directory > section:first-child p { color: #625b54 !important; }
+.corporate-directory > section:first-child > div > div:last-child > div {
+  background: #fff !important; border-color: #e8ddd3 !important;
+}
+.corporate-directory > section:first-child > div > div:last-child > div > div { color: #625b54 !important; }
+.corporate-directory main { color: #27221e; }
+.corporate-directory main > div:first-child,
+.corporate-directory main section > div.bg-slate-900,
+.corporate-directory main section article,
+.corporate-directory main > section:last-of-type > div > div {
+  background: #fff !important; border-color: #e8ddd3 !important; box-shadow: 0 8px 24px rgba(62,39,25,.05);
+}
+.corporate-directory .bg-slate-900, .corporate-directory .bg-slate-900\/90,
+.corporate-directory .bg-slate-900\/70, .corporate-directory .bg-slate-900\/60,
+.corporate-directory .bg-slate-950\/50, .corporate-directory .bg-slate-950\/60 {
+  background: #fff !important; border-color: #e8ddd3 !important;
+}
+.corporate-directory .bg-slate-800 { background: #f7eee7 !important; border-color: #e8ddd3 !important; }
+.corporate-directory h2, .corporate-directory h3, .corporate-directory h4,
+.corporate-directory .text-white, .corporate-directory .text-slate-100,
+.corporate-directory .text-slate-200, .corporate-directory .text-slate-300 { color: #27221e !important; }
+.corporate-directory .text-slate-400, .corporate-directory .text-slate-500 { color: #625b54 !important; }
+.corporate-directory input, .corporate-directory select { min-height: 46px; color: #27221e !important; background: #fff !important; border-color: #d9ccc1 !important; font-size: .9rem !important; }
+.corporate-directory main a.bg-slate-800 { background: #f7eee7 !important; color: #27221e !important; border-color: #e8ddd3 !important; }
+.corporate-directory main a.bg-amber-500 { background: #c74325 !important; color: #fff !important; }
+.corporate-directory main a.bg-amber-500:hover { background: #96351e !important; }
+.corporate-directory main > section:nth-last-of-type(3) { background: #fff1e7 !important; border-color: #edcbb7 !important; }
+.corporate-directory main > section:nth-last-of-type(3) p { color: #625b54 !important; }
+
+/* Employee ordering portal shares the same light surfaces and clear ordering hierarchy */
+.office-portal { background: #fffaf5; }
+.office-portal > div:first-child {
+  background: linear-gradient(120deg, #fff2e8, #fffaf5 75%) !important;
+  color: #27221e !important;
+  border-bottom: 1px solid #e8ddd3;
+}
+.office-portal > div:first-child .text-white,
+.office-portal > div:first-child .text-slate-400 { color: #27221e !important; }
+.office-portal > div:first-child .text-amber-400,
+.office-portal > div:first-child .text-rose-300,
+.office-portal > div:first-child .text-emerald-300,
+.office-portal > div:first-child .text-blue-300,
+.office-portal > div:first-child .text-purple-300 { color: #9e3b22 !important; }
+.office-portal > div:first-child .bg-rose-900\/40,
+.office-portal > div:first-child .bg-emerald-900\/40 { background: #fff !important; border-color: #e8ddd3 !important; }
+.office-portal .max-w-6xl > .flex h2 { color: #27221e; }
+.office-portal .max-w-6xl > .flex > div:first-child .rounded-xl { border-color: #e8ddd3; }
+.office-portal .max-w-6xl > .flex > div:first-child button { min-height: 44px; }
+.office-portal .fixed.bottom-0 button { background: #c74325 !important; color: #fff !important; min-height: 50px; }
+.office-portal .fixed.bottom-0 button:hover { background: #96351e !important; }
+
+@media (max-width: 760px) {
+  .home-hero, .menu-hero { gap: 28px; }
+  .home-hero-photo, .menu-hero-image { min-height: 300px; }
+  .home-trust { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .events-types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .events-types > div { justify-content: flex-start; padding: 14px 18px; }
+}
+
+/* Storefront social proof: real delivered-order reviews plus a direct Google profile link */
+.home-trust-section {
+  width: min(1220px, calc(100% - 48px));
+  margin: clamp(64px, 8vw, 112px) auto;
+  padding: clamp(28px, 4.5vw, 56px);
+  display: grid;
+  grid-template-columns: minmax(210px, .8fr) minmax(360px, 1.5fr) minmax(220px, .75fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
+  border: 1px solid #ebddd1;
+  border-radius: 28px;
+  background: linear-gradient(128deg, #fff4e9 0%, #fffaf5 58%, #f8eee4 100%);
+  box-shadow: 0 18px 48px rgba(66, 42, 27, .06);
+}
+.home-trust-intro .home-kicker { color: #96351e; }
+.home-trust-intro h2 { margin: 12px 0 10px; max-width: 340px; font: 500 clamp(2rem, 3vw, 2.8rem)/1.08 Georgia, "Times New Roman", serif; letter-spacing: -.035em; }
+.home-trust-intro p { margin: 0; max-width: 330px; color: #625b54; line-height: 1.65; }
+.home-review-stars { display: flex; align-items: center; gap: 3px; color: #a85616; }
+.home-review-empty { max-width: 200px; line-height: 1.5; }
+.home-google-profile { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 20px; border: 1px solid #e5e7eb; border-radius: 18px; background: #fff; box-shadow: 0 5px 18px rgba(36, 39, 43, .06); }
+.home-google-profile-top { display: flex; align-items: center; gap: 9px; color: #5f6368; font-size: .77rem; font-weight: 700; }
+.home-google-mark { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid #e5e7eb; border-radius: 50%; color: #4285f4; font: 700 1.1rem/1 Arial, sans-serif; }
+.home-google-business-name { color: #202124; font-size: 1.1rem; line-height: 1.3; }
+.home-google-business-type { color: #5f6368; font-size: .82rem; }
+.home-google-profile > p { margin: 0; color: #5f6368; font-size: .85rem; line-height: 1.5; }
+.home-google-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; margin-top: 2px; padding: 0 14px; border: 1px solid #ddc9b9; border-radius: 999px; color: #7f321d; background: rgba(255,255,255,.82); text-decoration: none; font-size: .85rem; font-weight: 800; transition: background-color .2s ease, border-color .2s ease; }
+.home-google-link:focus-visible { outline: 3px solid #c74325; outline-offset: 3px; }
+.home-google-link:hover { background: #fff; border-color: #c74325; }
+.home-review-grid { display: grid; gap: 12px; }
+.home-review-card { min-width: 0; margin: 0; padding: 17px 19px; border: 1px solid #eadfd5; border-radius: 17px; background: rgba(255,255,255,.86); }
+.home-review-card blockquote { margin: 9px 0 11px; color: #342d27; font: 400 1rem/1.55 Georgia, "Times New Roman", serif; }
+.home-review-card figcaption { display: flex; align-items: center; gap: 7px; color: #625b54; font-size: .76rem; font-weight: 700; }
+.home-review-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+.home-verified-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #178a68; }
+@media (max-width: 1060px) {
+  .home-trust-section { grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr); }
+  .home-trust-intro { grid-column: 1; grid-row: 1; }
+  .home-google-profile { grid-column: 2; grid-row: 1; }
+  .home-review-grid { grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+}
+@media (max-width: 620px) {
+  .home-trust-section { width: min(calc(100% - 28px), 520px); margin: 48px auto; padding: 24px 18px; grid-template-columns: 1fr; gap: 22px; border-radius: 22px; }
+  .home-trust-intro, .home-google-profile, .home-review-grid { grid-column: 1; grid-row: auto; }
+  .home-trust-intro h2 { font-size: 2.15rem; }
+  .home-review-grid { grid-template-columns: 1fr; }
 }

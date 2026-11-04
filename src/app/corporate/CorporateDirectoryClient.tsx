@@ -65,7 +65,7 @@ export function CorporateDirectoryClient({
   }, [companies, selectedSlug]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-20">
+    <div className="corporate-directory min-h-screen bg-slate-950 text-slate-100 pb-20">
       {/* Hero Header */}
       <section className="relative overflow-hidden border-b border-slate-800 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 py-16 px-4 sm:px-6">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent pointer-events-none" />

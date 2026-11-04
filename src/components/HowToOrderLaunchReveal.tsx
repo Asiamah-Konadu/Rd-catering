@@ -259,8 +259,8 @@ export default function HowToOrderLaunchReveal() {
         </p>
 
         <div className="launch-reveal-actions">
-          <a href="#today-menu" className="launch-reveal-cta-primary">
-            <span>Explore Today&apos;s Menu</span>
+          <a href="/menu" className="launch-reveal-cta-primary">
+            <span>Browse the Full Menu</span>
             <ArrowDown size={16} aria-hidden="true" />
           </a>
           <Link href="/corporate" className="launch-reveal-cta-secondary">

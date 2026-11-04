@@ -229,7 +229,7 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
       <div
         ref={outerRef}
         className="wgs-outer"
-        id="today-menu"
+        id="featured-dishes"
         aria-label="What sounds good? Food Showcase"
         style={{ height: `${Math.max(3, count) * 70}vh` }}
       >

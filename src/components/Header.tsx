@@ -225,6 +225,7 @@ export default function Header() {
         id="mobile-navigation"
         className={`pillflow-mobile-drawer ${navOpen ? "is-open" : ""}`}
         aria-hidden={!navOpen}
+        inert={!navOpen}
       >
         <div className="mobile-drawer-header">
           <div className="mobile-drawer-status">

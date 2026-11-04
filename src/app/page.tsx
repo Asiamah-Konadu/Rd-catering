@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowRight, Clock3, MapPin, MessageCircle } from "lucide-react";
-import MenuCard from "@/components/MenuCard";
+import { ArrowRight, Clock3, ExternalLink, MapPin, MessageCircle, Star } from "lucide-react";
 import MobileBagBar from "@/components/MobileBagBar";
 import { BUSINESS_HOURS } from "@/lib/business";
 import FoodWebGLShowcase from "@/components/FoodWebGLShowcase";
@@ -13,6 +12,7 @@ import { getPublicMenu, getWeeklyMenuItems } from "@/lib/menu";
 import { getActiveHeroPromo } from "@/lib/promo";
 import { getSiteSettings } from "@/lib/settings";
 import { getShowcaseConfig } from "@/lib/showcase";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -52,17 +52,28 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [categories, heroPromo, siteSettings, weeklyMenuItems, showcaseConfig] = await Promise.all([
+  const reviewWhere = {
+    isVisible: true,
+    comment: { not: null },
+    order: { status: "DELIVERED" as const },
+  };
+  const [categories, heroPromo, siteSettings, weeklyMenuItems, showcaseConfig, reviews, reviewSummary] = await Promise.all([
     getPublicMenu(),
     getActiveHeroPromo(),
     getSiteSettings(),
     getWeeklyMenuItems(),
     getShowcaseConfig(),
+    prisma.review.findMany({
+      where: reviewWhere,
+      select: { id: true, rating: true, comment: true },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+    }),
+    prisma.review.aggregate({ where: reviewWhere, _avg: { rating: true }, _count: { _all: true } }),
   ]);
   const allDishes = categories.flatMap((category) => category.items);
   const featuredItem = allDishes.find((item) => item.isFeatured);
   const carouselDishes = weeklyMenuItems && weeklyMenuItems.length > 0 ? weeklyMenuItems : allDishes;
-
   return (
     <main className="home-page">
       <HomepageWebGLBackground />
@@ -166,6 +177,42 @@ export default async function Home() {
         <div><MessageCircle size={17} aria-hidden="true" /><span>WhatsApp order confirmation</span></div>
       </section>
 
+      <section className="home-trust-section" aria-labelledby="home-trust-heading">
+        <div className="home-trust-intro">
+          <span className="home-kicker">From our customers</span>
+          <h2 id="home-trust-heading">Kind words from happy customers.</h2>
+          <p>
+            {reviewSummary._count._all > 0
+              ? `Feedback from customers with delivered orders${reviewSummary._avg.rating ? ` · ${reviewSummary._avg.rating.toFixed(1)} out of 5 from ${reviewSummary._count._all} ratings` : ""}.`
+              : "We’re gathering feedback from customers whose orders made it to their door."}
+          </p>
+        </div>
+        <div className="home-review-grid">
+          {reviews.length > 0 ? reviews.map((review) => (
+            <figure className="home-review-card" key={review.id}>
+              <div className="home-review-stars" aria-label={`${review.rating} out of 5 stars`}>
+                {Array.from({ length: 5 }, (_, index) => (
+                  <Star key={index} size={15} fill={index < review.rating ? "currentColor" : "none"} aria-hidden="true" />
+                ))}
+              </div>
+              <blockquote>“{review.comment}”</blockquote>
+              <figcaption><span className="home-verified-dot" aria-hidden="true" /> Verified customer order</figcaption>
+            </figure>
+          )) : <p className="home-review-empty">Customer testimonials will appear here as feedback comes in.</p>}
+        </div>
+        <aside className="home-google-profile" aria-label="Rich-Dons Catering Google Business Profile">
+          <div className="home-google-profile-top">
+            <span className="home-google-mark" aria-hidden="true">G</span>
+            <span>Google Business Profile</span>
+          </div>
+          <strong className="home-google-business-name">Rich-Dons Catering</strong>
+          <span className="home-google-business-type">Restaurant · Accra, Ghana</span>
+          <p>Find our location, business details and Google profile here.</p>
+          <a href="https://share.google/ePL7JXc4AHAIDlwCy" target="_blank" rel="noopener noreferrer" className="home-google-link">
+            Open Google profile <ExternalLink size={15} aria-hidden="true" />
+          </a>
+        </aside>
+      </section>
       <ThisWeekDishesCarousel items={carouselDishes} />
 
       {featuredItem && (
@@ -204,42 +251,6 @@ export default async function Home() {
       </section>
 
       <FoodWebGLShowcase config={showcaseConfig} />
-
-      <section className="home-menu" id="today-menu">
-        <div className="home-menu-intro">
-          <div>
-            <span className="home-kicker">Good food, no fuss</span>
-            <h2>What sounds good?</h2>
-          </div>
-          {categories.length > 1 && (
-            <nav className="home-category-nav" aria-label="Jump to a menu category">
-              {categories.map((category) => (
-                <a key={category.id} href={`#category-${category.slug}`}>
-                  {category.name}
-                </a>
-              ))}
-            </nav>
-          )}
-        </div>
-        {categories.length ? categories.map((category) => (
-          <section className="home-category" id={`category-${category.slug}`} key={category.id}>
-            <div className="home-category-heading">
-              <h3>{category.name}</h3>
-              <span>{String(category.items.length).padStart(2, "0")} dishes</span>
-            </div>
-            <div className="menu-grid">
-              {category.items.map((item) => (
-                <MenuCard key={item.id} item={item} showAddToBag={false} />
-              ))}
-            </div>
-          </section>
-        )) : (
-          <div className="home-menu-empty">
-            <h3>Today&apos;s menu is being refreshed</h3>
-            <p>Check back shortly for the dishes available from our kitchen.</p>
-          </div>
-        )}
-      </section>
 
       <HowToOrderLaunchReveal />
 
