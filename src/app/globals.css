@@ -6293,3 +6293,29 @@ html { scroll-padding-top: 100px; }
 @keyframes skeletonShimmer { to { transform: translateX(100%); } }
 @keyframes splashIdentityIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .splash-logo-img, .splash-text-group, .splash-skeleton, .splash-skeleton::after, .splash-skeleton-line::after, .splash-skeleton-block::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+
+/* Launch sequence: zoom the static mark, then show a page-shaped skeleton if load is slow. */
+.splash-card { animation: none; }
+.splash-logo-img { animation: splashMarkZoom .9s cubic-bezier(.16,1,.3,1) both; }
+@keyframes splashMarkZoom {
+  0% { opacity: 0; transform: scale(.12); }
+  72% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 0; transform: scale(1); }
+}
+.splash-content-skeleton { position: fixed; inset: 24px 5vw; display: grid; grid-template-rows: 58px minmax(240px, 1fr) 170px; gap: 22px; max-width: 1440px; margin: auto; opacity: 0; animation: splashSkeletonAppear .4s ease both; }
+.splash-skeleton-active .splash-content-skeleton { opacity: 1; }
+@keyframes splashSkeletonAppear { to { opacity: 1; } }
+.splash-content-skeleton > span, .skeleton-row i { position: relative; display: block; overflow: hidden; border-radius: 14px; background: rgba(255,255,255,.09); }
+.splash-content-skeleton > span::after, .skeleton-row i::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent); animation: skeletonShimmer 1.5s ease-in-out infinite; }
+.splash-content-skeleton .skeleton-nav { width: 100%; height: 58px; border-radius: 10px; }
+.splash-content-skeleton .skeleton-hero { min-height: 240px; }
+.splash-content-skeleton .skeleton-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; background: none; overflow: visible; }
+.splash-content-skeleton .skeleton-row i { border-radius: 14px; }
+.splash-skeleton-active .splash-logo-container { display: none; }
+@media (max-width: 640px) {
+  .splash-content-skeleton { inset: 16px; grid-template-rows: 52px minmax(220px, 1fr) 250px; gap: 14px; }
+  .splash-content-skeleton .skeleton-row { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); gap: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-logo-img, .splash-content-skeleton > span::after, .skeleton-row i::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
