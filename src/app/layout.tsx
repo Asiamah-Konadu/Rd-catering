@@ -6,6 +6,7 @@ import { CartProvider } from "@/components/cart/CartProvider";
 import SplashScreen from "@/components/SplashScreen";
 import Footer from "@/components/Footer";
 import InstallAppPrompt from "@/components/InstallAppPrompt";
+import MobileLiquidNav from "@/components/mobile/MobileLiquidNav";
 import { SITE_URL } from "@/lib/site-url";
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || "G-K9K46SSV4D";
@@ -202,6 +203,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Header />
           {children}
           <Footer />
+          <MobileLiquidNav />
         </CartProvider>
         <InstallAppPrompt />
       </body>

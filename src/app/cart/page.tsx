@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Minus, Plus, Trash2, Sparkles } from "lucide-react";
 import { useCart } from "@/components/cart/CartProvider";
+import MobileFloatingCheckout from "@/components/mobile/MobileFloatingCheckout";
 
 export default function CartPage() {
   const { items, subtotal, setQuantity, remove, clear } = useCart();
@@ -115,6 +116,15 @@ export default function CartPage() {
             </Link>
           </aside>
         </div>
+      )}
+
+      {items.length > 0 && (
+        <MobileFloatingCheckout
+          type="cart"
+          total={total}
+          itemCount={items.length}
+          actionText="Proceed to Checkout"
+        />
       )}
     </main>
   );

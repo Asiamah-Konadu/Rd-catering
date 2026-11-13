@@ -142,16 +142,19 @@ export function ComboCustomizerModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="combo-modal-title"
     >
       <div
-        className="bg-white rounded-3xl max-w-lg md:max-w-2xl lg:max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-amber-100 overflow-hidden animate-in zoom-in-95 duration-200"
+        className="bg-white rounded-t-[32px] sm:rounded-3xl max-w-lg md:max-w-2xl lg:max-w-3xl w-full max-h-[88vh] sm:max-h-[92vh] flex flex-col shadow-2xl border-t sm:border border-white/60 sm:border-amber-100 overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-200 mobile-liquid-modal"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile Pull Pill */}
+        <div className="w-10 h-1 rounded-full bg-white/40 mx-auto mt-2.5 -mb-1 sm:hidden pointer-events-none relative z-10" />
+
         {/* Header with Dish Banner */}
         <div className="relative bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 text-white p-5 sm:p-6 pb-6">
           <button
@@ -295,7 +298,7 @@ export function ComboCustomizerModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 space-y-2.5">
+        <div className="p-4 sm:p-5 bg-white/90 sm:bg-slate-50 backdrop-blur-xl border-t border-slate-200/80 sm:border-slate-100 space-y-2.5">
           <button
             type="button"
             onClick={handleAddCombo}

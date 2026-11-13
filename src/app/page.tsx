@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Clock3, ExternalLink, MapPin, MessageCircle, Star } from "lucide-react";
-import MobileBagBar from "@/components/MobileBagBar";
+import MobileBentoGrid from "@/components/mobile/MobileBentoGrid";
 import { BUSINESS_HOURS } from "@/lib/business";
 import FoodWebGLShowcase from "@/components/FoodWebGLShowcase";
 import HomepageWebGLBackground from "@/components/HomepageWebGLBackground";
@@ -180,6 +180,14 @@ export default async function Home() {
         <div><MessageCircle size={17} aria-hidden="true" /><span>WhatsApp order confirmation</span></div>
       </section>
 
+      {/* 20% Bento Grid UI — Strictly for Mobile screens */}
+      <MobileBentoGrid
+        categories={categories}
+        featuredItem={featuredItem}
+        weeklyMenuItems={weeklyMenuItems}
+        heroPromo={heroPromo}
+      />
+
       <section className="home-trust-section" aria-labelledby="home-trust-heading">
         <SectionLineArt kind="community" label="Customer conversation illustration" />
         <div className="home-trust-intro">
@@ -260,8 +268,7 @@ export default async function Home() {
 
       <HowToOrderLaunchReveal />
 
-      <JourneyRope />
-      <MobileBagBar />
+      <JourneyRope />
     </main>
   );
 }

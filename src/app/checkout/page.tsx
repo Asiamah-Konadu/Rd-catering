@@ -3,6 +3,7 @@
 import { useCart } from "@/components/cart/CartProvider";
 import { useState, useMemo, useEffect } from "react";
 import { LocationPicker, type LocationData } from "@/components/LocationPicker";
+import MobileFloatingCheckout from "@/components/mobile/MobileFloatingCheckout";
 import {
   MapPin,
   Navigation,
@@ -374,7 +375,7 @@ export default function CheckoutPage() {
       </div>
 
       <div className="checkout-layout">
-        <form className="checkout space-y-6" onSubmit={submit} aria-busy={loading}>
+        <form id="checkout-form" className="checkout space-y-6" onSubmit={submit} aria-busy={loading}>
           {/* ─── 1. ORDER TIMING SECTION ───────────────────────────────── */}
           <section className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
@@ -949,6 +950,17 @@ export default function CheckoutPage() {
             onClose={() => setShowLocationPicker(false)}
           />
         </div>
+      )}
+
+      {items.length > 0 && (
+        <MobileFloatingCheckout
+          type="checkout"
+          total={total}
+          itemCount={items.length}
+          loading={loading}
+          formId="checkout-form"
+          actionText="Continue to WhatsApp"
+        />
       )}
     </main>
   );
