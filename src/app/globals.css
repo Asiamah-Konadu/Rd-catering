@@ -5960,69 +5960,79 @@ html { scroll-padding-top: 100px; }
   .menu-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px 10px !important;
+    gap: 10px 8px !important;
   }
 
+  /* ── Card shell ── */
   .menu-page .menu-card,
   .menu-card {
-    border-radius: 20px !important;
+    border-radius: 18px !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: space-between !important;
     overflow: hidden !important;
-    background: rgba(255, 255, 255, 0.85) !important;
-    border: 1px solid rgba(255, 255, 255, 0.8) !important;
-    box-shadow: 0 8px 24px -6px rgba(40, 20, 10, 0.08) !important;
+    background: #fff !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    box-shadow: 0 4px 16px -4px rgba(40, 20, 10, 0.1) !important;
+    transition: none !important;
+    transform: none !important;
   }
 
-  /* Compact 135px food photo */
+  /* ── Food photo: taller so food is appetising ── */
   .menu-page .food-placeholder,
   .food-placeholder {
-    height: 135px !important;
-    border-top-left-radius: 19px !important;
-    border-top-right-radius: 19px !important;
+    height: 150px !important;
+    border-top-left-radius: 17px !important;
+    border-top-right-radius: 17px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
   }
 
   .food-placeholder span {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 10px !important;
   }
 
   .food-placeholder span svg {
-    width: 22px !important;
-    height: 22px !important;
+    width: 20px !important;
+    height: 20px !important;
   }
 
-  /* Compact badges */
+  /* ── Compact overlay badges ── */
   .menu-card-category {
-    left: 8px !important;
-    bottom: 8px !important;
-    padding: 2.5px 8px !important;
-    font-size: 0.58rem !important;
-    letter-spacing: 0.04em !important;
-    max-width: calc(100% - 64px) !important;
+    left: 7px !important;
+    bottom: 7px !important;
+    padding: 2px 7px !important;
+    font-size: 0.57rem !important;
+    letter-spacing: 0.03em !important;
+    max-width: calc(100% - 60px) !important;
   }
 
   .food-placeholder .status-pill {
-    top: 8px !important;
-    right: 8px !important;
-    padding: 2.5px 7px !important;
-    font-size: 0.6rem !important;
+    top: 7px !important;
+    right: 7px !important;
+    padding: 2px 6px !important;
+    font-size: 0.58rem !important;
   }
 
-  /* Bento Card Body */
+  /* ── Card body ── */
   .menu-card-body {
-    padding: 10px 10px 12px !important;
+    padding: 9px 9px 10px !important;
     display: flex !important;
     flex-direction: column !important;
     flex: 1 !important;
+    background: #fff !important;
+  }
+
+  /* ── Hide arrow pseudo-element (too cramped on 2-col) ── */
+  .menu-card h3 a::after {
+    display: none !important;
   }
 
   .menu-card h3 {
-    font-size: 0.88rem !important;
+    font-size: 0.82rem !important;
     line-height: 1.25 !important;
-    margin: 0 0 4px !important;
+    margin: 0 0 3px !important;
     font-weight: 800 !important;
   }
 
@@ -6031,82 +6041,160 @@ html { scroll-padding-top: 100px; }
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
+    color: #191918 !important;
+    -webkit-text-fill-color: initial !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
   }
 
+  /* ── Hide description — not enough space at 2-col ── */
   .menu-card p {
-    font-size: 0.7rem !important;
-    line-height: 1.35 !important;
-    min-height: auto !important;
-    -webkit-line-clamp: 2 !important;
-    margin-bottom: 8px !important;
-    color: #64748b !important;
+    display: none !important;
   }
 
-  /* Compact pricing and action buttons */
+  /* ── Footer: price row + single CTA ── */
   .menu-card-footer {
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 6px !important;
-    padding-top: 8px !important;
+    gap: 5px !important;
+    padding-top: 7px !important;
     margin-top: auto !important;
-    border-top: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-top: 1px solid rgba(226, 232, 240, 0.7) !important;
   }
 
   .menu-card-price {
     display: flex !important;
     align-items: baseline !important;
     justify-content: space-between !important;
-    gap: 4px !important;
+    gap: 2px !important;
   }
 
   .menu-card-price span {
-    font-size: 0.58rem !important;
+    font-size: 0.55rem !important;
     color: #94a3b8 !important;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
   }
 
   .menu-card-price strong {
-    font-size: 0.95rem !important;
-    font-family: monospace !important;
+    font-size: 0.9rem !important;
     font-weight: 900 !important;
-    color: #b43419 !important;
+    color: #c74325 !important;
+    font-family: monospace !important;
+    letter-spacing: -0.01em !important;
   }
 
+  /* ── "Add / Combo" becomes the primary compact CTA ── */
   .combo-trigger-btn {
-    font-size: 0.68rem !important;
-    padding: 4px 6px !important;
-    border-radius: 8px !important;
+    font-size: 0.7rem !important;
+    padding: 6px 8px !important;
+    border-radius: 10px !important;
     justify-content: center !important;
-    background: #fef3c7 !important;
-    color: #92400e !important;
-    border: 1px solid #fde68a !important;
+    background: linear-gradient(135deg, #f74326, #c9270e) !important;
+    color: #fff !important;
+    border: none !important;
     width: 100% !important;
     font-weight: 800 !important;
+    min-height: 32px !important;
+    box-shadow: 0 4px 12px -2px rgba(247, 67, 38, 0.35) !important;
   }
 
-  .menu-card-body > button:last-of-type {
-    margin-top: 6px !important;
-    padding: 7px 10px !important;
-    font-size: 0.74rem !important;
-    border-radius: 10px !important;
-    font-weight: 800 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    min-height: 34px !important;
+  /* ── Hide "Add to bag" button — combo covers it ── */
+  .menu-card-body > button:last-of-type:not(.combo-trigger-btn) {
+    display: none !important;
   }
 
+  /* ── "View dish" link (when showAddToBag=false) ── */
   .menu-card-view-link {
-    font-size: 0.74rem !important;
-    padding: 6px 10px !important;
+    font-size: 0.7rem !important;
+    padding: 6px 8px !important;
     text-align: center !important;
     justify-content: center !important;
+    border-radius: 10px !important;
+    min-height: 32px !important;
   }
 
-  /* Hide the horizontal top pill strip on mobile as the bottom liquid dock handles collapsible category navigation */
+  /* ── Hide the horizontal top pill strip on mobile;
+        the bottom liquid dock handles category nav ── */
   .menu-side-nav {
     display: none !important;
+  }
+
+  /* ── Hover / press ripple: subtle on mobile ── */
+  .menu-card:active {
+    transform: scale(0.985) !important;
+    box-shadow: 0 2px 8px -2px rgba(40, 20, 10, 0.1) !important;
+  }
+
+  /* ── Homepage: hide desktop-only heavy sections on mobile ──
+     Keep: home-hero, home-trust bar, MobileBentoGrid, home-trust-section (reviews)
+     Hide: featured dish, delivery note, WebGL showcase, how-to, rope, home-menu carousel ── */
+  .home-pick,
+  .home-delivery-note,
+  .wgs-outer,
+  .launch-reveal-section,
+  .journey-rope,
+  .home-menu {
+    display: none !important;
+  }
+
+  /* ── Hide ThisWeekDishesCarousel on mobile (bento grid covers specials) ── */
+  .dishes-showcase-section {
+    display: none !important;
+  }
+
+  /* ── Homepage hero: tighter vertical rhythm on small screens ── */
+  .home-hero h1 {
+    font-size: 2.6rem !important;
+    margin: 10px 0 10px !important;
+  }
+
+  .home-hero-copy > p {
+    font-size: 0.9rem !important;
+    max-width: 100% !important;
+    line-height: 1.55 !important;
+  }
+
+  .home-actions {
+    gap: 10px !important;
+    margin-top: 16px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .home-primary,
+  .home-secondary {
+    font-size: 0.9rem !important;
+    padding: 13px 20px !important;
+    min-height: 46px !important;
+    border-radius: 12px !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  /* ── Reviews section: single column, compact ── */
+  .home-review-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .home-review-card {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  /* ── Google profile aside: compact ── */
+  .home-google-profile {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  /* ── Trust section (reviews wrapper): tighter padding ── */
+  .home-trust-section {
+    padding-top: 28px !important;
+    padding-bottom: 28px !important;
   }
 }
