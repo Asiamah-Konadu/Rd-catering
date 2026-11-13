@@ -32,7 +32,7 @@ export default function SplashScreen() {
       logoZoomComplete = true;
       if (pageReady) revealSite();
       else setShowSkeleton(true);
-    }, 900);
+    }, 1300);
     let removeTimer: ReturnType<typeof setTimeout> | undefined;
 
     const revealSite = () => {

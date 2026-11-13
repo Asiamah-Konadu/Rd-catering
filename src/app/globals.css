@@ -6296,7 +6296,7 @@ html { scroll-padding-top: 100px; }
 
 /* Launch sequence: zoom the static mark, then show a page-shaped skeleton if load is slow. */
 .splash-card { animation: none; }
-.splash-logo-img { animation: splashMarkZoom .9s cubic-bezier(.16,1,.3,1) both; }
+.splash-logo-img { animation: splashMarkZoom 1.3s cubic-bezier(.16,1,.3,1) both; }
 @keyframes splashMarkZoom {
   0% { opacity: 0; transform: scale(.12); }
   72% { opacity: 1; transform: scale(1.08); }
