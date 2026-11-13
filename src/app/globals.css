@@ -2201,7 +2201,8 @@ footer strong { color: var(--ink); }
   height: 100vh;
   min-height: 620px;
   max-height: 100vh;
-  background: transparent;
+  /* WGS typography is light; keep a dark surface behind the copy on every page. */
+  background: #10151f;
   overflow: hidden;
   display: flex;
   flex-direction: column;
