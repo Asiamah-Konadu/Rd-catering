@@ -1403,7 +1403,7 @@ img { max-width: 100%; }
 }
 .menu-side-nav-index {
   flex: 0 0 auto;
-  color: #a0a68e;
+  color: #626b4a;
   font-size: .63rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -1571,7 +1571,7 @@ img { max-width: 100%; }
 .cart-row:last-child { border-bottom: 0; }
 .cart-row span {
   display: block;
-  color: #777;
+  color: #625b54;
   font-size: .85rem;
   margin-top: 5px;
 }
@@ -4500,6 +4500,7 @@ footer strong { color: var(--ink); }
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .1em;
+  text-shadow: 0 1px 3px rgba(12, 23, 20, .75);
 }
 .events-landscape-h2 {
   margin: 18px 0 22px;
@@ -4516,6 +4517,7 @@ footer strong { color: var(--ink); }
   color: rgba(255, 244, 215, 0.8);
   font-size: 1.02rem;
   line-height: 1.72;
+  text-shadow: 0 1px 3px rgba(12, 23, 20, .75);
 }
 .events-landscape-steps {
   display: grid;
@@ -4546,11 +4548,13 @@ footer strong { color: var(--ink); }
   color: #fff9ef;
   font-size: .9rem;
   font-weight: 700;
+  text-shadow: 0 1px 3px rgba(12, 23, 20, .75);
 }
 .events-landscape-steps li p {
   margin: 4px 0 0;
   color: rgba(255, 240, 200, 0.68);
   font-size: .82rem;
+  text-shadow: 0 1px 3px rgba(12, 23, 20, .75);
 }
 /* RIGHT – floating glass card */
 .events-glass-card {
@@ -4641,6 +4645,18 @@ footer strong { color: var(--ink); }
   outline: none;
   transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
+.events-glass-card .events-glass-heading h3 { color: #27221e; }
+.events-glass-card .events-glass-heading p { color: #625b54; }
+.events-glass-card .events-field label { color: #514e47; }
+.events-glass-card .events-field input,
+.events-glass-card .events-field select,
+.events-glass-card .events-field textarea {
+  border-color: #d9d3c7;
+  background: #fdfcf8;
+  color: #27221e;
+}
+.events-glass-card .events-field input::placeholder,
+.events-glass-card .events-field textarea::placeholder { color: #625b54; opacity: 1; }
 .events-field input::placeholder,
 .events-field textarea::placeholder { color: rgba(255, 240, 200, 0.38); }
 .events-field select option { background: #1a3060; color: #fff; }
@@ -4664,7 +4680,7 @@ footer strong { color: var(--ink); }
   border-radius: 5px;
 }
 .events-form-wrap .events-field input::placeholder,
-.events-form-wrap .events-field textarea::placeholder { color: #99958d; }
+.events-form-wrap .events-field textarea::placeholder { color: #625b54; opacity: 1; }
 .events-form-wrap .events-field input:focus,
 .events-form-wrap .events-field select:focus,
 .events-form-wrap .events-field textarea:focus {
@@ -5557,7 +5573,13 @@ html { scroll-padding-top: 100px; }
 .corporate-directory .text-white, .corporate-directory .text-slate-100,
 .corporate-directory .text-slate-200, .corporate-directory .text-slate-300 { color: #27221e !important; }
 .corporate-directory .text-slate-400, .corporate-directory .text-slate-500 { color: #625b54 !important; }
+.corporate-directory .text-amber-300, .corporate-directory .text-amber-400 { color: #854d0e !important; }
+.corporate-directory .text-emerald-300, .corporate-directory .text-emerald-400 { color: #047857 !important; }
+.corporate-directory .text-blue-300 { color: #1d4ed8 !important; }
+.corporate-directory .text-purple-300 { color: #7e22ce !important; }
+.corporate-directory .text-rose-300 { color: #be123c !important; }
 .corporate-directory input, .corporate-directory select { min-height: 46px; color: #27221e !important; background: #fff !important; border-color: #d9ccc1 !important; font-size: .9rem !important; }
+.corporate-directory input::placeholder, .corporate-directory textarea::placeholder { color: #625b54; opacity: 1; }
 .corporate-directory main a.bg-slate-800 { background: #f7eee7 !important; color: #27221e !important; border-color: #e8ddd3 !important; }
 .corporate-directory main a.bg-amber-500 { background: #c74325 !important; color: #fff !important; }
 .corporate-directory main a.bg-amber-500:hover { background: #96351e !important; }
@@ -5696,6 +5718,8 @@ html { scroll-padding-top: 100px; }
 .page-heading h1 { letter-spacing: -.035em; }
 .cart-row, .checkout, .empty { border-color: #e8ddd3; border-radius: 18px; }
 .checkout input, .checkout textarea, .corporate-directory input, .corporate-directory select { border-radius: 10px; }
+.checkout .text-slate-400 { color: #625b54 !important; }
+.checkout input::placeholder, .checkout textarea::placeholder { color: #625b54; opacity: 1; }
 .events-page { --brand: #c74325; }
 .events-form, .events-glass-card { border-radius: 18px; }
 .office-portal { color: #27221e; }
