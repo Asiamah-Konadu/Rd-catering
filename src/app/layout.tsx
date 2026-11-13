@@ -168,6 +168,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try { if (sessionStorage.getItem('rd-splash-shown') === '1') document.documentElement.classList.add('rd-splash-seen'); } catch {}`,
+          }}
+        />
         {/* Google tag (gtag.js) */}
         <script
           async

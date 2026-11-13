@@ -17,33 +17,58 @@ export default function SplashScreen() {
       return;
     }
 
+    // Show the brand intro once per browser tab session. Client-side route
+    // changes and hard navigations inside the site should go straight to content.
+    try {
+      if (window.sessionStorage.getItem('rd-splash-shown') === '1') {
+        setMounted(false);
+        return;
+      }
+    } catch {
+      // Keep the splash functional when storage is unavailable.
+    }
+
     // Display time calibrated to 3.3s for the self-drawing animation and full reveal
     const minDisplayMs = 3300;
     const startTime = Date.now();
+    let dismissScheduled = false;
+    let dismissTimer: ReturnType<typeof setTimeout> | undefined;
+    let removeTimer: ReturnType<typeof setTimeout> | undefined;
 
     const handleDismiss = () => {
+      if (dismissScheduled) return;
+      dismissScheduled = true;
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, minDisplayMs - elapsed);
 
-      setTimeout(() => {
+      dismissTimer = setTimeout(() => {
+        try {
+          window.sessionStorage.setItem('rd-splash-shown', '1');
+        } catch {
+          // Dismissing the splash must not depend on storage availability.
+        }
         setFading(true);
-        setTimeout(() => {
+        removeTimer = setTimeout(() => {
           setMounted(false);
         }, 600); // matches fade-out transition duration
       }, remaining);
     };
 
+    let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
     if (document.readyState === 'complete') {
       handleDismiss();
     } else {
       window.addEventListener('load', handleDismiss, { once: true });
       // Fallback timeout in case load event fires late
-      const fallbackTimer = setTimeout(handleDismiss, 3900);
-      return () => {
-        window.removeEventListener('load', handleDismiss);
-        clearTimeout(fallbackTimer);
-      };
+      fallbackTimer = setTimeout(handleDismiss, 3900);
     }
+
+    return () => {
+      window.removeEventListener('load', handleDismiss);
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      if (dismissTimer) clearTimeout(dismissTimer);
+      if (removeTimer) clearTimeout(removeTimer);
+    };
   }, [isAdmin]);
 
   if (!mounted || isAdmin) {
@@ -56,6 +81,11 @@ export default function SplashScreen() {
       className={`splash-overlay ${fading ? 'splash-fading' : ''}`}
       onClick={() => {
         // Allow user to click to dismiss immediately
+        try {
+          window.sessionStorage.setItem('rd-splash-shown', '1');
+        } catch {
+          // The user can still dismiss the splash when storage is unavailable.
+        }
         setFading(true);
         setTimeout(() => setMounted(false), 500);
       }}
