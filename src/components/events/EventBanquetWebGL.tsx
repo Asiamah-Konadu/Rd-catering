@@ -9,6 +9,7 @@ export default function EventBanquetWebGL() {
   const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
+    if (window.matchMedia("(max-width: 760px)").matches) return;
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;

@@ -117,6 +117,12 @@ export default function SplashScreen() {
           </p>
         </div>
 
+        <div className="splash-skeleton" aria-hidden="true">
+          <span className="splash-skeleton-line splash-skeleton-line-wide" />
+          <span className="splash-skeleton-line splash-skeleton-line-short" />
+          <span className="splash-skeleton-block" />
+        </div>
+
         {/* Elegant Animated Loader Bar */}
         <div className="splash-progress-track">
           <div className="splash-progress-bar" />

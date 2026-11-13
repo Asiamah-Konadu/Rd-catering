@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import {
   CalendarDays,
   Check,
@@ -10,7 +10,7 @@ import {
   UsersRound,
   UtensilsCrossed,
 } from "lucide-react";
-import SandTypographyHero from "@/components/events/SandTypography";
+import EventBanquetWebGL from "@/components/events/EventBanquetWebGL";
 
 type EventInquiryProps = {
   whatsappUrl: string | null;
@@ -19,6 +19,19 @@ type EventInquiryProps = {
 export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [step, setStep] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  function moveStep(direction: number) {
+    const form = formRef.current;
+    if (!form) return;
+    if (direction > 0) {
+      const fields = Array.from(form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(`[data-step="${step}"] input, [data-step="${step}"] select, [data-step="${step}"] textarea`));
+      const invalid = fields.find((field) => !field.checkValidity());
+      if (invalid) { invalid.reportValidity(); return; }
+    }
+    setStep((current) => Math.max(0, Math.min(2, current + direction)));
+  }
 
   function submitInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -63,12 +76,17 @@ export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
 
   return (
     <main className="events-page">
-      <SandTypographyHero
-        heading="Make your gathering worth gathering for."
-        subheading="From intimate dinners to milestone celebrations in Accra, we plan a menu that feels generous, considered, and unmistakably Ghanaian."
-        ctaLabel="Plan your event ↓"
-        onCTAClick="#appointment"
-      />
+      <section className="events-photo-hero" aria-label="Event catering in Accra">
+        <img src="/events-banquet.jpg" alt="A beautifully arranged Rich-Dons Catering banquet with golden chafing dishes" />
+        <div className="events-photo-shade" />
+        <div className="events-webgl-desktop"><EventBanquetWebGL /></div>
+        <div className="events-photo-copy">
+          <span>Event catering in Accra</span>
+          <h1>Make your gathering worth gathering for.</h1>
+          <p>From intimate dinners to milestone celebrations, we plan a menu that feels generous, considered, and unmistakably Ghanaian.</p>
+          <a href="#appointment">Plan your event <span aria-hidden="true">↓</span></a>
+        </div>
+      </section>
 
       {/* ── Types strip ── */}
       <section className="events-types" aria-label="Event catering types">
@@ -172,69 +190,50 @@ export function EventInquiryClient({ whatsappUrl }: EventInquiryProps) {
               </div>
             )}
 
-            <form className="events-form" onSubmit={submitInquiry}>
-              <div className="events-field events-field-wide">
-                <label htmlFor="event-name">Your name</label>
-                <input id="event-name" name="name" autoComplete="name" required placeholder="Full name" />
+            <div className="events-step-progress" aria-live="polite">
+              <span>Step {step + 1} of 3</span>
+              <div><i style={{ width: `${((step + 1) / 3) * 100}%` }} /></div>
+              <strong>{["Your event", "Event details", "Your contact"][step]}</strong>
+            </div>
+            <form ref={formRef} className="events-form" onSubmit={submitInquiry}>
+              <div className="events-step-fields" data-step="0" hidden={step !== 0}>
+                <div className="events-field">
+                  <label htmlFor="event-type">Type of event</label>
+                  <select id="event-type" name="eventType" required defaultValue="">
+                    <option value="" disabled>Select event</option><option>Wedding</option><option>Corporate event</option><option>Birthday</option><option>Anniversary</option><option>Private dinner</option><option>Other celebration</option>
+                  </select>
+                </div>
+                <div className="events-field">
+                  <label htmlFor="event-date">Event date</label><input id="event-date" name="eventDate" type="date" min={today} required />
+                </div>
+                <div className="events-field">
+                  <label htmlFor="event-time">Start time</label><input id="event-time" name="eventTime" type="time" />
+                </div>
               </div>
-              <div className="events-field">
-                <label htmlFor="event-phone">Phone number</label>
-                <input id="event-phone" name="phone" type="tel" autoComplete="tel" required placeholder="e.g. 024 000 0000" />
+              <div className="events-step-fields" data-step="1" hidden={step !== 1}>
+                <div className="events-field">
+                  <label htmlFor="event-guests">Estimated guests</label><input id="event-guests" name="guests" type="number" min="1" required placeholder="No. of guests" />
+                </div>
+                <div className="events-field">
+                  <label htmlFor="event-budget">Estimated budget</label>
+                  <select id="event-budget" name="budget" defaultValue=""><option value="" disabled>Select a range</option><option>Under GH? 5,000</option><option>GH? 5,000 � 10,000</option><option>GH? 10,000 � 20,000</option><option>GH? 20,000 � 50,000</option><option>Over GH? 50,000</option></select>
+                </div>
+                <div className="events-field events-field-wide">
+                  <label htmlFor="event-location">Venue or location</label><input id="event-location" name="location" required placeholder="Venue name and area" />
+                </div>
+                <div className="events-field events-field-wide">
+                  <label htmlFor="event-details">What would make the meal special?</label><textarea id="event-details" name="details" rows={3} placeholder="Preferred dishes, dietary needs, serving style, or anything else" />
+                </div>
               </div>
-              <div className="events-field">
-                <label htmlFor="event-type">Type of event</label>
-                <select id="event-type" name="eventType" required defaultValue="">
-                  <option value="" disabled>Select event</option>
-                  <option>Wedding</option>
-                  <option>Corporate event</option>
-                  <option>Birthday</option>
-                  <option>Anniversary</option>
-                  <option>Private dinner</option>
-                  <option>Other celebration</option>
-                </select>
+              <div className="events-step-fields" data-step="2" hidden={step !== 2}>
+                <div className="events-field events-field-wide"><label htmlFor="event-name">Your name</label><input id="event-name" name="name" autoComplete="name" required placeholder="Full name" /></div>
+                <div className="events-field events-field-wide"><label htmlFor="event-phone">Phone number</label><input id="event-phone" name="phone" type="tel" autoComplete="tel" required placeholder="e.g. 024 000 0000" /></div>
               </div>
-              <div className="events-field">
-                <label htmlFor="event-date">Event date</label>
-                <input id="event-date" name="eventDate" type="date" min={today} required />
+              <div className="events-step-actions">
+                {step > 0 && <button className="events-step-back" type="button" onClick={() => moveStep(-1)}>Back</button>}
+                {step < 2 ? <button className="events-submit" type="button" onClick={() => moveStep(1)}>Continue <span aria-hidden="true">?</span></button> : <button className="events-submit" type="submit" disabled={!whatsappUrl}><MessageCircle size={19} aria-hidden="true" /> Request appointment on WhatsApp</button>}
               </div>
-              <div className="events-field">
-                <label htmlFor="event-time">Start time</label>
-                <input id="event-time" name="eventTime" type="time" />
-              </div>
-              <div className="events-field">
-                <label htmlFor="event-guests">Estimated guests</label>
-                <input id="event-guests" name="guests" type="number" min="1" required placeholder="No. of guests" />
-              </div>
-              <div className="events-field">
-                <label htmlFor="event-budget">Estimated budget</label>
-                <select id="event-budget" name="budget" defaultValue="">
-                  <option value="" disabled>Select a range</option>
-                  <option>Under GH₵ 5,000</option>
-                  <option>GH₵ 5,000 – 10,000</option>
-                  <option>GH₵ 10,000 – 20,000</option>
-                  <option>GH₵ 20,000 – 50,000</option>
-                  <option>Over GH₵ 50,000</option>
-                </select>
-              </div>
-              <div className="events-field events-field-wide">
-                <label htmlFor="event-location">Venue or location</label>
-                <input id="event-location" name="location" required placeholder="Venue name and area" />
-              </div>
-              <div className="events-field events-field-wide">
-                <label htmlFor="event-details">What would make the meal special?</label>
-                <textarea
-                  id="event-details"
-                  name="details"
-                  rows={3}
-                  placeholder="Preferred dishes, dietary needs, serving style, or anything else"
-                />
-              </div>
-              <button className="events-submit events-field-wide" type="submit" disabled={!whatsappUrl}>
-                <MessageCircle size={19} aria-hidden="true" />
-                Request appointment on WhatsApp
-              </button>
-            </form>
-            {error && <p className="events-config-note" role="alert">{error}</p>}
+            </form>            {error && <p className="events-config-note" role="alert">{error}</p>}
             {!whatsappUrl && (
               <p className="events-config-note">WhatsApp booking is temporarily unavailable.</p>
             )}
