@@ -6027,10 +6027,11 @@ html { scroll-padding-top: 100px; }
   .menu-card-category {
     left: 7px !important;
     bottom: 7px !important;
-    min-width: 80px !important;
+    min-width: 108px !important;
     max-width: calc(100% - 14px) !important;
-    padding: 3px 9px !important;
+    padding: 1px 9px !important;
     font-size: 0.52rem !important;
+    line-height: 1.15 !important;
     letter-spacing: 0.03em !important;
   }
 
@@ -6040,8 +6041,9 @@ html { scroll-padding-top: 100px; }
     min-width: 72px !important;
     max-width: calc(100% - 14px) !important;
     justify-content: center !important;
-    padding: 3px 8px !important;
+    padding: 1px 8px !important;
     font-size: 0.54rem !important;
+    line-height: 1.15 !important;
     white-space: nowrap !important;
   }
 
