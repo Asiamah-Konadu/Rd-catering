@@ -185,10 +185,6 @@ export default function Header() {
           })}
         </nav>
 
-        <Link href="/menu" className="mobile-nav-title" onClick={closeNav}>
-          Our Menu
-        </Link>
-
         {/* Action Area: Magnetic Bag Button & Mobile Nav Toggle */}
         <div className="pillflow-actions">
           <Link

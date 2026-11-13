@@ -107,6 +107,10 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
       const target = Math.max(0, Math.min(count - 1, index));
       setActiveIndex(target);
 
+      // Mobile uses a flowing layout, so navigation changes the dish without
+      // scrolling the entire page to a virtual snap point.
+      if (window.matchMedia("(max-width: 640px)").matches) return;
+
       const outer = outerRef.current;
       if (!outer) return;
       const totalH = outer.offsetHeight;
@@ -130,6 +134,10 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
 
   // ── Snap-style scroll: only advance on decisive scroll past clear threshold ──
   useEffect(() => {
+    // The mobile showcase is taller than the viewport and no longer sticky.
+    // Keep its dish selection on the explicit controls instead of page scroll.
+    if (window.matchMedia("(max-width: 640px)").matches) return;
+
     let ticking = false;
     let cachedTop = 0;
     let cachedMaxScroll = 1;
