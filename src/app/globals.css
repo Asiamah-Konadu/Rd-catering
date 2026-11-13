@@ -6129,12 +6129,11 @@ html { scroll-padding-top: 100px; }
     box-shadow: 0 2px 8px -2px rgba(40, 20, 10, 0.1) !important;
   }
 
-  /* ── Homepage: hide desktop-only heavy sections on mobile ──
+  /* ── Homepage: keep the mobile layout compact while retaining WebGL ──
      Keep: home-hero, home-trust bar, MobileBentoGrid, home-trust-section (reviews)
-     Hide: featured dish, delivery note, WebGL showcase, how-to, rope, home-menu carousel ── */
+     Hide: featured dish, delivery note, how-to, rope, home-menu carousel ── */
   .home-pick,
   .home-delivery-note,
-  .wgs-outer,
   .launch-reveal-section,
   .journey-rope,
   .home-menu {
