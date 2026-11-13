@@ -6043,9 +6043,11 @@ html { scroll-padding-top: 100px; }
     line-height: 1.2 !important;
     letter-spacing: 0.04em !important;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9) !important;
+    text-align: left !important;
     white-space: normal !important;
     overflow: visible !important;
-    overflow-wrap: anywhere !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
     text-overflow: clip !important;
   }
 
