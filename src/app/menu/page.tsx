@@ -133,7 +133,14 @@ export default async function MenuPage() {
 
           <div className="menu-body-layout">
             {/* Sticky left side nav */}
-            <MenuSideNav categories={categories.map(c => ({ id: c.id, name: c.name, slug: c.slug }))} />
+            <MenuSideNav
+              categories={categories.map((c) => ({
+                id: c.id,
+                name: c.name,
+                slug: c.slug,
+                count: `${String(c.items.length).padStart(2, "0")} dishes`,
+              }))}
+            />
 
             {/* Main scrollable content */}
             <div className="menu-content-area">

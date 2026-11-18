@@ -332,7 +332,7 @@ model SiteSettings {
   businessHoursText   String   @default("Orders open 9am · close 10pm")
   deliveryFeeText     String   @default("Standard delivery is GH₵ 20")
   deliveryNoteText    String   @default("Registered office orders may qualify for free delivery and group discounts.")
-  whatsappPhone       String   @default("+233248179348")
+  whatsappPhone       String   @default("+233591754764")
   openingTime         String   @default("08:00")
   closingTime         String   @default("22:00")
   updatedAt           DateTime @updatedAt

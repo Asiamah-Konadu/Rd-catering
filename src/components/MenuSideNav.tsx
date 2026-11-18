@@ -6,6 +6,7 @@ interface Category {
   id: string;
   name: string;
   slug: string;
+  count?: string;
 }
 
 interface MenuSideNavProps {
@@ -15,6 +16,20 @@ interface MenuSideNavProps {
 export default function MenuSideNav({ categories }: MenuSideNavProps) {
   const [activeId, setActiveId] = useState<string>("");
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Broadcast and cache categories for mobile navigation dock
+  useEffect(() => {
+    if (typeof window !== "undefined" && categories.length > 0) {
+      const payload = categories.map((c) => ({
+        id: `menu-${c.slug}`,
+        slug: c.slug,
+        name: c.name,
+        count: c.count || "",
+      }));
+      (window as unknown as { __RD_MENU_CATEGORIES__?: typeof payload }).__RD_MENU_CATEGORIES__ = payload;
+      window.dispatchEvent(new CustomEvent("rd:menu-categories", { detail: payload }));
+    }
+  }, [categories]);
 
   useEffect(() => {
     const sectionIds = categories.map((c) => `menu-${c.slug}`);

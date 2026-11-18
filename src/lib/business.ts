@@ -24,7 +24,8 @@ export const BUSINESS_HOURS = {
 } as const;
 
 export const BUSINESS_CONTACT = {
-  whatsapp: "0248179348",
-  whatsappInternational: "+233248179348",
-  phones: ["0550103277", "0244995212"],
+  whatsapp: "059 175 4764",
+  whatsappInternational: "+233591754764",
+  whatsappUsername: "richdonscatering",
+  phones: ["0550103277", "0591754764"],
 } as const;

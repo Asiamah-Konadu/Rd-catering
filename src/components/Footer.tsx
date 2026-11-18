@@ -56,7 +56,7 @@ export default function Footer() {
   const whatsappMessage = encodeURIComponent(
     "Hello Rich-Dons Catering! I have an inquiry about your food and catering services."
   );
-  const whatsappUrl = `https://wa.me/233248179348?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/233591754764?text=${whatsappMessage}`;
 
   return (
     <footer className="site-footer" aria-label="Site footer">
@@ -232,8 +232,8 @@ export default function Footer() {
                 <div>
                   <strong>Customer Service & WhatsApp Hotline</strong>
                   <div className="flex flex-col gap-0.5">
-                    <a href="tel:+233248179348" className="site-footer-phone-link" title="Call customer service">
-                      024 817 9348 / +233 (0) 24 817 9348
+                    <a href="tel:+233591754764" className="site-footer-phone-link" title="Call customer service">
+                      059 175 4764 / +233 (0) 59 175 4764
                     </a>
                     <a
                       href={whatsappUrl}

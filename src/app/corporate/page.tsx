@@ -115,7 +115,7 @@ export default async function CorporateDirectoryPage() {
           "@type": "CateringService",
           name: "Rich-Dons Catering",
           url: SITE_URL,
-          telephone: "+233248179348",
+          telephone: "+233591754764",
         },
         areaServed: {
           "@type": "City",

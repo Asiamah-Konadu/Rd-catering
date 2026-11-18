@@ -13,7 +13,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsData = {
   businessHoursText: "Orders open 8am · close 10pm",
   deliveryFeeText: "Standard delivery is GH₵ 20",
   deliveryNoteText: "Registered office orders may qualify for free delivery and group discounts.",
-  whatsappPhone: "+233248179348",
+  whatsappPhone: "+233591754764",
   openingTime: "08:00",
   closingTime: "22:00",
 };

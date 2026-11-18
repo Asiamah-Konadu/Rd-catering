@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import BusinessContactLinks from "@/components/BusinessContactLinks";
 import { BUSINESS_CONTACT } from "@/lib/business";
 import { getWhatsAppOrderUrl } from "@/lib/whatsapp";
 import { SITE_URL } from "@/lib/site-url";
@@ -9,27 +8,32 @@ const eventFaqs = [
   {
     question: "What events does Rich-Dons Catering cater?",
     answer:
-      "Rich-Dons discusses catering for weddings and ceremonies, corporate functions, birthdays and reunions, and private dining.",
+      "Rich-Dons provides full-service catering for weddings and traditional engagements, corporate banquets and galas, milestone birthdays, anniversaries, and bespoke private dining.",
   },
   {
     question: "How do I request event catering?",
     answer:
-      "Send an inquiry on WhatsApp with your event type, preferred date, guest count, and venue. The team will confirm availability and discuss menu options.",
+      "Send an inquiry on WhatsApp or submit the booking form with your event type, preferred date, guest count, and venue in Accra. Our team will verify date availability and curate a tailored menu proposal.",
   },
   {
     question: "How much does event catering cost?",
     answer:
-      "Event menus and pricing are discussed for each booking. Share your guest count, venue, and budget to request a tailored quote.",
+      "Event menus and pricing are customized for each booking based on your guest count, chosen dishes, and serving format. Share your estimated budget to receive a personalized quote.",
   },
   {
     question: "How far in advance should I book?",
     answer:
-      "Availability depends on the event date. Share your preferred date with the inquiry so the team can check availability; no fixed minimum booking period is published.",
+      "We recommend booking at least 1 to 3 weeks in advance for large celebrations to secure your preferred date, though we also accommodate shorter-notice bookings depending on kitchen capacity.",
   },
   {
     question: "Where does Rich-Dons provide event catering?",
     answer:
-      "Rich-Dons provides event catering in Accra and across Greater Accra. Include your venue or area when requesting availability.",
+      "We cater events across Accra and Greater Accra, including East Legon, Airport Residential, Cantonments, Dzorwulu, Ridge, Osu, Tema, and surrounding areas.",
+  },
+  {
+    question: "Do you provide chafing dishes and banquet stewards?",
+    answer:
+      "Yes. We provide complete chafing dish setups with food warmers, serving utensils, and professional banquet attendants to ensure food stays fresh and hot throughout your event.",
   },
 ];
 
@@ -115,30 +119,7 @@ export default function EventCateringPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
       />
-      <EventInquiryClient whatsappUrl={whatsappUrl} />
-      <section
-        aria-labelledby="event-faq-heading"
-        className="mx-auto max-w-3xl px-4 py-12"
-      >
-        <h2
-          id="event-faq-heading"
-          className="mb-6 text-center text-2xl font-extrabold"
-        >
-          Event Catering FAQs
-        </h2>
-        <div className="space-y-5">
-          {eventFaqs.map((faq) => (
-            <article
-              key={faq.question}
-              className="rounded-xl border border-slate-200 bg-white p-5"
-            >
-              <h3 className="font-bold">{faq.question}</h3>
-              <p className="mt-2 leading-relaxed text-slate-600">{faq.answer}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-      <BusinessContactLinks className="mx-auto mt-10 max-w-3xl gap-2 text-center text-sm not-italic text-slate-600" />
+      <EventInquiryClient whatsappUrl={whatsappUrl} faqs={eventFaqs} />
     </>
   );
 }

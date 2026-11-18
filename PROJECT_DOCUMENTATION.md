@@ -170,7 +170,7 @@ At minimum, configure these in `.env.local` for normal ordering:
 
 ```dotenv
 DATABASE_URL="postgresql://..."
-WHATSAPP_ORDER_NUMBER="233248179348"
+WHATSAPP_ORDER_NUMBER="233591754764"
 AUTH_SECRET="a-long-random-secret"
 NEXTAUTH_URL="http://localhost:3000"
 ```

@@ -1,9 +1,10 @@
 import { BUSINESS_CONTACT } from "@/lib/business";
 
 export const DEFAULT_WHATSAPP_NUMBER = BUSINESS_CONTACT.whatsappInternational;
+export const WHATSAPP_USERNAME = BUSINESS_CONTACT.whatsappUsername;
 export const CUSTOMER_SERVICE_PHONE = BUSINESS_CONTACT.whatsappInternational;
-export const CUSTOMER_SERVICE_PHONE_DISPLAY = "024 817 9348";
-export const CUSTOMER_SERVICE_PHONE_INTL = "+233 (0) 24 817 9348";
+export const CUSTOMER_SERVICE_PHONE_DISPLAY = "059 175 4764";
+export const CUSTOMER_SERVICE_PHONE_INTL = "+233 (0) 59 175 4764";
 
 export function getWhatsAppNumber() {
   const rawNumber =

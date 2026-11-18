@@ -381,7 +381,7 @@ export function OrderTrackerClient({
           <span className="text-3xl">⚠️</span>
           <h2 className="text-xl font-bold text-rose-800">Order Cancelled</h2>
           <p className="text-sm text-rose-600">
-            This order was cancelled. Please call or WhatsApp customer service at 024 817 9348 (+233 24 817 9348) if you have questions.
+            This order was cancelled. Please call or WhatsApp customer service at 059 175 4764 (+233 59 175 4764) if you have questions.
           </p>
         </div>
       ) : (
@@ -602,10 +602,10 @@ export function OrderTrackerClient({
             <span className="font-bold text-slate-900 block">Customer Service & Hotline</span>
             <p>
               Need help with this order? Call or WhatsApp us at{" "}
-              <a href="tel:+233248179348" className="font-bold text-amber-800 underline">
-                024 817 9348
+              <a href="tel:+233591754764" className="font-bold text-amber-800 underline">
+                059 175 4764
               </a>{" "}
-              (<a href="https://wa.me/233248179348" target="_blank" rel="noopener noreferrer" className="text-emerald-700 font-bold underline">WhatsApp Direct</a>).
+              (<a href="https://wa.me/233591754764" target="_blank" rel="noopener noreferrer" className="text-emerald-700 font-bold underline">WhatsApp Direct</a>).
             </p>
           </div>
           </div>

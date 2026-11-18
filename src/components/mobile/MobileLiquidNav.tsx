@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -41,66 +41,155 @@ export default function MobileLiquidNav() {
   const isCorporate = pathname === "/corporate" || pathname.startsWith("/corporate/");
   const isEvents = pathname === "/events";
 
-  // Scrape and observe menu categories when on /menu
+  // Discover categories from window cache or DOM
+  const discoverCategories = useCallback(() => {
+    if (typeof window === "undefined") return false;
+
+    // 1. Check window cache if already populated by MenuPage/MenuSideNav
+    const cached = (window as unknown as { __RD_MENU_CATEGORIES__?: CategoryNavItem[] })
+      .__RD_MENU_CATEGORIES__;
+    if (Array.isArray(cached) && cached.length > 0) {
+      setCategories(cached);
+      setActiveCategorySlug((current) => current || cached[0].slug);
+      return true;
+    }
+
+    // 2. Query DOM for .menu-category-section
+    const sections = Array.from(
+      document.querySelectorAll<HTMLElement>(".menu-category-section")
+    );
+    if (sections.length > 0) {
+      const found: CategoryNavItem[] = sections.map((sec) => {
+        const h2 = sec.querySelector("h2");
+        const countSpan = sec.querySelector(".menu-category-heading span:last-child");
+        const slug = sec.id.replace("menu-", "");
+        return {
+          id: sec.id,
+          slug,
+          name: h2?.textContent?.trim() || slug,
+          count: countSpan?.textContent?.trim() || "",
+        };
+      });
+
+      setCategories(found);
+      setActiveCategorySlug((current) => current || found[0].slug);
+      (window as unknown as { __RD_MENU_CATEGORIES__?: CategoryNavItem[] }).__RD_MENU_CATEGORIES__ = found;
+      return true;
+    }
+
+    return false;
+  }, []);
+
+  // Category discovery lifecycle: handles initial load, client-side navigation, and late DOM mounting
   useEffect(() => {
     if (!isMenuPage) {
       setIsCategoryDrawerOpen(false);
       return;
     }
 
-    const discoverCategories = () => {
-      const sections = Array.from(
-        document.querySelectorAll<HTMLElement>(".menu-category-section")
-      );
-      if (sections.length > 0) {
-        const found = sections.map((sec) => {
-          const h2 = sec.querySelector("h2");
-          const countSpan = sec.querySelector(".menu-category-heading span:last-child");
-          const slug = sec.id.replace("menu-", "");
-          return {
-            id: sec.id,
-            slug,
-            name: h2?.textContent?.trim() || slug,
-            count: countSpan?.textContent?.trim() || "",
-          };
-        });
-        setCategories(found);
-        if (!activeCategorySlug && found.length > 0) {
-          setActiveCategorySlug(found[0].slug);
-        }
+    // Attempt immediate discovery (e.g. from SSR or window cache)
+    discoverCategories();
+
+    // Listen to custom event dispatched when MenuSideNav mounts on the menu page
+    const handleCategoriesReady = (e: Event) => {
+      const customEvent = e as CustomEvent<CategoryNavItem[]>;
+      if (Array.isArray(customEvent.detail) && customEvent.detail.length > 0) {
+        setCategories(customEvent.detail);
+        setActiveCategorySlug((current) => current || customEvent.detail[0].slug);
+      } else {
+        discoverCategories();
       }
     };
+    window.addEventListener("rd:menu-categories", handleCategoriesReady);
 
-    discoverCategories();
-    const timer = setTimeout(discoverCategories, 400);
+    // Watch DOM mutations so categories are populated as soon as the menu page finishes rendering
+    let mutationObserver: MutationObserver | null = null;
+    if (typeof MutationObserver !== "undefined") {
+      mutationObserver = new MutationObserver(() => {
+        const found = discoverCategories();
+        if (found && mutationObserver) {
+          mutationObserver.disconnect();
+          mutationObserver = null;
+        }
+      });
+      mutationObserver.observe(document.body, { childList: true, subtree: true });
+    }
 
-    // Track active category on scroll
-    const sections = document.querySelectorAll<HTMLElement>(".menu-category-section");
-    if (sections.length === 0) return () => clearTimeout(timer);
+    // Polling retry fallback for client transitions across varying network/render speeds
+    const pollDelays = [50, 150, 300, 600, 1200, 2500];
+    const timers = pollDelays.map((delay) =>
+      setTimeout(() => {
+        discoverCategories();
+      }, delay)
+    );
+
+    return () => {
+      window.removeEventListener("rd:menu-categories", handleCategoriesReady);
+      if (mutationObserver) {
+        mutationObserver.disconnect();
+      }
+      timers.forEach(clearTimeout);
+    };
+  }, [isMenuPage, discoverCategories]);
+
+  // Track active category on scroll when categories are loaded
+  useEffect(() => {
+    if (!isMenuPage || categories.length === 0) return;
+
+    const ratioMap = new Map<string, number>();
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const slug = entry.target.id.replace("menu-", "");
           if (entry.isIntersecting) {
-            const slug = entry.target.id.replace("menu-", "");
-            setActiveCategorySlug(slug);
+            ratioMap.set(slug, entry.intersectionRatio);
+          } else {
+            ratioMap.delete(slug);
           }
         });
+
+        let highestSlug = "";
+        let highestRatio = -1;
+        ratioMap.forEach((ratio, slug) => {
+          if (ratio > highestRatio) {
+            highestRatio = ratio;
+            highestSlug = slug;
+          }
+        });
+
+        if (highestSlug) {
+          setActiveCategorySlug(highestSlug);
+        }
       },
-      { rootMargin: "-15% 0px -65% 0px", threshold: 0.05 }
+      { rootMargin: "-15% 0px -65% 0px", threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] }
     );
 
-    sections.forEach((s) => observer.observe(s));
+    categories.forEach((cat) => {
+      const el = document.getElementById(cat.id) || document.getElementById(`menu-${cat.slug}`);
+      if (el) observer.observe(el);
+    });
 
     return () => {
-      clearTimeout(timer);
       observer.disconnect();
     };
-  }, [isMenuPage, activeCategorySlug]);
+  }, [isMenuPage, categories]);
+
+  // Toggle category drawer and trigger immediate check if categories not yet loaded
+  const handleToggleCategoryDrawer = () => {
+    setIsCategoryDrawerOpen((prev) => {
+      const next = !prev;
+      if (next && categories.length === 0) {
+        discoverCategories();
+      }
+      return next;
+    });
+  };
 
   // Jump to category and close collapsible
   const handleJumpToCategory = (slug: string) => {
     setIsCategoryDrawerOpen(false);
+    setActiveCategorySlug(slug);
     const target = document.getElementById(`menu-${slug}`);
     if (target) {
       const yOffset = -85;
@@ -110,7 +199,11 @@ export default function MobileLiquidNav() {
   };
 
   const activeCategory = categories.find((c) => c.slug === activeCategorySlug);
-  const activeCategoryLabel = activeCategory ? activeCategory.name : "Categories";
+  const activeCategoryLabel = activeCategory
+    ? activeCategory.name
+    : categories.length > 0
+    ? categories[0].name
+    : "Categories";
 
   // Hide on admin routes, or on checkout/cart (where MobileFloatingCheckout handles 1-tap actions)
   if (
@@ -159,43 +252,51 @@ export default function MobileLiquidNav() {
               </div>
 
               <div className="grid grid-cols-1 gap-1.5">
-                {categories.map((cat, idx) => {
-                  const isActive = activeCategorySlug === cat.slug;
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => handleJumpToCategory(cat.slug)}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-2xl transition active:scale-[0.98] ${
-                        isActive
-                          ? "bg-amber-600 text-white font-black shadow-xs"
-                          : "bg-white/70 hover:bg-white text-slate-800 font-bold border border-slate-200/60"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span
-                          className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${
-                            isActive
-                              ? "bg-black/20 text-white"
-                              : "bg-slate-100 text-slate-600"
-                          }`}
-                        >
-                          {String(idx + 1).padStart(2, "0")}
-                        </span>
-                        <span className="text-xs text-left">{cat.name}</span>
-                      </div>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full ${
+                {categories.length === 0 ? (
+                  <div className="py-6 text-center text-xs text-slate-500 font-medium">
+                    Loading menu categories...
+                  </div>
+                ) : (
+                  categories.map((cat, idx) => {
+                    const isActive = activeCategorySlug === cat.slug;
+                    return (
+                      <button
+                        key={cat.id || cat.slug}
+                        type="button"
+                        onClick={() => handleJumpToCategory(cat.slug)}
+                        className={`w-full flex items-center justify-between p-2.5 rounded-2xl transition active:scale-[0.98] ${
                           isActive
-                            ? "bg-amber-700/80 text-amber-100"
-                            : "bg-slate-100 text-slate-600"
+                            ? "bg-amber-600 text-white font-black shadow-xs"
+                            : "bg-white/70 hover:bg-white text-slate-800 font-bold border border-slate-200/60"
                         }`}
                       >
-                        {cat.count}
-                      </span>
-                    </button>
-                  );
-                })}
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                              isActive
+                                ? "bg-black/20 text-white"
+                                : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            {String(idx + 1).padStart(2, "0")}
+                          </span>
+                          <span className="text-xs text-left">{cat.name}</span>
+                        </div>
+                        {cat.count && (
+                          <span
+                            className={`text-[10px] px-2 py-0.5 rounded-full ${
+                              isActive
+                                ? "bg-amber-700/80 text-amber-100"
+                                : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            {cat.count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </div>
           </>
@@ -211,7 +312,7 @@ export default function MobileLiquidNav() {
             {/* Collapsible Jump to Category Button */}
             <button
               type="button"
-              onClick={() => setIsCategoryDrawerOpen((prev) => !prev)}
+              onClick={handleToggleCategoryDrawer}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-[22px] transition active:scale-95 ${
                 isCategoryDrawerOpen
                   ? "bg-amber-600 text-white shadow-xs"
@@ -355,7 +456,7 @@ export default function MobileLiquidNav() {
             </Link>
 
             <a
-              href="https://wa.me/233248179348?text=Hello%20Rich-Dons%20Catering%2C%20I%20would%20like%20to%20inquire%20about%20office%20lunch%20catering."
+              href="https://wa.me/233591754764?text=Hello%20Rich-Dons%20Catering%2C%20I%20would%20like%20to%20inquire%20about%20office%20lunch%20catering."
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-[22px] bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black active:scale-95 transition shadow-xs"
@@ -398,7 +499,7 @@ export default function MobileLiquidNav() {
             </button>
 
             <a
-              href="https://wa.me/233248179348?text=Hello%20Rich-Dons%20Catering%2C%20I%20would%20like%20to%20inquire%20about%20event%20catering."
+              href="https://wa.me/233591754764?text=Hello%20Rich-Dons%20Catering%2C%20I%20would%20like%20to%20inquire%20about%20event%20catering."
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-2.5 rounded-[22px] bg-emerald-600 text-white text-xs font-black active:scale-95 transition shadow-xs"
