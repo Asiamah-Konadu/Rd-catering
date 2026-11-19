@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { PaymentMethod, PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { normalizeGhanaPhone, requestMtnMomoPayment } from "@/lib/mtn-momo";
+import { normalizeGhanaPhone, requestPaystackMobileMoneyPayment } from "@/lib/paystack";
 import { sendWhatsAppText } from "@/lib/whatsapp";
 
 export const runtime = "nodejs";
@@ -44,26 +44,31 @@ async function beginPayment(message: IncomingMessage) {
     include: { payment: true },
   });
   if (!order || normalizeGhanaPhone(order.customerPhone) !== sender || !order.payment) return;
-  if (order.status === "CANCELLED") return;
-  if (order.payment.status !== PaymentStatus.PENDING) return;
+  if (order.status === "CANCELLED" || order.payment.status !== PaymentStatus.PENDING) return;
 
-  const referenceId = randomUUID();
+  if (!order.customerEmail) {
+    await sendWhatsAppText(sender, `We couldn't start payment for order ${order.orderNumber} because an email address is missing from the order. Please contact Rich-Dons Catering so we can update it.`);
+    return;
+  }
+
+  const reference = `PS-${Date.now()}-${randomUUID()}`;
   const claim = await prisma.payment.updateMany({
     where: { id: order.payment.id, status: PaymentStatus.PENDING },
-    data: { status: PaymentStatus.PROCESSING, method: PaymentMethod.MOBILE_MONEY, transactionId: referenceId },
+    data: { status: PaymentStatus.PROCESSING, method: PaymentMethod.MOBILE_MONEY, transactionId: reference },
   });
   if (claim.count !== 1) return;
 
   try {
-    await requestMtnMomoPayment({
-      referenceId,
-      amount: order.payment.amount.toFixed(2),
+    const charge = await requestPaystackMobileMoneyPayment({
+      reference,
+      amount: Number(order.payment.amount),
       phone: sender,
       orderNumber: order.orderNumber,
+      email: order.customerEmail,
     });
-    await sendWhatsAppText(sender, `Payment request sent for order ${order.orderNumber} (GH₵ ${order.payment.amount.toFixed(2)}). Approve it on your MTN MoMo phone to complete payment.`);
+    await sendWhatsAppText(sender, `Payment request sent for order ${order.orderNumber} (GHS ${order.payment.amount.toFixed(2)}). ${charge.displayText}`);
   } catch (error) {
-    console.error("Could not start MTN MoMo payment", { orderNumber: order.orderNumber, error });
+    console.error("Could not start Paystack mobile money payment", { orderNumber: order.orderNumber, error });
     // Keep PROCESSING when the network outcome is uncertain to prevent duplicate collection.
   }
 }

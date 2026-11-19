@@ -665,8 +665,9 @@ export default function CheckoutPage() {
             </div>
 
             <label className="block text-xs font-semibold text-slate-700">
-              Email <span className="text-slate-400 font-normal">(optional for receipt)</span>
+              Email * <span className="text-slate-400 font-normal">(required for mobile money payment)</span>
               <input
+                required
                 type="email"
                 maxLength={150}
                 autoComplete="email"
@@ -772,7 +773,7 @@ export default function CheckoutPage() {
             </div>
 
             <p className="text-sm text-slate-600">
-              We&apos;ll save your order and open WhatsApp with the items, delivery details, and total ready to send. The restaurant will confirm availability and payment with you in chat.
+              We&apos;ll save your order and open WhatsApp with its reference. Send that message to request a Paystack mobile money prompt on your phone.
             </p>
             <div className="text-xs text-slate-600 bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex items-center justify-between flex-wrap gap-2">
               <span>Checkout WhatsApp: <strong className="text-slate-900 font-bold">059 175 4764</strong></span>

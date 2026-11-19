@@ -171,8 +171,8 @@ export async function POST(request: Request) {
     if (!name || name.length < 2 || !phone || !validPhone(phone) || !address || !city) {
       return NextResponse.json({ error: "Enter a valid name, Ghanaian phone number, address, and city." }, { status: 400 });
     }
-    if (email && !validEmail(email)) {
-      return NextResponse.json({ error: "Enter a valid email address or leave it blank." }, { status: 400 });
+    if (!email || !validEmail(email)) {
+      return NextResponse.json({ error: "Enter a valid email address to place your order and pay by mobile money." }, { status: 400 });
     }
     if (!Array.isArray(payload.items) || payload.items.length === 0) {
       return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
