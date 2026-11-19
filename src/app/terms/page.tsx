@@ -61,7 +61,7 @@ export default function TermsOfServicePage() {
             All prices displayed on our website are denominated in Ghana Cedis (GH₵) and include applicable local taxes unless explicitly noted.
           </p>
           <ul className="list-disc pl-6 space-y-2 text-stone-600">
-            <li>Mobile money payments are processed through Paystack. Your order is paid only after the transaction is confirmed by the payment provider.</li>
+            <li>Online payments are processed through Hubtel. Your order is paid only after the transaction is confirmed by the payment provider.</li>
             <li>Delivery fees are calculated based on your destination within Greater Accra. Corporate batch deliveries may qualify for free delivery subject to office portal agreements.</li>
           </ul>
         </section>

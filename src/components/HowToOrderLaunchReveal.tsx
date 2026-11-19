@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowRight, Sparkles, Utensils, SlidersHorizontal, MessageCircle, ChevronRight } from "lucide-react";
+import { ArrowDown, ArrowRight, Sparkles, Utensils, SlidersHorizontal, CreditCard, ChevronRight } from "lucide-react";
 import SectionLineArt from "@/components/SectionLineArt";
 
 interface OrderStep {
@@ -46,14 +46,14 @@ const ORDER_STEPS: OrderStep[] = [
   {
     id: "step-3",
     step: "03",
-    title: "Confirm on WhatsApp",
-    subtitle: "Instant Kitchen Dispatch",
+    title: "Review and Pay",
+    subtitle: "Secure Online Checkout",
     description:
-      "Review your bag and tap to send a pre-formatted WhatsApp message directly to our Accra kitchen for instant confirmation and live delivery tracking.",
+      "Review your order and pay securely on this site with mobile money, card, or Hubtel Wallet. Track your order online after checkout.",
     imageUrl: "/how-to-order-3.jpg",
-    alt: "Step 3: Confirm order directly with our kitchen over WhatsApp",
+    alt: "Step 3: Pay securely using the online checkout",
     badge: "Step 03 · Dispatch",
-    icon: <MessageCircle size={16} aria-hidden="true" />,
+    icon: <CreditCard size={16} aria-hidden="true" />,
   },
 ];
 
@@ -257,7 +257,7 @@ export default function HowToOrderLaunchReveal() {
         </h2>
 
         <p className="launch-reveal-subtitle">
-          Browse our authentic Ghanaian dishes, customise to your exact taste, and confirm directly with our kitchen over WhatsApp.
+          Browse our authentic Ghanaian dishes, customise your order, and pay securely on this site.
         </p>
 
         <div className="launch-reveal-actions">

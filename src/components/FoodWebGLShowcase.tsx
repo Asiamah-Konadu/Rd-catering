@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { ArrowRight, Flame, Sparkles, Clock, Star, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Flame, Sparkles, Clock, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import type { ShowcaseConfig } from "@/lib/showcase";
 import { DEFAULT_SHOWCASE_CONFIG } from "@/lib/showcase";
 
@@ -221,12 +221,6 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
   const activeDish = activeItems[activeIndex] || activeItems[0];
   const activeMetric = DISH_METRICS[activeDish.slug] || DEFAULT_METRIC;
 
-  const whatsappUrl = useMemo(() => {
-    const msg = `Hello Rich-Dons Kitchen! I'd like to order:\n\n*${activeDish.name}*\nPrice: GH₵ ${activeDish.price.toFixed(
-      2
-    )}\nCategory: ${activeDish.category}\n\nPlease confirm availability and estimated delivery time.`;
-    return `https://wa.me/233591754764?text=${encodeURIComponent(msg)}`;
-  }, [activeDish]);
 
   return (
     <>
@@ -386,16 +380,6 @@ export default function FoodWebGLShowcase({ config = DEFAULT_SHOWCASE_CONFIG }: 
 
                     {/* Actions */}
                     <div className="wgs-actions">
-                      <a
-                        href={whatsappUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="wgs-order-btn"
-                        aria-label={`Order ${dish.name} on WhatsApp`}
-                      >
-                        <MessageCircle size={16} aria-hidden="true" />
-                        <span>Order on WhatsApp</span>
-                      </a>
                       <Link href={`/menu/${dish.slug}`} className="wgs-details-btn">
                         <span>View Dish Details</span>
                         <ArrowRight size={14} aria-hidden="true" />

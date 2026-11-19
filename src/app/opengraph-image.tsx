@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt = "Rich-Dons Catering — Fresh Ghanaian Food Delivered in Accra";
+export const dynamic = "force-dynamic";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

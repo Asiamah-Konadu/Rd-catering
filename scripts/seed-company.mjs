@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import fs from "fs";
 import path from "path";
 
@@ -35,7 +36,7 @@ if (validPostgresUrl) {
   process.env.DATABASE_URL = validPostgresUrl;
 }
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaNeon({ connectionString: process.env.DATABASE_URL }) });
 
 async function main() {
   const count = await prisma.company.count();

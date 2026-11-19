@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaNeon({ connectionString: process.env.DATABASE_URL }) });
 
 const DEFAULT_EXTRAS = [
   { name: "Charcoal Grilled Chicken", price: 20.0 },

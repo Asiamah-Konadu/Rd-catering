@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Clock3, ExternalLink, MapPin, MessageCircle, Star } from "lucide-react";
+import { ArrowRight, Clock3, ExternalLink, MapPin, ShieldCheck, Star } from "lucide-react";
 import MobileBentoGrid from "@/components/mobile/MobileBentoGrid";
 import { BUSINESS_HOURS } from "@/lib/business";
 import FoodWebGLShowcase from "@/components/FoodWebGLShowcase";
@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Rich-Dons Catering | Fresh Ghanaian Food & Office Lunch Delivery Accra",
   description:
-    "Order authentic Ghanaian food from Rich-Dons Catering. Smoky jollof rice, waakye, swallows & soups freshly prepared and delivered across Accra. Direct WhatsApp ordering & corporate lunch portals.",
+    "Order authentic Ghanaian food from Rich-Dons Catering. Smoky jollof rice, waakye, swallows & soups freshly prepared and delivered across Accra. Secure online checkout and corporate lunch portals.",
   alternates: {
     canonical: "/",
   },
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Rich-Dons Catering | Fresh Ghanaian Food Delivered in Accra",
     description:
-      "Authentic Ghanaian cuisine cooked fresh to order. Fast doorstep delivery in Accra. Browse the menu and order on WhatsApp.",
+      "Authentic Ghanaian cuisine cooked fresh to order. Fast doorstep delivery in Accra. Browse the menu and place your order online.",
     url: "/",
     siteName: "Rich-Dons Catering",
     locale: "en_GH",
@@ -96,7 +96,7 @@ export default async function Home() {
             <span className="home-open-dot" />
             <span>{siteSettings.businessHoursText || BUSINESS_HOURS.label}</span>
             <span className="home-note-divider" />
-            <span>Confirm and pay in WhatsApp</span>
+            <span>Order and pay securely online</span>
           </div>
         </div>
 
@@ -177,7 +177,7 @@ export default async function Home() {
         <SectionLineArt kind="route" label="Delivery route illustration" />
         <div><MapPin size={17} aria-hidden="true" /><span>Accra delivery</span></div>
         <div><Clock3 size={17} aria-hidden="true" /><span>Made fresh to order</span></div>
-        <div><MessageCircle size={17} aria-hidden="true" /><span>WhatsApp order confirmation</span></div>
+        <div><ShieldCheck size={17} aria-hidden="true" /><span>Secure online checkout</span></div>
       </section>
 
       {/* 20% Bento Grid UI — Strictly for Mobile screens */}

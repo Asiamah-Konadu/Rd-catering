@@ -337,7 +337,7 @@ export default function Footer() {
               <span>Mobile Money</span>
               <span>Hubtel</span>
               <span>Card</span>
-              <span>WhatsApp Direct</span>
+              <span>Secure Checkout</span>
             </div>
 
             <button

@@ -1,5 +1,6 @@
 generator client {
     provider = "prisma-client-js"
+    engineType = "client"
 }
 
 datasource db {
@@ -263,6 +264,8 @@ model Payment {
   method        PaymentMethod
   status        PaymentStatus @default(PENDING)
   transactionId String?
+  checkoutUrl   String?
+  providerTransactionId String?
   order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

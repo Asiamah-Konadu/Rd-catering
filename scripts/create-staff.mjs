@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { hash } from "bcryptjs";
 import fs from "fs";
 import path from "path";
@@ -43,9 +44,7 @@ if (!dbUrl || dbUrl === "[SENSITIVE]") {
 }
 
 const prisma = new PrismaClient({
-  datasources: {
-    db: { url: dbUrl },
-  },
+  adapter: new PrismaNeon({ connectionString: dbUrl }),
 });
 
 const name = (process.env.STAFF_NAME || process.env.ADMIN_NAME || "Menu Manager")?.trim();

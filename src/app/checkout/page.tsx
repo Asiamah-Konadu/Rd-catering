@@ -11,7 +11,6 @@ import {
   Calendar,
   Clock,
   Zap,
-  MessageCircle,
   ShieldCheck,
   CheckCircle2,
   Tag,
@@ -337,14 +336,12 @@ export default function CheckoutPage() {
         !data ||
         typeof data !== "object" ||
         !("orderNumber" in data) ||
-        typeof data.orderNumber !== "string" ||
-        !("whatsappUrl" in data) ||
-        typeof data.whatsappUrl !== "string"
+        typeof data.orderNumber !== "string"
       ) {
-        throw new Error("The order was created, but WhatsApp checkout could not be opened.");
+        throw new Error("The order was created, but payment checkout could not be opened.");
       }
       clear();
-      window.location.assign(data.whatsappUrl);
+      window.location.assign(`/pay/${encodeURIComponent(data.orderNumber)}`);
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
@@ -665,9 +662,8 @@ export default function CheckoutPage() {
             </div>
 
             <label className="block text-xs font-semibold text-slate-700">
-              Email * <span className="text-slate-400 font-normal">(required for mobile money payment)</span>
+              Email <span className="text-slate-400 font-normal">(optional)</span>
               <input
-                required
                 type="email"
                 maxLength={150}
                 autoComplete="email"
@@ -760,12 +756,12 @@ export default function CheckoutPage() {
             </label>
           </section>
 
-          {/* ─── 3. WHATSAPP ORDER CONFIRMATION ────────────────────────── */}
+          {/* ─── 3. SECURE PAYMENT ────────────────────────────────────── */}
           <section className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-900 text-base">Confirm on WhatsApp</h3>
+                <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-bold text-slate-900 text-base">Pay securely online</h3>
               </div>
               <span className="text-[11px] font-semibold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full">
                 Step 3 of 3
@@ -773,11 +769,11 @@ export default function CheckoutPage() {
             </div>
 
             <p className="text-sm text-slate-600">
-              We&apos;ll save your order and open WhatsApp with its reference. Send that message to request a Paystack mobile money prompt on your phone.
+              After you place your order, choose mobile money, card, or Hubtel Wallet in the secure checkout on this site. We&apos;ll show your payment status here.
             </p>
             <div className="text-xs text-slate-600 bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex items-center justify-between flex-wrap gap-2">
-              <span>Checkout WhatsApp: <strong className="text-slate-900 font-bold">059 175 4764</strong></span>
-              <span>Customer Service Call Line: <a href="tel:+233591754764" className="text-amber-700 font-bold hover:underline">059 175 4764</a></span>
+              <span>Secure payments processed by Hubtel</span>
+              <span>Customer service: <a href="tel:+233591754764" className="text-amber-700 font-bold hover:underline">059 175 4764</a></span>
             </div>
           </section>
 
@@ -792,7 +788,7 @@ export default function CheckoutPage() {
             className="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-2xl text-base shadow-lg hover:shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             disabled={loading}
           >
-            {loading ? "Preparing WhatsApp order..." : "Continue to WhatsApp"}
+            {loading ? "Preparing secure checkout..." : "Place order and pay"}
           </button>
         </form>
 
@@ -960,7 +956,7 @@ export default function CheckoutPage() {
           itemCount={items.length}
           loading={loading}
           formId="checkout-form"
-          actionText="Continue to WhatsApp"
+          actionText="Place order and pay"
         />
       )}
     </main>

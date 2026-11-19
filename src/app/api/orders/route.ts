@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getWhatsAppOrderUrl } from "@/lib/whatsapp";
 import { getSiteSettings } from "@/lib/settings";
 import { checkIsKitchenOpen } from "@/lib/kitchen-hours";
 
@@ -14,7 +13,7 @@ const MAX_NOTES_LENGTH = 500;
 
 function orderNumber() {
   const date = new Date().toISOString().slice(0, 10).replaceAll("-", "");
-  const suffix = crypto.randomUUID().replaceAll("-", "").slice(0, 8).toUpperCase();
+  const suffix = crypto.randomUUID().replaceAll("-", "").slice(0, 16).toUpperCase();
   return `RD-${date}-${suffix}`;
 }
 
@@ -141,13 +140,6 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!getWhatsAppOrderUrl("WhatsApp checkout configuration check")) {
-      return NextResponse.json(
-        { error: "WhatsApp ordering is not configured. Please contact the restaurant directly." },
-        { status: 503 }
-      );
-    }
-
     const latitude = typeof payload.latitude === "number" &&
       Number.isFinite(payload.latitude) &&
       payload.latitude >= -90 &&
@@ -171,8 +163,8 @@ export async function POST(request: Request) {
     if (!name || name.length < 2 || !phone || !validPhone(phone) || !address || !city) {
       return NextResponse.json({ error: "Enter a valid name, Ghanaian phone number, address, and city." }, { status: 400 });
     }
-    if (!email || !validEmail(email)) {
-      return NextResponse.json({ error: "Enter a valid email address to place your order and pay by mobile money." }, { status: 400 });
+    if (email && !validEmail(email)) {
+      return NextResponse.json({ error: "Enter a valid email address or leave it blank." }, { status: 400 });
     }
     if (!Array.isArray(payload.items) || payload.items.length === 0) {
       return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
@@ -354,7 +346,7 @@ export async function POST(request: Request) {
           payment: {
             create: {
               amount: finalTotal,
-              method: "WHATSAPP",
+              method: "MOBILE_MONEY",
               status: "PENDING",
             },
           },
@@ -376,46 +368,7 @@ export async function POST(request: Request) {
       return { order: createdOrder, finalTotal, discount };
     });
 
-    const itemsSummary = orderLines.map(line => {
-      const extrasDetail = line.selectedExtras.length > 0
-        ? `\n   └ Extras: ${line.selectedExtras.map(e => `${e.name} (+GH₵ ${e.price.toFixed(2)})`).join(", ")}`
-        : "";
-      return `${line.quantity} x ${line.item.name} - GH₵ ${line.totalPrice.toFixed(2)}${extrasDetail}`;
-    });
-
-    const message = [
-      "Hello Rich-Dons Catering, I would like to confirm this order:",
-      `Order: ${result.order.orderNumber}`,
-      `Name: ${name}`,
-      `Phone: ${phone}`,
-      "",
-      "Items:",
-      ...itemsSummary,
-      "",
-      `Subtotal: GH₵ ${subtotal.toFixed(2)}`,
-      `Delivery: GH₵ ${fee.toFixed(2)}`,
-      `Discount: GH₵ ${result.discount.toFixed(2)}`,
-      `Total: GH₵ ${result.finalTotal.toFixed(2)}`,
-      `Delivery address: ${address}, ${city}${region ? `, ${region}` : ""}`,
-      `Google Maps navigation: https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`,
-      `GPS coordinates: ${latitude}, ${longitude}`,
-      `Schedule: ${isScheduled ? `${scheduledSlot || "Scheduled"}${scheduledFor ? ` on ${scheduledFor.toLocaleString("en-GH")}` : ""}` : "ASAP"}`,
-      ...(staffDepartment ? [`Department / desk: ${staffDepartment}`] : []),
-      ...(notes ? [`Notes: ${notes}`] : []),
-    ].join("\n");
-    const whatsappUrl = getWhatsAppOrderUrl(message);
-
-    if (!whatsappUrl) {
-      return NextResponse.json(
-        { error: "WhatsApp ordering is not configured. Please contact the restaurant directly." },
-        { status: 503 }
-      );
-    }
-
-    return NextResponse.json(
-      { orderNumber: result.order.orderNumber, whatsappUrl },
-      { status: 201 }
-    );
+    return NextResponse.json({ orderNumber: result.order.orderNumber }, { status: 201 });
   } catch (err: unknown) {
     console.error("Failed to create order:", err);
     const errorMessage = err instanceof Error ? err.message : "Unable to create your order right now. Please try again.";

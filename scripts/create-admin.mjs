@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { hash } from "bcryptjs";
 import fs from "fs";
 import path from "path";
@@ -30,7 +31,7 @@ function loadEnvFile(filePath) {
 loadEnvFile(path.resolve(process.cwd(), ".env.local"));
 loadEnvFile(path.resolve(process.cwd(), ".env"));
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaNeon({ connectionString: process.env.DATABASE_URL }) });
 const name = process.env.ADMIN_NAME?.trim();
 const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
 const password = process.env.ADMIN_PASSWORD;

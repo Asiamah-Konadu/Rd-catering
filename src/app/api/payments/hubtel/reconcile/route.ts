@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PaymentMethod, PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { PAYSTACK_REFERENCE_PREFIX, settlePaystackPayment } from "@/lib/paystack";
+import { HUBTEL_REFERENCE_PREFIX, settleHubtelPayment } from "@/lib/hubtel";
 
 export const runtime = "nodejs";
 
@@ -15,24 +15,26 @@ export async function POST(request: Request) {
     where: {
       status: PaymentStatus.PROCESSING,
       method: PaymentMethod.MOBILE_MONEY,
-      transactionId: { startsWith: PAYSTACK_REFERENCE_PREFIX },
+      transactionId: { startsWith: HUBTEL_REFERENCE_PREFIX },
+      updatedAt: { lt: new Date(Date.now() - 5 * 60 * 1000) },
     },
     orderBy: { updatedAt: "asc" },
-    take: 50,
+    take: 30,
   });
 
   let checked = 0;
   let completed = 0;
+  let failed = 0;
   for (const payment of payments) {
     if (!payment.transactionId) continue;
     checked++;
     try {
-      const result = await settlePaystackPayment(payment.transactionId);
+      const result = await settleHubtelPayment(payment.transactionId);
       if (result.completed) completed++;
     } catch (error) {
-      console.error("Paystack payment reconciliation failed", { paymentId: payment.id, error });
+      failed++;
+      console.error("Hubtel payment reconciliation failed", { paymentId: payment.id, error });
     }
   }
-
-  return NextResponse.json({ checked, completed });
+  return NextResponse.json({ checked, completed, failed });
 }
