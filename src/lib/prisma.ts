@@ -3,12 +3,28 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) throw new Error("DATABASE_URL is not configured.");
+function getPrismaClient(): PrismaClient {
+  if (globalForPrisma.prisma) return globalForPrisma.prisma;
 
-const adapter = new PrismaNeon({ connectionString });
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({ adapter, log: ["error", "warn"] });
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error("DATABASE_URL is not configured.");
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+  const client = new PrismaClient({
+    adapter: new PrismaNeon({ connectionString }),
+    log: ["error", "warn"]
+  });
+
+  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;
+  return client;
+}
+
+// API route modules are imported while Next collects build metadata. Defer
+// creating the database adapter until a handler actually uses Prisma so builds
+// do not need production secrets in their environment.
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, property) {
+    const client = getPrismaClient();
+    const value = Reflect.get(client, property, client) as unknown;
+    return typeof value === "function" ? value.bind(client) : value;
+  }
+});
