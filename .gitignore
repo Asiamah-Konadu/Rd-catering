@@ -12,3 +12,4 @@ coverage/
 .dev.vars*
 .wrangler/
 .open-next/
+.neon

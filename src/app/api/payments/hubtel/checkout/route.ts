@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { createHubtelCheckout, newHubtelReference } from "@/lib/hubtel";
+import { createHubtelCheckout, isHubtelConfigured, newHubtelReference } from "@/lib/hubtel";
 
 export const runtime = "nodejs";
 
@@ -65,6 +65,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ status: "PROCESSING", checkoutUrl: order.payment.checkoutUrl });
     }
     return NextResponse.json({ error: "Checkout is being prepared. Refresh this page in a moment." }, { status: 409 });
+  }
+
+  if (!isHubtelConfigured()) {
+    return NextResponse.json(
+      { error: "Online payment gateway is pending live credentials. Please contact richdonscatering@gmail.com or 059 175 4764 to complete payment." },
+      { status: 503 }
+    );
   }
 
   const reference = newHubtelReference();

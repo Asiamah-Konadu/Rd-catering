@@ -553,9 +553,19 @@ export function OrderTrackerClient({
               <div className={`mt-1 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold w-fit ${order.payment?.status === "PAID" ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200"}`}>
                 <span>{order.payment?.status ?? "PENDING"}</span>
                 <span className="text-[11px] font-normal">
-                  via {order.payment?.method?.replace(/_/g, " ") ?? "WHATSAPP"}
+                  via {order.payment?.method ? order.payment.method.replace(/_/g, " ") : "MOBILE MONEY"}
                 </span>
               </div>
+              {order.payment?.status !== "PAID" && order.status !== "CANCELLED" && (
+                <div className="mt-3">
+                  <Link
+                    href={`/pay/${order.orderNumber}`}
+                    className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-sm"
+                  >
+                    <span>💳 Complete Payment (Hubtel)</span>
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Schedule details if scheduled */}

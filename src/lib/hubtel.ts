@@ -5,10 +5,17 @@ const HUBTEL_CHECKOUT_API = "https://payproxyapi.hubtel.com/items/initiate";
 const HUBTEL_STATUS_API = "https://api-txnstatus.hubtel.com/transactions";
 const HUBTEL_REFERENCE_PREFIX = "HB-";
 
+export function isHubtelConfigured(): boolean {
+  const apiId = process.env.HUBTEL_API_ID || process.env.HUBTEL_CLIENT_ID;
+  const apiKey = process.env.HUBTEL_API_KEY || process.env.HUBTEL_CLIENT_SECRET;
+  const account = process.env.HUBTEL_COLLECTION_ACCOUNT || process.env.HUBTEL_MERCHANT_ACCOUNT_NUMBER || process.env.HUBTEL_ACCOUNT_NUMBER;
+  return Boolean(apiId && apiKey && account);
+}
+
 function credentials() {
-  const apiId = process.env.HUBTEL_API_ID;
-  const apiKey = process.env.HUBTEL_API_KEY;
-  const account = process.env.HUBTEL_COLLECTION_ACCOUNT;
+  const apiId = process.env.HUBTEL_API_ID || process.env.HUBTEL_CLIENT_ID;
+  const apiKey = process.env.HUBTEL_API_KEY || process.env.HUBTEL_CLIENT_SECRET;
+  const account = process.env.HUBTEL_COLLECTION_ACCOUNT || process.env.HUBTEL_MERCHANT_ACCOUNT_NUMBER || process.env.HUBTEL_ACCOUNT_NUMBER;
   if (!apiId || !apiKey || !account) throw new Error("Hubtel Online Checkout is not configured.");
   return { apiId, apiKey, account };
 }
@@ -130,6 +137,15 @@ async function applyHubtelResult(reference: string, status: {
     },
   });
   if (updated.count !== 1) return { found: true, completed: false };
+
+  if (nextStatus === PaymentStatus.PAID) {
+    await prisma.order.update({
+      where: { id: payment.orderId },
+      data: { status: "CONFIRMED" },
+    }).catch((err) => {
+      console.error("Failed to update order status to CONFIRMED on payment success:", err);
+    });
+  }
 
   return { found: true, completed: nextStatus === PaymentStatus.PAID };
 }

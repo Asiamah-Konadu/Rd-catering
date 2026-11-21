@@ -19,6 +19,8 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@neon/config": "^1.14.5",
+    "@neon/env": "^2.1.8",
     "@prisma/adapter-neon": "6.19.3",
     "@prisma/client": "6.19.3",
     "@types/three": "^0.186.0",
@@ -31,6 +33,7 @@
     "three": "^0.186.1"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.16",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/bcryptjs": "^2.4.6",
     "@types/google.maps": "^3.66.0",
@@ -40,10 +43,9 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.5.23",
     "prisma": "6.19.3",
-    "@opennextjs/cloudflare": "^1.20.16",
-    "wrangler": "^4.13.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "wrangler": "^4.13.0"
   },
   "overrides": {
     "postcss": "8.5.23",

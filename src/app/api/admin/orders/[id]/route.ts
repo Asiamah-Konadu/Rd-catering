@@ -74,7 +74,7 @@ export async function PATCH(
           create: {
             orderId: id,
             amount: order.total,
-            method: PaymentMethod.WHATSAPP,
+            method: PaymentMethod.MOBILE_MONEY,
             status: paymentStatus,
           },
           update: { status: paymentStatus },
