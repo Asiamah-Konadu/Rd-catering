@@ -339,5 +339,9 @@ model SiteSettings {
   whatsappPhone       String   @default("+233591754764")
   openingTime         String   @default("08:00")
   closingTime         String   @default("22:00")
+  promoEnabled        Boolean  @default(false)
+  promoDiscountPct    Decimal  @default(0) @db.Decimal(5, 2)
+  promoLabel          String   @default("Promo")
+  promoMinOrderGHS    Decimal  @default(0) @db.Decimal(10, 2)
   updatedAt           DateTime @updatedAt
 }

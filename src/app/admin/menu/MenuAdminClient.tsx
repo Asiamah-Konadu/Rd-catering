@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { GripVertical } from "lucide-react";
 
 export type AdminCategory = {
   id: string;
@@ -18,6 +19,7 @@ export type AdminMenuItem = {
   price: number | string;
   isAvailable: boolean;
   isFeatured: boolean;
+  sortOrder: number;
   category?: AdminCategory;
 };
 
@@ -29,9 +31,15 @@ export function MenuAdminClient({
   initialItems: AdminMenuItem[];
 }) {
   const [categories] = useState<AdminCategory[]>(initialCategories);
-  const [items, setItems] = useState<AdminMenuItem[]>(initialItems);
+  const [items, setItems] = useState<AdminMenuItem[]>(
+    initialItems.map((item, index) => ({
+      ...item,
+      sortOrder: item.sortOrder ?? index,
+    }))
+  );
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<AdminMenuItem | null>(null);
@@ -50,9 +58,79 @@ export function MenuAdminClient({
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  // Drag-and-drop state
+  const dragIndexRef = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const isFiltered =
+    selectedCategory !== "ALL" || searchQuery.trim() !== "";
+
+  // Drag handlers
+  const handleDragStart = (index: number) => {
+    dragIndexRef.current = index;
+    setIsDragging(true);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    const dragIndex = dragIndexRef.current;
+    if (dragIndex === null || dragIndex === dropIndex) {
+      setIsDragging(false);
+      setDragOverIndex(null);
+      dragIndexRef.current = null;
+      return;
+    }
+
+    // Reorder the items array
+    const newItems = [...items];
+    const [dragged] = newItems.splice(dragIndex, 1);
+    newItems.splice(dropIndex, 0, dragged);
+
+    // Assign new sortOrder values based on new positions
+    const reordered = newItems.map((item, idx) => ({
+      ...item,
+      sortOrder: idx,
+    }));
+
+    setItems(reordered);
+    setIsDragging(false);
+    setDragOverIndex(null);
+    dragIndexRef.current = null;
+
+    // Persist to backend
+    try {
+      const res = await fetch("/api/admin/menu", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reorder: reordered.map((item) => ({
+            id: item.id,
+            sortOrder: item.sortOrder,
+          })),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      showToast("Order saved");
+    } catch {
+      showToast("Failed to save order");
+    }
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    setDragOverIndex(null);
+    dragIndexRef.current = null;
   };
 
   const openCreateModal = () => {
@@ -214,7 +292,33 @@ export function MenuAdminClient({
           })}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {/* View mode toggle */}
+          <div className="flex border border-slate-200 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setViewMode("grid")}
+              title="Grid view"
+              className={`px-2.5 py-2 text-sm transition ${
+                viewMode === "grid"
+                  ? "bg-slate-900 text-white"
+                  : "bg-white text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              ⊞
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              title="List view"
+              className={`px-2.5 py-2 text-sm transition ${
+                viewMode === "list"
+                  ? "bg-slate-900 text-white"
+                  : "bg-white text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              ☰
+            </button>
+          </div>
+
           <input
             type="text"
             placeholder="Search dish name..."
@@ -231,93 +335,239 @@ export function MenuAdminClient({
         </div>
       </div>
 
-      {/* Grid of Dishes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredItems.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition"
-          >
-            <div>
-              {item.imageUrl ? (
-                <div className="h-44 w-full overflow-hidden relative bg-slate-100">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {item.isFeatured && (
-                    <span className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-xs">
-                      Featured
+      {/* Reorder hint / filter notice (list view only) */}
+      {viewMode === "list" && (
+        <div className="text-xs text-slate-500 flex items-center gap-2 px-1">
+          {isFiltered ? (
+            <span className="text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg font-medium">
+              Clear filters to reorder
+            </span>
+          ) : (
+            <span className="text-slate-400 italic">
+              Drag the <GripVertical className="inline w-3.5 h-3.5 -mt-0.5" /> handle to reorder dishes
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Grid View */}
+      {viewMode === "grid" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredItems.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition"
+            >
+              <div>
+                {item.imageUrl ? (
+                  <div className="h-44 w-full overflow-hidden relative bg-slate-100">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {item.isFeatured && (
+                      <span className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-xs">
+                        Featured
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="h-28 w-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-medium">
+                    No image provided
+                  </div>
+                )}
+
+                <div className="p-4 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-slate-900 text-lg">{item.name}</h3>
+                    <span className="font-extrabold text-amber-700 text-base">
+                      GH₵ {Number(item.price).toFixed(2)}
                     </span>
+                  </div>
+                  <div className="text-xs text-amber-800 font-semibold bg-amber-50 inline-block px-2 py-0.5 rounded">
+                    {item.category?.name || "Uncategorized"}
+                  </div>
+                  {item.description && (
+                    <p className="text-xs text-slate-600 line-clamp-2">
+                      {item.description}
+                    </p>
                   )}
                 </div>
-              ) : (
-                <div className="h-28 w-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-medium">
-                  No image provided
-                </div>
-              )}
+              </div>
 
-              <div className="p-4 space-y-2">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-slate-900 text-lg">{item.name}</h3>
-                  <span className="font-extrabold text-amber-700 text-base">
-                    GH₵ {Number(item.price).toFixed(2)}
-                  </span>
+              <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleToggle(item, "isAvailable")}
+                    className={`text-xs font-bold px-2.5 py-1 rounded-full border transition ${
+                      item.isAvailable
+                        ? "bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200"
+                        : "bg-rose-100 text-rose-800 border-rose-300 hover:bg-rose-200"
+                    }`}
+                  >
+                    {item.isAvailable ? "In Stock" : "Out of Stock"}
+                  </button>
+                  <button
+                    onClick={() => handleToggle(item, "isFeatured")}
+                    className={`text-xs font-semibold px-2 py-1 rounded transition ${
+                      item.isFeatured
+                        ? "bg-amber-100 text-amber-800 hover:bg-amber-200"
+                        : "bg-slate-200 text-slate-600 hover:bg-slate-300"
+                    }`}
+                  >
+                    {item.isFeatured ? "★ Featured" : "☆ Feature"}
+                  </button>
                 </div>
-                <div className="text-xs text-amber-800 font-semibold bg-amber-50 inline-block px-2 py-0.5 rounded">
-                  {item.category?.name || "Uncategorized"}
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => openEditModal(item)}
+                    className="text-xs font-semibold text-slate-700 hover:text-amber-700 underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item)}
+                    className="text-xs font-semibold text-rose-600 hover:text-rose-800 underline"
+                  >
+                    Delete
+                  </button>
                 </div>
-                {item.description && (
-                  <p className="text-xs text-slate-600 line-clamp-2">
-                    {item.description}
-                  </p>
-                )}
               </div>
             </div>
+          ))}
+        </div>
+      )}
 
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleToggle(item, "isAvailable")}
-                  className={`text-xs font-bold px-2.5 py-1 rounded-full border transition ${
-                    item.isAvailable
-                      ? "bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200"
-                      : "bg-rose-100 text-rose-800 border-rose-300 hover:bg-rose-200"
-                  }`}
-                >
-                  {item.isAvailable ? "In Stock" : "Out of Stock"}
-                </button>
-                <button
-                  onClick={() => handleToggle(item, "isFeatured")}
-                  className={`text-xs font-semibold px-2 py-1 rounded transition ${
-                    item.isFeatured
-                      ? "bg-amber-100 text-amber-800 hover:bg-amber-200"
-                      : "bg-slate-200 text-slate-600 hover:bg-slate-300"
-                  }`}
-                >
-                  {item.isFeatured ? "★ Featured" : "☆ Feature"}
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => openEditModal(item)}
-                  className="text-xs font-semibold text-slate-700 hover:text-amber-700 underline"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(item)}
-                  className="text-xs font-semibold text-rose-600 hover:text-rose-800 underline"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+      {/* List / Table View with drag-to-reorder */}
+      {viewMode === "list" && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          {/* Table header */}
+          <div className="grid grid-cols-[2rem_2.5rem_1fr_6rem_7rem_6rem_auto] gap-x-3 items-center px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wide">
+            <span />
+            <span />
+            <span>Dish</span>
+            <span>Price</span>
+            <span>Status</span>
+            <span>Featured</span>
+            <span>Actions</span>
           </div>
-        ))}
-      </div>
+
+          {filteredItems.length === 0 && (
+            <div className="px-4 py-10 text-center text-sm text-slate-400">
+              No dishes found.
+            </div>
+          )}
+
+          {filteredItems.map((item, index) => {
+            const isDragSource = dragIndexRef.current === index && isDragging;
+            const isDragTarget = dragOverIndex === index && !isDragSource;
+
+            return (
+              <div
+                key={item.id}
+                draggable={!isFiltered}
+                onDragStart={!isFiltered ? () => handleDragStart(index) : undefined}
+                onDragOver={!isFiltered ? (e) => handleDragOver(e, index) : undefined}
+                onDrop={!isFiltered ? (e) => handleDrop(e, index) : undefined}
+                onDragEnd={!isFiltered ? handleDragEnd : undefined}
+                className={`grid grid-cols-[2rem_2.5rem_1fr_6rem_7rem_6rem_auto] gap-x-3 items-center px-4 py-3 border-b border-slate-100 last:border-b-0 text-sm transition
+                  ${isDragSource ? "opacity-50 bg-amber-50 border border-dashed border-amber-300" : ""}
+                  ${isDragTarget ? "bg-amber-50 border-t-2 border-t-amber-400" : ""}
+                  ${!isFiltered ? "cursor-default" : ""}
+                `}
+              >
+                {/* Drag handle */}
+                <div className="flex items-center justify-center">
+                  {!isFiltered ? (
+                    <span
+                      className="text-slate-300 hover:text-amber-500 cursor-grab active:cursor-grabbing transition"
+                      title="Drag to reorder"
+                    >
+                      <GripVertical className="w-4 h-4" />
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                </div>
+
+                {/* Thumbnail */}
+                <div className="flex items-center">
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-9 h-9 rounded-lg object-cover border border-slate-200"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300 text-xs">
+                      🍽
+                    </div>
+                  )}
+                </div>
+
+                {/* Name + category */}
+                <div className="min-w-0">
+                  <div className="font-semibold text-slate-900 truncate">{item.name}</div>
+                  <div className="text-xs text-amber-700 font-medium truncate">
+                    {item.category?.name || "Uncategorized"}
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="font-bold text-amber-700 text-sm whitespace-nowrap">
+                  GH₵ {Number(item.price).toFixed(2)}
+                </div>
+
+                {/* Availability */}
+                <div>
+                  <button
+                    onClick={() => handleToggle(item, "isAvailable")}
+                    className={`text-xs font-bold px-2.5 py-1 rounded-full border transition ${
+                      item.isAvailable
+                        ? "bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200"
+                        : "bg-rose-100 text-rose-800 border-rose-300 hover:bg-rose-200"
+                    }`}
+                  >
+                    {item.isAvailable ? "In Stock" : "Out of Stock"}
+                  </button>
+                </div>
+
+                {/* Featured */}
+                <div>
+                  <button
+                    onClick={() => handleToggle(item, "isFeatured")}
+                    className={`text-xs font-semibold px-2 py-1 rounded transition ${
+                      item.isFeatured
+                        ? "bg-amber-100 text-amber-800 hover:bg-amber-200"
+                        : "bg-slate-200 text-slate-600 hover:bg-slate-300"
+                    }`}
+                  >
+                    {item.isFeatured ? "★ Featured" : "☆ Feature"}
+                  </button>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-3 justify-end">
+                  <button
+                    onClick={() => openEditModal(item)}
+                    className="text-xs font-semibold text-slate-700 hover:text-amber-700 underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item)}
+                    className="text-xs font-semibold text-rose-600 hover:text-rose-800 underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Modal Form for Create / Edit */}
       {isModalOpen && (

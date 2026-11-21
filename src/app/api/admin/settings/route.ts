@@ -40,11 +40,22 @@ export async function PATCH(req: Request) {
       whatsappPhone,
       openingTime,
       closingTime,
+      promoEnabled,
+      promoDiscountPct,
+      promoLabel,
+      promoMinOrderGHS,
     } = body;
 
     const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
     const validOpeningTime = typeof openingTime === "string" && timeRegex.test(openingTime.trim()) ? openingTime.trim() : undefined;
     const validClosingTime = typeof closingTime === "string" && timeRegex.test(closingTime.trim()) ? closingTime.trim() : undefined;
+
+    const validPromoDiscountPct =
+      typeof promoDiscountPct === "number" && promoDiscountPct >= 0 && promoDiscountPct <= 100
+        ? promoDiscountPct
+        : undefined;
+    const validPromoMinOrderGHS =
+      typeof promoMinOrderGHS === "number" && promoMinOrderGHS >= 0 ? promoMinOrderGHS : undefined;
 
     const updated = await prisma.siteSettings.upsert({
       where: { id: "singleton" },
@@ -55,6 +66,10 @@ export async function PATCH(req: Request) {
         ...(typeof whatsappPhone === "string" ? { whatsappPhone: whatsappPhone.trim() } : {}),
         ...(validOpeningTime ? { openingTime: validOpeningTime } : {}),
         ...(validClosingTime ? { closingTime: validClosingTime } : {}),
+        ...(typeof promoEnabled === "boolean" ? { promoEnabled } : {}),
+        ...(validPromoDiscountPct !== undefined ? { promoDiscountPct: validPromoDiscountPct } : {}),
+        ...(typeof promoLabel === "string" ? { promoLabel: promoLabel.trim() } : {}),
+        ...(validPromoMinOrderGHS !== undefined ? { promoMinOrderGHS: validPromoMinOrderGHS } : {}),
       },
       create: {
         id: "singleton",
@@ -64,6 +79,10 @@ export async function PATCH(req: Request) {
         whatsappPhone: whatsappPhone?.trim() || DEFAULT_SITE_SETTINGS.whatsappPhone,
         openingTime: validOpeningTime || DEFAULT_SITE_SETTINGS.openingTime,
         closingTime: validClosingTime || DEFAULT_SITE_SETTINGS.closingTime,
+        promoEnabled: typeof promoEnabled === "boolean" ? promoEnabled : DEFAULT_SITE_SETTINGS.promoEnabled,
+        promoDiscountPct: validPromoDiscountPct ?? DEFAULT_SITE_SETTINGS.promoDiscountPct,
+        promoLabel: promoLabel?.trim() || DEFAULT_SITE_SETTINGS.promoLabel,
+        promoMinOrderGHS: validPromoMinOrderGHS ?? DEFAULT_SITE_SETTINGS.promoMinOrderGHS,
       },
     });
 

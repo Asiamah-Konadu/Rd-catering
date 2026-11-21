@@ -7,6 +7,10 @@ export type SiteSettingsData = {
   whatsappPhone: string;
   openingTime: string;
   closingTime: string;
+  promoEnabled: boolean;
+  promoDiscountPct: number;
+  promoLabel: string;
+  promoMinOrderGHS: number;
 };
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsData = {
@@ -16,6 +20,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsData = {
   whatsappPhone: "+233591754764",
   openingTime: "08:00",
   closingTime: "22:00",
+  promoEnabled: false,
+  promoDiscountPct: 0,
+  promoLabel: "Promo",
+  promoMinOrderGHS: 0,
 };
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {
@@ -39,6 +47,10 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
           : DEFAULT_SITE_SETTINGS.whatsappPhone,
       openingTime: settings.openingTime || DEFAULT_SITE_SETTINGS.openingTime,
       closingTime: settings.closingTime || DEFAULT_SITE_SETTINGS.closingTime,
+      promoEnabled: settings.promoEnabled ?? false,
+      promoDiscountPct: Number(settings.promoDiscountPct ?? 0),
+      promoLabel: settings.promoLabel || DEFAULT_SITE_SETTINGS.promoLabel,
+      promoMinOrderGHS: Number(settings.promoMinOrderGHS ?? 0),
     };
   } catch (error) {
     console.error("Failed to fetch site settings:", error);

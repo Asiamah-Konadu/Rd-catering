@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/authz";
 
-// GET /api/admin/orders - Fetch all orders for admin orders dashboard
-export async function GET() {
+// GET /api/admin/orders - Fetch paginated orders for admin orders dashboard
+export async function GET(req: NextRequest) {
   const { user, response } = await requireApiRole([
     "ADMIN",
     "ORDER_HANDLER",
@@ -13,38 +13,62 @@ export async function GET() {
   if (response || !user) return response;
 
   try {
-    const orders = await prisma.order.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        items: {
-          include: {
-            extras: {
-              include: { extra: true },
-            },
-          },
-        },
-        payment: true,
-        delivery: {
-          include: {
-            agent: {
-              select: {
-                id: true,
-                name: true,
-                phone: true,
+    const { searchParams } = req.nextUrl;
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+    const limit = Math.max(1, Math.min(200, parseInt(searchParams.get("limit") ?? "50", 10)));
+    const dateFrom = searchParams.get("dateFrom");
+    const dateTo = searchParams.get("dateTo");
+
+    const where: Parameters<typeof prisma.order.findMany>[0]["where"] = {};
+    if (dateFrom || dateTo) {
+      where.createdAt = {
+        ...(dateFrom ? { gte: new Date(dateFrom) } : {}),
+        ...(dateTo
+          ? { lte: new Date(new Date(dateTo).setHours(23, 59, 59, 999)) }
+          : {}),
+      };
+    }
+
+    const [totalCount, orders] = await Promise.all([
+      prisma.order.count({ where }),
+      prisma.order.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          items: {
+            include: {
+              extras: {
+                include: { extra: true },
               },
             },
           },
-        },
-        company: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            batchDeliveryTime: true,
+          payment: true,
+          delivery: {
+            include: {
+              agent: {
+                select: {
+                  id: true,
+                  name: true,
+                  phone: true,
+                },
+              },
+            },
+          },
+          company: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              batchDeliveryTime: true,
+            },
           },
         },
-      },
-    });
+      }),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(totalCount / limit));
 
     const formattedOrders = orders.map((o) => ({
       id: o.id,
@@ -103,7 +127,12 @@ export async function GET() {
         : null,
     }));
 
-    return NextResponse.json(formattedOrders);
+    return NextResponse.json({
+      orders: formattedOrders,
+      page,
+      totalPages,
+      totalCount,
+    });
   } catch (error) {
     console.error("GET /api/admin/orders error:", error);
     return NextResponse.json(

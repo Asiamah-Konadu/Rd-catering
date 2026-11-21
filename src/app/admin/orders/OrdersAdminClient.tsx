@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { RefreshCw, Printer } from "lucide-react";
 
 // ─── Receipt Printer ─────────────────────────────────────────────────────────
@@ -285,10 +286,24 @@ const STATUS_BADGE_CLASSES: Record<string, string> = {
 export function OrdersAdminClient({
   initialOrders,
   deliveryAgents,
+  initialPage = 1,
+  totalPages: initialTotalPages = 1,
+  totalCount: initialTotalCount = 0,
+  initialDateFrom = "",
+  initialDateTo = "",
 }: {
   initialOrders: AdminOrder[];
   deliveryAgents: DeliveryAgentInfo[];
+  initialPage?: number;
+  totalPages?: number;
+  totalCount?: number;
+  initialDateFrom?: string;
+  initialDateTo?: string;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [orders, setOrders] = useState<AdminOrder[]>(initialOrders);
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -302,40 +317,106 @@ export function OrdersAdminClient({
 
   const [scheduleFilter, setScheduleFilter] = useState<"ALL" | "SCHEDULED" | "ASAP" | "CORPORATE">("ALL");
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [totalCount, setTotalCount] = useState(initialTotalCount);
+
+  // Date range filter state
+  const [dateFrom, setDateFrom] = useState(initialDateFrom);
+  const [dateTo, setDateTo] = useState(initialDateTo);
+
   const showToast = (msg: string) => {
     setNotification(msg);
     setTimeout(() => setNotification(null), 3500);
   };
 
-  const fetchLatest = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      const res = await fetch("/api/admin/orders");
-      if (res.ok) {
-        const data = await res.json();
-        setOrders((prev) => {
-          // If new orders detected, alert with toast
-          if (data.length > prev.length && prev.length > 0) {
-            showToast(`🔔 ${data.length - prev.length} new order(s) received!`);
-          }
-          return data;
-        });
-        setLastSync(new Date());
-      }
-    } catch (err) {
-      console.error("Failed to sync orders:", err);
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, []);
+  // Build the fetch URL for the API
+  const buildApiUrl = useCallback(
+    (page: number, from: string, to: string) => {
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      params.set("limit", "50");
+      if (from) params.set("dateFrom", from);
+      if (to) params.set("dateTo", to);
+      return `/api/admin/orders?${params.toString()}`;
+    },
+    []
+  );
 
+  const fetchPage = useCallback(
+    async (page: number, from: string, to: string, silent = false) => {
+      if (!silent) setIsRefreshing(true);
+      try {
+        const res = await fetch(buildApiUrl(page, from, to));
+        if (res.ok) {
+          const data = await res.json();
+          setOrders((prev) => {
+            if (
+              data.orders.length > prev.length &&
+              prev.length > 0 &&
+              page === currentPage
+            ) {
+              showToast(`🔔 ${data.orders.length - prev.length} new order(s) received!`);
+            }
+            return data.orders;
+          });
+          setTotalCount(data.totalCount);
+          setTotalPages(data.totalPages);
+          setLastSync(new Date());
+        }
+      } catch (err) {
+        console.error("Failed to sync orders:", err);
+      } finally {
+        if (!silent) setIsRefreshing(false);
+      }
+    },
+    [buildApiUrl, currentPage]
+  );
+
+  const fetchLatest = useCallback(() => {
+    return fetchPage(currentPage, dateFrom, dateTo);
+  }, [fetchPage, currentPage, dateFrom, dateTo]);
+
+  // Auto-poll every 10s with current page + date filters
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchLatest();
-    }, 10000); // Poll every 10s
-
+      fetchPage(currentPage, dateFrom, dateTo, true);
+    }, 10000);
     return () => clearInterval(interval);
-  }, [fetchLatest]);
+  }, [fetchPage, currentPage, dateFrom, dateTo]);
+
+  // Push page + date filters into URL so they survive refresh
+  const navigateTo = useCallback(
+    (page: number, from: string, to: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", String(page));
+      if (from) params.set("dateFrom", from); else params.delete("dateFrom");
+      if (to) params.set("dateTo", to); else params.delete("dateTo");
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams]
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    navigateTo(page, dateFrom, dateTo);
+    fetchPage(page, dateFrom, dateTo);
+  };
+
+  const handleDateFilter = () => {
+    setCurrentPage(1);
+    navigateTo(1, dateFrom, dateTo);
+    fetchPage(1, dateFrom, dateTo);
+  };
+
+  const handleClearDates = () => {
+    setDateFrom("");
+    setDateTo("");
+    setCurrentPage(1);
+    navigateTo(1, "", "");
+    fetchPage(1, "", "");
+  };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setUpdatingId(orderId);
@@ -495,6 +576,46 @@ export function OrdersAdminClient({
 
       {/* Schedule Timing Quick Switcher & Filters */}
       <div className="flex flex-col gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        {/* Date Range Filter Row */}
+        <div className="flex flex-wrap items-end gap-3 pb-3 border-b border-slate-100">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              From Date
+            </label>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              To Date
+            </label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+            />
+          </div>
+          <button
+            onClick={handleDateFilter}
+            className="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition"
+          >
+            Apply Filter
+          </button>
+          {(dateFrom || dateTo) && (
+            <button
+              onClick={handleClearDates}
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition"
+            >
+              Clear Dates
+            </button>
+          )}
+        </div>
+
         {/* Schedule Mode Selector Tabs */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">

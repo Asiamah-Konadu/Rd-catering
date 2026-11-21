@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Clock, Truck, MessageCircle, Save, CheckCircle2, AlertCircle, RefreshCw, Zap } from "lucide-react";
+import { Clock, Truck, MessageCircle, Save, CheckCircle2, AlertCircle, RefreshCw, Zap, Tag } from "lucide-react";
 import type { SiteSettingsData } from "@/lib/settings";
 import { checkIsKitchenOpen, formatTime12Hour } from "@/lib/kitchen-hours";
 

@@ -6,14 +6,38 @@ import { OrdersAdminClient } from "./OrdersAdminClient";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function OrdersAdminPage() {
+const LIMIT = 50;
+
+export default async function OrdersAdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; dateFrom?: string; dateTo?: string }>;
+}) {
   const user = await requireAnyRole(["ADMIN", "ORDER_HANDLER"]);
   if (!user) redirect("/admin/login");
 
-  const [orders, deliveryAgents] = await Promise.all([
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10));
+  const dateFrom = params.dateFrom;
+  const dateTo = params.dateTo;
+
+  const where: Parameters<typeof prisma.order.findMany>[0]["where"] = {};
+  if (dateFrom || dateTo) {
+    where.createdAt = {
+      ...(dateFrom ? { gte: new Date(dateFrom) } : {}),
+      ...(dateTo
+        ? { lte: new Date(new Date(dateTo).setHours(23, 59, 59, 999)) }
+        : {}),
+    };
+  }
+
+  const [totalCount, orders, deliveryAgents] = await Promise.all([
+    prisma.order.count({ where }),
     prisma.order.findMany({
+      where,
       orderBy: { createdAt: "desc" },
-      take: 100,
+      skip: (page - 1) * LIMIT,
+      take: LIMIT,
       include: {
         items: {
           include: {
@@ -36,6 +60,14 @@ export default async function OrdersAdminPage() {
             },
           },
         },
+        company: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            batchDeliveryTime: true,
+          },
+        },
       },
     }),
     prisma.user.findMany({
@@ -48,6 +80,8 @@ export default async function OrdersAdminPage() {
       orderBy: { name: "asc" },
     }),
   ]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / LIMIT));
 
   const formattedOrders = orders.map((o) => ({
     id: o.id,
@@ -64,6 +98,9 @@ export default async function OrdersAdminPage() {
     isScheduled: o.isScheduled,
     scheduledFor: o.scheduledFor ? o.scheduledFor.toISOString() : null,
     scheduledSlot: o.scheduledSlot,
+    companyId: o.companyId,
+    companyName: (o as { company?: { name?: string } }).company?.name || null,
+    staffDepartment: o.staffDepartment || null,
     createdAt: o.createdAt.toISOString(),
     items: o.items.map((i) => ({
       id: i.id,
@@ -106,7 +143,7 @@ export default async function OrdersAdminPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <span className="text-xs font-semibold tracking-wider text-amber-600 uppercase">
-            Kitchen & Staff Operations
+            Kitchen &amp; Staff Operations
           </span>
           <h1 className="text-3xl font-extrabold text-slate-900">Order Management Queue</h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -114,7 +151,15 @@ export default async function OrdersAdminPage() {
           </p>
         </div>
       </div>
-      <OrdersAdminClient initialOrders={formattedOrders} deliveryAgents={deliveryAgents} />
+      <OrdersAdminClient
+        initialOrders={formattedOrders}
+        deliveryAgents={deliveryAgents}
+        initialPage={page}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        initialDateFrom={dateFrom ?? ""}
+        initialDateTo={dateTo ?? ""}
+      />
     </main>
   );
 }
