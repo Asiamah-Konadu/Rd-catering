@@ -880,6 +880,68 @@ export function OrdersAdminClient({
             </table>
           </div>
         )}
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-200 bg-slate-50/50 text-xs text-slate-600">
+            <div>
+              Showing{" "}
+              <strong className="text-slate-900 font-bold">
+                {(currentPage - 1) * 50 + 1}
+              </strong>{" "}
+              to{" "}
+              <strong className="text-slate-900 font-bold">
+                {Math.min(currentPage * 50, totalCount || orders.length)}
+              </strong>{" "}
+              of{" "}
+              <strong className="text-slate-900 font-bold">
+                {totalCount || orders.length}
+              </strong>{" "}
+              orders
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage <= 1 || isRefreshing}
+                className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-slate-700 transition"
+              >
+                Previous
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
+                .map((p, idx, arr) => {
+                  const prev = arr[idx - 1];
+                  const showEllipsis = prev && p - prev > 1;
+                  return (
+                    <span key={p} className="flex items-center gap-1">
+                      {showEllipsis && <span className="px-1 text-slate-400">…</span>}
+                      <button
+                        onClick={() => handlePageChange(p)}
+                        disabled={isRefreshing}
+                        className={`min-w-8 h-8 px-2 rounded-lg font-bold transition text-xs ${
+                          currentPage === p
+                            ? "bg-slate-900 text-white shadow-xs"
+                            : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    </span>
+                  );
+                })}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages || isRefreshing}
+                className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-slate-700 transition"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Order Detail Modal */}

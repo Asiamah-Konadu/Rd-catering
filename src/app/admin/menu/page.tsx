@@ -26,7 +26,7 @@ export default async function MenuAdminPage() {
     slug: c.slug,
   }));
 
-  const formattedItems = items.map((i) => ({
+  const formattedItems = items.map((i, index) => ({
     id: i.id,
     categoryId: i.categoryId,
     name: i.name,
@@ -36,6 +36,7 @@ export default async function MenuAdminPage() {
     price: Number(i.price),
     isAvailable: i.isAvailable,
     isFeatured: i.isFeatured,
+    sortOrder: index,
     category: i.category
       ? {
           id: i.category.id,

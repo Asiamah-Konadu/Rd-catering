@@ -126,6 +126,12 @@ const NAV_GROUPS = [
         roles: ["ADMIN", "ORDER_HANDLER"],
       },
       {
+        label: "Reviews",
+        href: "/admin/reviews",
+        icon: Star,
+        roles: ["ADMIN"],
+      },
+      {
         label: "Staff Accounts",
         href: "/admin/staff",
         icon: Users,

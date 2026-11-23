@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { requireAnyRole } from "@/lib/authz";
 import { OrdersAdminClient } from "./OrdersAdminClient";
@@ -21,7 +22,7 @@ export default async function OrdersAdminPage({
   const dateFrom = params.dateFrom;
   const dateTo = params.dateTo;
 
-  const where: Parameters<typeof prisma.order.findMany>[0]["where"] = {};
+  const where: Prisma.OrderWhereInput = {};
   if (dateFrom || dateTo) {
     where.createdAt = {
       ...(dateFrom ? { gte: new Date(dateFrom) } : {}),

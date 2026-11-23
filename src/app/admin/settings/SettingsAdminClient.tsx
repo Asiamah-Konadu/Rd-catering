@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Clock, Truck, MessageCircle, Save, CheckCircle2, AlertCircle, RefreshCw, Zap, Tag } from "lucide-react";
+import { Clock, Truck, MessageCircle, Save, CheckCircle2, AlertCircle, RefreshCw, Zap } from "lucide-react";
 import type { SiteSettingsData } from "@/lib/settings";
 import { checkIsKitchenOpen, formatTime12Hour } from "@/lib/kitchen-hours";
 
@@ -68,11 +68,10 @@ export function SettingsAdminClient({ initialSettings }: Props) {
 
       {statusMessage && (
         <div
-          className={`p-4 rounded-xl flex items-start gap-3 border ${
-            statusMessage.type === "success"
+          className={`p-4 rounded-xl flex items-start gap-3 border ${statusMessage.type === "success"
               ? "bg-emerald-50 text-emerald-900 border-emerald-200"
               : "bg-red-50 text-red-900 border-red-200"
-          }`}
+            }`}
         >
           {statusMessage.type === "success" ? (
             <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
@@ -87,7 +86,7 @@ export function SettingsAdminClient({ initialSettings }: Props) {
         {/* Main Settings Form */}
         <div className="lg:col-span-2">
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
-            
+
             {/* 1. Kitchen Hours & ASAP Delivery Control */}
             <div className="p-5 bg-gradient-to-br from-amber-50/80 to-stone-50 rounded-2xl border border-amber-200/80 space-y-4">
               <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -101,16 +100,14 @@ export function SettingsAdminClient({ initialSettings }: Props) {
                   </p>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shrink-0 ${
-                    liveKitchenStatus.isOpen
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shrink-0 ${liveKitchenStatus.isOpen
                       ? "bg-emerald-100 text-emerald-900 border-emerald-300 shadow-xs"
                       : "bg-rose-100 text-rose-900 border-rose-300 shadow-xs"
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`w-2.5 h-2.5 rounded-full ${
-                      liveKitchenStatus.isOpen ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
-                    }`}
+                    className={`w-2.5 h-2.5 rounded-full ${liveKitchenStatus.isOpen ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
+                      }`}
                   />
                   {liveKitchenStatus.isOpen ? "Kitchen OPEN Now" : "Kitchen CLOSED Now"}
                 </span>
@@ -318,9 +315,8 @@ export function SettingsAdminClient({ initialSettings }: Props) {
               </span>
               <div className="inline-flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-full text-xs text-slate-200">
                 <span
-                  className={`w-2 h-2 rounded-full ${
-                    liveKitchenStatus.isOpen ? "bg-emerald-400 animate-pulse" : "bg-rose-400"
-                  }`}
+                  className={`w-2 h-2 rounded-full ${liveKitchenStatus.isOpen ? "bg-emerald-400 animate-pulse" : "bg-rose-400"
+                    }`}
                 />
                 <span className="font-medium">{formData.businessHoursText || "Orders open 8am · close 10pm"}</span>
                 <span className="text-slate-500">·</span>

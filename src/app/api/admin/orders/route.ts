@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { requireApiRole } from "@/lib/authz";
 
 // GET /api/admin/orders - Fetch paginated orders for admin orders dashboard
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
     const dateFrom = searchParams.get("dateFrom");
     const dateTo = searchParams.get("dateTo");
 
-    const where: Parameters<typeof prisma.order.findMany>[0]["where"] = {};
+    const where: Prisma.OrderWhereInput = {};
     if (dateFrom || dateTo) {
       where.createdAt = {
         ...(dateFrom ? { gte: new Date(dateFrom) } : {}),
@@ -105,25 +106,25 @@ export async function GET(req: NextRequest) {
       })),
       payment: o.payment
         ? {
-            id: o.payment.id,
-            method: o.payment.method,
-            status: o.payment.status,
-            amount: Number(o.payment.amount),
-            transactionId: o.payment.transactionId,
-          }
+          id: o.payment.id,
+          method: o.payment.method,
+          status: o.payment.status,
+          amount: Number(o.payment.amount),
+          transactionId: o.payment.transactionId,
+        }
         : null,
       delivery: o.delivery
         ? {
-            id: o.delivery.id,
-            address: o.delivery.address,
-            city: o.delivery.city,
-            region: o.delivery.region,
-            latitude: o.delivery.latitude !== null ? Number(o.delivery.latitude) : null,
-            longitude: o.delivery.longitude !== null ? Number(o.delivery.longitude) : null,
-            status: o.delivery.status,
-            agentId: o.delivery.agentId,
-            agent: o.delivery.agent,
-          }
+          id: o.delivery.id,
+          address: o.delivery.address,
+          city: o.delivery.city,
+          region: o.delivery.region,
+          latitude: o.delivery.latitude !== null ? Number(o.delivery.latitude) : null,
+          longitude: o.delivery.longitude !== null ? Number(o.delivery.longitude) : null,
+          status: o.delivery.status,
+          agentId: o.delivery.agentId,
+          agent: o.delivery.agent,
+        }
         : null,
     }));
 

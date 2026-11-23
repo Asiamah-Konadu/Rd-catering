@@ -19,7 +19,7 @@ export type AdminMenuItem = {
   price: number | string;
   isAvailable: boolean;
   isFeatured: boolean;
-  sortOrder: number;
+  sortOrder?: number;
   category?: AdminCategory;
 };
 
