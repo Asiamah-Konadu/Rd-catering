@@ -1,51 +1,33 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaD1 } from "@prisma/adapter-d1";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { cache } from "react";
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-
-function getPrismaClient(): PrismaClient {
-  if (globalForPrisma.prisma) return globalForPrisma.prisma;
-
-  let connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    try {
-      // When deployed or executing in Cloudflare Workers, env bindings may be accessible via OpenNext context
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { getCloudflareContext } = require("@opennextjs/cloudflare");
-      const ctx = getCloudflareContext();
-      if (ctx?.env?.DATABASE_URL) {
-        connectionString = ctx.env.DATABASE_URL;
-      }
-    } catch {
-      // Outside Cloudflare context or during early metadata collection
-    }
+function getD1Binding() {
+  try {
+    const { env } = getCloudflareContext();
+    if (env?.DB) return env.DB;
+  } catch {
+    // Outside the Workers runtime (for example during early metadata collection).
   }
 
-  if (!connectionString && process.env.DATABASE_URL_UNPOOLED) {
-    connectionString = process.env.DATABASE_URL_UNPOOLED;
-  }
-
-  if (!connectionString) {
-    throw new Error(
-      "DATABASE_URL is not configured. Please add DATABASE_URL to your Cloudflare Workers/Pages environment variables or secrets."
-    );
-  }
-
-  const client = new PrismaClient({
-    adapter: new PrismaNeon({ connectionString }),
-    log: ["error", "warn"]
-  });
-
-  globalForPrisma.prisma = client;
-  return client;
+  throw new Error(
+    "Cloudflare D1 binding `DB` is not available. Bind the database in wrangler.jsonc and run the app with OpenNext (`npm run dev` / `npm run cf:preview` / `npm run cf:deploy`)."
+  );
 }
 
+const createPrismaClient = cache(() => {
+  return new PrismaClient({
+    adapter: new PrismaD1(getD1Binding()),
+    log: ["error", "warn"]
+  });
+});
+
 // API route modules are imported while Next collects build metadata. Defer
-// creating the database adapter until a handler actually uses Prisma so builds
-// do not need production secrets in their environment.
+// creating the D1 adapter until a handler actually uses Prisma.
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, property) {
-    const client = getPrismaClient();
+    const client = createPrismaClient();
     const value = Reflect.get(client, property, client) as unknown;
     return typeof value === "function" ? value.bind(client) : value;
   }

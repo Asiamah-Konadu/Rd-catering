@@ -6,6 +6,9 @@ node_modules/
 *.log
 coverage/
 .codex-frontend-backup*
+prisma/dev.db
+prisma/dev.db-journal
+*.db
 
 .vercel
 .env*

@@ -18,6 +18,13 @@
       "service": "rd-catering"
     }
   ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rd-catering",
+      "database_id": "bb14fdbd-e3cb-4b9a-8a63-9582b486121b"
+    }
+  ],
   "r2_buckets": [
     {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",

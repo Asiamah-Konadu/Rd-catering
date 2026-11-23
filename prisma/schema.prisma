@@ -4,9 +4,8 @@ generator client {
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DATABASE_URL_UNPOOLED")
+    provider = "sqlite"
+    url      = "file:./dev.db"
 }
 
 enum UserRole {
@@ -88,7 +87,7 @@ model MenuItem {
   slug        String           @unique
   description String?
   imageUrl    String?
-  price       Decimal          @db.Decimal(10, 2)
+  price       Decimal
   isAvailable Boolean          @default(true)
   isFeatured  Boolean          @default(false)
   category    Category         @relation(fields: [categoryId], references: [id])
@@ -129,7 +128,7 @@ model Combo {
   slug        String      @unique
   description String?
   imageUrl    String?
-  price       Decimal     @db.Decimal(10, 2)
+  price       Decimal
   isAvailable Boolean     @default(true)
   items       ComboItem[]
   orderItems  OrderItem[]
@@ -151,7 +150,7 @@ model Extra {
   id          String          @id @default(uuid())
   menuItemId  String?
   name        String
-  price       Decimal         @db.Decimal(10, 2)
+  price       Decimal
   isActive    Boolean         @default(true)
   menuItem    MenuItem?       @relation(fields: [menuItemId], references: [id])
   orderExtras OrderItemExtra[]
@@ -164,10 +163,10 @@ model Order {
   customerName   String
   customerPhone  String
   customerEmail  String?
-  subtotal       Decimal        @db.Decimal(10, 2)
-  deliveryFee    Decimal        @db.Decimal(10, 2) @default(0)
-  discount       Decimal        @db.Decimal(10, 2) @default(0)
-  total          Decimal        @db.Decimal(10, 2)
+  subtotal       Decimal
+  deliveryFee    Decimal        @default(0)
+  discount       Decimal        @default(0)
+  total          Decimal
   status         OrderStatus    @default(PENDING)
   notes          String?
   isScheduled    Boolean        @default(false)
@@ -203,7 +202,7 @@ model Company {
   contactEmail      String?
   cutoffTime        String    @default("10:30 AM")
   batchDeliveryTime String    @default("12:00 PM - 1:00 PM")
-  discountPercent   Decimal   @default(0) @db.Decimal(5, 2)
+  discountPercent   Decimal   @default(0)
   freeDelivery      Boolean   @default(true)
   customPackaging   Boolean   @default(true)
   isActive          Boolean   @default(true)
@@ -239,8 +238,8 @@ model OrderItem {
   comboId     String?
   name        String
   quantity    Int             @default(1)
-  unitPrice   Decimal         @db.Decimal(10, 2)
-  totalPrice  Decimal         @db.Decimal(10, 2)
+  unitPrice   Decimal
+  totalPrice  Decimal
   order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   menuItem    MenuItem?       @relation(fields: [menuItemId], references: [id])
   combo       Combo?          @relation(fields: [comboId], references: [id])
@@ -252,7 +251,7 @@ model OrderItemExtra {
   orderItemId String
   extraId     String
   quantity    Int       @default(1)
-  price       Decimal   @db.Decimal(10, 2)
+  price       Decimal
   orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
   extra       Extra     @relation(fields: [extraId], references: [id])
   @@unique([orderItemId, extraId])
@@ -261,7 +260,7 @@ model OrderItemExtra {
 model Payment {
   id            String        @id @default(uuid())
   orderId       String        @unique
-  amount        Decimal       @db.Decimal(10, 2)
+  amount        Decimal
   method        PaymentMethod
   status        PaymentStatus @default(PENDING)
   transactionId String?
@@ -279,8 +278,8 @@ model Delivery {
   address      String
   city         String
   region       String?
-  latitude     Decimal?       @db.Decimal(10, 7)
-  longitude    Decimal?       @db.Decimal(10, 7)
+  latitude     Decimal?
+  longitude    Decimal?
   status       DeliveryStatus @default(PENDING)
   assignedAt   DateTime?
   deliveredAt DateTime?
@@ -320,7 +319,7 @@ model HeroPromo {
   badgeText   String?  @default("SPECIAL / GH")
   imageUrl    String
   description String?
-  price       Decimal? @db.Decimal(10, 2)
+  price       Decimal?
   linkUrl     String?  @default("/menu")
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -340,8 +339,8 @@ model SiteSettings {
   openingTime         String   @default("08:00")
   closingTime         String   @default("22:00")
   promoEnabled        Boolean  @default(false)
-  promoDiscountPct    Decimal  @default(0) @db.Decimal(5, 2)
+  promoDiscountPct    Decimal  @default(0)
   promoLabel          String   @default("Promo")
-  promoMinOrderGHS    Decimal  @default(0) @db.Decimal(10, 2)
+  promoMinOrderGHS    Decimal  @default(0)
   updatedAt           DateTime @updatedAt
 }
