@@ -21,14 +21,22 @@ function getPrismaClient(): PrismaClient {
     }
   }
 
-  if (!connectionString) throw new Error("DATABASE_URL is not configured.");
+  if (!connectionString && process.env.DATABASE_URL_UNPOOLED) {
+    connectionString = process.env.DATABASE_URL_UNPOOLED;
+  }
+
+  if (!connectionString) {
+    throw new Error(
+      "DATABASE_URL is not configured. Please add DATABASE_URL to your Cloudflare Workers/Pages environment variables or secrets."
+    );
+  }
 
   const client = new PrismaClient({
     adapter: new PrismaNeon({ connectionString }),
     log: ["error", "warn"]
   });
 
-  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;
+  globalForPrisma.prisma = client;
   return client;
 }
 
