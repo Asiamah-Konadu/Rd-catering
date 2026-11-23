@@ -14,6 +14,7 @@
     "cf:preview": "opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare deploy",
     "db:studio": "prisma studio",
+    "db:seed": "node scripts/seed-menu.mjs",
     "admin:create": "node scripts/create-admin.mjs",
     "staff:create": "node scripts/create-staff.mjs",
     "postinstall": "prisma generate"
