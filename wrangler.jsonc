@@ -22,7 +22,8 @@
     {
       "binding": "DB",
       "database_name": "rd-catering",
-      "database_id": "bb14fdbd-e3cb-4b9a-8a63-9582b486121b"
+      "database_id": "bb14fdbd-e3cb-4b9a-8a63-9582b486121b",
+      "migrations_dir": "migrations"
     }
   ],
   "r2_buckets": [

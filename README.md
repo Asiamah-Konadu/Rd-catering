@@ -25,11 +25,10 @@ Production-oriented starter application for RD Catering.
 - Responsive customer homepage and menu
 - Local cart
 - Checkout flow
-- PostgreSQL/Neon + Prisma schema
+- Cloudflare D1 (SQLite) + Prisma schema
 - Order creation API
 - Order confirmation page
 - Basic operations/admin dashboard
-- Neon GitHub workflow placeholder
 - Secure `.env` pattern
 
 ## Run locally
@@ -40,7 +39,7 @@ npx prisma generate
 npm run dev
 ```
 
-Configure `DATABASE_URL`, `APP_URL`, and the Hubtel values below before using checkout. Customers place orders and pay on the website; WhatsApp is not part of the payment flow. Apply database changes with `npx prisma migrate deploy` before deploying.
+The app runtime uses the Cloudflare D1 binding `DB` (`bb14fdbd-e3cb-4b9a-8a63-9582b486121b`). Set `DATABASE_URL="file:./dev.db"` only for Prisma CLI (`generate` / `studio`). Apply schema with `npm run db:deploy:local` (Wrangler local D1) or `npm run db:deploy` (remote D1). Node seed scripts need `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_D1_TOKEN`. Configure `APP_URL` and the Hubtel values below before using checkout.
 
 ## Hubtel Online Checkout
 
@@ -63,16 +62,17 @@ Hubtel does not document a production callback signature, so the callback handle
 
 ## Cloudflare deployment
 
-The app uses OpenNext to run Next.js on Cloudflare Workers. Prisma is configured without its Rust engine and uses Neon Serverless, which can connect from Workers. Use the pooled Neon connection string for `DATABASE_URL`. Store `DATABASE_URL`, `NEXTAUTH_SECRET`, `HUBTEL_API_ID`, `HUBTEL_API_KEY`, and `PAYMENT_RECONCILE_SECRET` as Worker secrets. Set `APP_URL`, `NEXTAUTH_URL`, `HUBTEL_ENV`, and `HUBTEL_COLLECTION_ACCOUNT` as Worker variables.
+The app uses OpenNext to run Next.js on Cloudflare Workers. Prisma uses the D1 driver adapter against the `DB` binding. Store `NEXTAUTH_SECRET`, `HUBTEL_API_ID`, `HUBTEL_API_KEY`, and `PAYMENT_RECONCILE_SECRET` as Worker secrets. Set `APP_URL`, `NEXTAUTH_URL`, `HUBTEL_ENV`, and `HUBTEL_COLLECTION_ACCOUNT` as Worker variables.
 
 Create the OpenNext cache bucket once with `npx wrangler r2 bucket create rd-catering-incremental-cache`. Then use `npm run cf:build` to build, `npm run cf:preview` to preview locally in the Workers runtime, and `npm run cf:deploy` to deploy. Apply the migration to the production database before accepting live orders. Configure the `rd-catering` Worker with the production domain in Cloudflare and set `APP_URL` to that same HTTPS domain.
 
 To show Google reviews on the homepage without a review aggregator, configure a Google Cloud project with approved Business Profile API access and OAuth credentials. Set the following server-only values in `.env.local` and in the deployment environment: `GOOGLE_BUSINESS_CLIENT_ID`, `GOOGLE_BUSINESS_CLIENT_SECRET`, `GOOGLE_BUSINESS_REFRESH_TOKEN`, `GOOGLE_BUSINESS_ACCOUNT_ID`, and `GOOGLE_BUSINESS_LOCATION_ID`. Optionally set `GOOGLE_BUSINESS_MIN_REVIEW_RATING` to a value from 1 to 5 (defaults to 4). Keep these values private and never prefix them with `NEXT_PUBLIC_`. The homepage reads reviews directly from the Google Business Profile API and temporarily caches the unmodified API response for ten minutes; it filters reviews in memory and does not save them to the application database. Until the credentials are configured, the homepage shows visible reviews from delivered Rich-Dons orders.
 
-For the first database migration:
+For the first D1 schema apply:
 
 ```bash
-npx prisma migrate dev --name init
+npm run db:deploy:local
+npm run db:deploy
 ```
 
 Never commit real secrets.

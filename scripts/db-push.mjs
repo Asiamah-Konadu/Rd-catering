@@ -2,43 +2,30 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
-const envPath = path.resolve(process.cwd(), ".env.local");
-if (fs.existsSync(envPath)) {
-  const content = fs.readFileSync(envPath, "utf8");
-  for (const line of content.split("\n")) {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith("#")) {
-      const idx = trimmed.indexOf("=");
-      if (idx !== -1) {
-        const key = trimmed.slice(0, idx).trim();
-        let val = trimmed.slice(idx + 1).trim();
-        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-          val = val.slice(1, -1);
-        }
-        process.env[key] = val;
-      }
-    }
-  }
-}
+const schemaPath = path.resolve(process.cwd(), "prisma/schema.prisma");
+const outPath = path.resolve(process.cwd(), "migrations/0001_init.sql");
+const remote = process.argv.includes("--remote");
 
-const validPostgresUrl = [
-  process.env.DATABASE_URL_UNPOOLED,
-  process.env.DATABASE_POSTGRES_URL,
-  process.env.DIRECT_URL,
-  process.env.DATABASE_URL,
-].find(url => url && (url.startsWith("postgresql://") || url.startsWith("postgres://")));
+fs.mkdirSync(path.dirname(outPath), { recursive: true });
 
-if (validPostgresUrl) {
-  process.env.DATABASE_URL = validPostgresUrl;
-}
+console.log("Generating SQLite SQL from Prisma schema...");
+const sql = execSync(
+  `npx prisma migrate diff --from-empty --to-schema-datamodel "${schemaPath}" --script`,
+  { encoding: "utf8", env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL || "file:./dev.db" } }
+);
+fs.writeFileSync(outPath, sql);
+console.log(`Wrote ${outPath}`);
 
-try {
-  console.log("Running prisma db push...");
-  execSync("npx prisma db push", { stdio: "inherit", env: process.env });
-  console.log("Running prisma generate...");
-  execSync("npx prisma generate", { stdio: "inherit", env: process.env });
-  console.log("Database schema synced and Prisma client generated successfully!");
-} catch (err) {
-  console.error("Failed:", err);
-  process.exit(1);
-}
+const target = remote ? "--remote" : "--local";
+console.log(`Applying schema to D1 (${remote ? "remote" : "local"})...`);
+execSync(`npx wrangler d1 execute rd-catering ${target} --file="${outPath}"`, {
+  stdio: "inherit",
+});
+
+console.log("Generating Prisma client...");
+execSync("npx prisma generate", {
+  stdio: "inherit",
+  env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL || "file:./dev.db" },
+});
+
+console.log("D1 schema synced.");

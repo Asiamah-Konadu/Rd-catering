@@ -1,3 +1,1 @@
-[mcp_servers.Neon]
-type = "http"
-url = "https://mcp.neon.tech/mcp"
+# Codex MCP config. Neon has been removed; D1 is bound in wrangler.jsonc.

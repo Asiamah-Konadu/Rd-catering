@@ -1,43 +1,6 @@
-import fs from "fs";
-import path from "path";
-import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
+import { createPrisma } from "./prisma-d1.mjs";
 
-function loadEnvFile(filePath) {
-  if (fs.existsSync(filePath)) {
-    const content = fs.readFileSync(filePath, "utf-8");
-    for (const line of content.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) continue;
-      const eqIdx = trimmed.indexOf("=");
-      if (eqIdx > 0) {
-        const key = trimmed.slice(0, eqIdx).trim();
-        let val = trimmed.slice(eqIdx + 1).trim();
-        if (
-          (val.startsWith('"') && val.endsWith('"')) ||
-          (val.startsWith("'") && val.endsWith("'"))
-        ) {
-          val = val.slice(1, -1);
-        }
-        if (!process.env[key] && val && val !== "[SENSITIVE]") {
-          process.env[key] = val;
-        }
-      }
-    }
-  }
-}
-
-loadEnvFile(path.resolve(process.cwd(), ".env.local"));
-loadEnvFile(path.resolve(process.cwd(), ".env"));
-
-if (!process.env.DATABASE_URL) {
-  console.error("Error: DATABASE_URL is not set.");
-  process.exit(1);
-}
-
-const prisma = new PrismaClient({
-  adapter: new PrismaNeon({ connectionString: process.env.DATABASE_URL }),
-});
+const prisma = createPrisma();
 
 const MENU_DATA = [
   {
@@ -177,9 +140,8 @@ const EXTRAS_DATA = [
 ];
 
 async function main() {
-  console.log("🚀 Starting database seeding for Rich-Dons Catering...\n");
+  console.log("Starting database seeding for Rich-Dons Catering...\n");
 
-  // 1. Seed Categories & Menu Items
   for (const group of MENU_DATA) {
     const category = await prisma.category.upsert({
       where: { slug: group.category.slug },
@@ -200,7 +162,7 @@ async function main() {
       },
     });
 
-    console.log(`📂 Category: ${category.name} (${category.slug})`);
+    console.log(`Category: ${category.name} (${category.slug})`);
 
     for (const item of group.items) {
       const menuItem = await prisma.menuItem.upsert({
@@ -226,12 +188,11 @@ async function main() {
         },
       });
 
-      console.log(`   🍽️  Dish: ${menuItem.name} - GH₵ ${item.price.toFixed(2)} [${menuItem.slug}]`);
+      console.log(`   Dish: ${menuItem.name} - GH₵ ${item.price.toFixed(2)} [${menuItem.slug}]`);
     }
     console.log("");
   }
 
-  // 2. Also register the Combo in Combo model
   const megaCombo = await prisma.combo.upsert({
     where: { slug: "rich-dons-mega-feast-combo" },
     update: {
@@ -250,10 +211,9 @@ async function main() {
       isAvailable: true,
     },
   });
-  console.log(`⭐ Combo Package: ${megaCombo.name} - GH₵ ${Number(megaCombo.price).toFixed(2)}\n`);
+  console.log(`Combo Package: ${megaCombo.name} - GH₵ ${Number(megaCombo.price).toFixed(2)}\n`);
 
-  // 3. Seed Extras
-  console.log("🥗 Seeding Extras & Add-ons...");
+  console.log("Seeding extras...");
   for (const extra of EXTRAS_DATA) {
     const existing = await prisma.extra.findFirst({
       where: { name: extra.name },
@@ -264,7 +224,7 @@ async function main() {
         where: { id: existing.id },
         data: { price: extra.price, isActive: true },
       });
-      console.log(`   ✓ Updated Extra: ${extra.name} - GH₵ ${extra.price.toFixed(2)}`);
+      console.log(`   Updated extra: ${extra.name} - GH₵ ${extra.price.toFixed(2)}`);
     } else {
       await prisma.extra.create({
         data: {
@@ -273,16 +233,16 @@ async function main() {
           isActive: true,
         },
       });
-      console.log(`   + Created Extra: ${extra.name} - GH₵ ${extra.price.toFixed(2)}`);
+      console.log(`   Created extra: ${extra.name} - GH₵ ${extra.price.toFixed(2)}`);
     }
   }
 
-  console.log("\n✅ Database filled successfully!");
+  console.log("\nDatabase filled successfully!");
 }
 
 main()
   .catch((err) => {
-    console.error("❌ Seeding failed:", err);
+    console.error("Seeding failed:", err);
     process.exit(1);
   })
   .finally(async () => {
