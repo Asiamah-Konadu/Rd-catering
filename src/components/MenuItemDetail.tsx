@@ -79,7 +79,7 @@ export default function MenuItemDetail({
   };
 
   return (
-    <main className="page narrow detail-page">
+    <main className="page narrow detail-page menu-theme-dark">
       <Link href="/menu" className="back-link">
         ← Back to menu
       </Link>

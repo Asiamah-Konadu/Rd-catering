@@ -291,8 +291,8 @@ export function WeeklyMenuClient({ categories, extras, combos }: WeeklyMenuClien
     <main className="weekly-dark-menu">
       <div className="weekly-shell">
         <div className="weekly-layout">
-          {/* ── PC LEFT STICKY SIDEBAR: CATEGORIES + LIVE CART ── */}
-          <aside className="weekly-sidebar" aria-label="Categories and live cart">
+          {/* ── PC LEFT STICKY SIDEBAR: CATEGORIES ── */}
+          <aside className="weekly-sidebar weekly-sidebar-left" aria-label="Menu categories">
             <nav className="weekly-side-card weekly-side-categories" aria-label="Menu categories">
               <div className="weekly-side-head">
                 <span className="weekly-side-title">
@@ -327,7 +327,362 @@ export function WeeklyMenuClient({ categories, extras, combos }: WeeklyMenuClien
                 })}
               </ul>
             </nav>
+          </aside>
 
+          {/* ── MAIN MENU CONTENT ── */}
+          <div className="weekly-main">
+            {/* ── 1. HERO BANNER ── */}
+            <section className="weekly-hero" aria-label="This Week's Menu">
+              <img
+                src="/coming-soon/jolof.avif"
+                alt="Freshly prepared Ghanaian Jollof rice and grilled chicken"
+                className="weekly-hero-bg"
+              />
+              <div className="weekly-hero-shade" />
+              <div className="weekly-hero-copy">
+                <div className="weekly-eyebrow">Freshly curated for you</div>
+                <h1>
+                  This Week&apos;s
+                  <br />
+                  <span>Menu</span>
+                </h1>
+                <p>Good food, made memorable. Fixed weekly selections cooked fresh daily.</p>
+                <div className="weekly-date-pill">
+                  <CalendarDays size={13} aria-hidden="true" />
+                  <span>{weekLabel}</span>
+                </div>
+              </div>
+            </section>
+
+            {/* ── 2. SEARCH & PRICE SORT ── */}
+            <div className="weekly-search-row">
+              <label className="weekly-search">
+                <Search size={16} aria-hidden="true" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search this week's menu…"
+                  aria-label="Search menu"
+                />
+              </label>
+              <button
+                type="button"
+                className={`weekly-filter-btn ${sortLow ? "active" : ""}`}
+                title={sortLow ? "Sorted by lowest price" : "Sort by lowest price"}
+                aria-label="Sort by price"
+                onClick={() => {
+                  const next = !sortLow;
+                  setSortLow(next);
+                  showToast(next ? "Sorted by lowest price" : "Default menu order");
+                }}
+              >
+                <ArrowUpDown size={17} aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* ── 3. CATEGORY CHIPS ── */}
+            <div className="weekly-chips" role="tablist" aria-label="Menu categories">
+              {filterChips.map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeFilter === chip.key}
+                  className={`weekly-chip ${activeFilter === chip.key ? "active" : ""}`}
+                  onClick={() => setActiveFilter(chip.key)}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+
+            {/* ── 4. MENU SECTIONS ── */}
+            {processedCategories.map((cat) => {
+              const isHidden = activeFilter !== "all" && activeFilter !== cat.slug;
+              if (isHidden) return null;
+
+              // Combo Package Section
+              if (cat.kind === "combo") {
+                const allComboCards = [
+                  ...cat.items.map((item) => ({
+                    id: item.id,
+                    name: item.name,
+                    slug: item.slug,
+                    description: item.description,
+                    price: item.price,
+                    imageUrl: item.imageUrl,
+                    isMenuItem: true,
+                  })),
+                  ...extraStandaloneCombos.map((c) => ({
+                    id: c.id,
+                    name: c.name,
+                    slug: c.slug,
+                    description: c.description,
+                    price: c.price,
+                    imageUrl: c.imageUrl,
+                    isMenuItem: false,
+                  })),
+                ];
+
+                return (
+                  <section
+                    key={cat.id}
+                    id={`menu-${cat.slug}`}
+                    className="weekly-section menu-category-section"
+                  >
+                    <div className="weekly-section-head">
+                      <h2 className="weekly-section-title">{cat.name}</h2>
+                      <span className="weekly-section-meta">
+                        {allComboCards.length} {allComboCards.length === 1 ? "selection" : "selections"}
+                      </span>
+                    </div>
+
+                    {allComboCards.length === 0 ? (
+                      <div className="weekly-empty">No combo packages match your search.</div>
+                    ) : (
+                      allComboCards.map((combo) => {
+                        const q = getCartQty(combo.id);
+                        return (
+                          <article key={combo.id} className="weekly-combo">
+                            <div className="weekly-combo-copy">
+                              <div className="weekly-featured-pill">★ FEATURED COMBO</div>
+                              <h3>{combo.name}</h3>
+                              <p>{combo.description || "Signature sharing platter crafted for big appetites."}</p>
+                              <div className="weekly-combo-price">{formatGHS(combo.price)}</div>
+                              <div className="weekly-combo-actions">
+                                {q > 0 ? (
+                                  renderQtyStepper(combo.id, combo.name)
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="weekly-add-combo-btn"
+                                    onClick={() => handleAddItem(combo)}
+                                  >
+                                    ＋ Add combo
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            {combo.imageUrl && (
+                              <img
+                                src={combo.imageUrl}
+                                alt={combo.name}
+                                className="weekly-combo-img"
+                                loading="lazy"
+                              />
+                            )}
+                          </article>
+                        );
+                      })
+                    )}
+                  </section>
+                );
+              }
+
+              // Salads & Add-ons Section
+              if (cat.kind === "addons") {
+                const combinedAddons = [
+                  ...cat.items.map((item) => ({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    imageUrl: item.imageUrl,
+                    slug: item.slug,
+                  })),
+                  ...filteredExtras
+                    .filter((ex) => !cat.items.some((i) => i.name.toLowerCase() === ex.name.toLowerCase()))
+                    .map((ex) => ({
+                      id: ex.id,
+                      name: ex.name,
+                      price: ex.price,
+                      imageUrl: null as string | null,
+                      slug: null as string | null,
+                    })),
+                ];
+
+                return (
+                  <section
+                    key={cat.id}
+                    id={`menu-${cat.slug}`}
+                    className="weekly-section menu-category-section"
+                  >
+                    <div className="weekly-section-head">
+                      <h2 className="weekly-section-title">{cat.name}</h2>
+                      <span className="weekly-section-meta">Make it yours</span>
+                    </div>
+
+                    {combinedAddons.length === 0 ? (
+                      <div className="weekly-empty">No add-ons match your search.</div>
+                    ) : (
+                      <div className="weekly-addon-list">
+                        {combinedAddons.map((addon) => {
+                          const q = getCartQty(addon.id);
+                          return (
+                            <div key={addon.id} className="weekly-addon">
+                              {addon.imageUrl ? (
+                                <img src={addon.imageUrl} alt={addon.name} loading="lazy" />
+                              ) : (
+                                <div className="weekly-addon-placeholder" aria-hidden="true">
+                                  <Sparkles size={18} />
+                                </div>
+                              )}
+                              <div className="weekly-addon-info">
+                                <div className="weekly-addon-name">{addon.name}</div>
+                                <div className="weekly-addon-price">{formatGHS(addon.price)}</div>
+                              </div>
+                              {q > 0 ? (
+                                renderQtyStepper(addon.id, addon.name)
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="weekly-add-btn"
+                                  aria-label={`Add ${addon.name}`}
+                                  onClick={() => handleAddItem(addon)}
+                                >
+                                  <Plus size={16} />
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </section>
+                );
+              }
+
+              // Soups & Swallows / Local Delights Horizontal Rows
+              if (cat.kind === "locals") {
+                return (
+                  <section
+                    key={cat.id}
+                    id={`menu-${cat.slug}`}
+                    className="weekly-section menu-category-section"
+                  >
+                    <div className="weekly-section-head">
+                      <h2 className="weekly-section-title">{cat.name}</h2>
+                      <span className="weekly-section-meta">Ghanaian favourites</span>
+                    </div>
+
+                    <div className="weekly-sunday-note">
+                      ☀ Authentic Ghanaian soups, swallows, and local dishes — freshly prepared daily for your table.
+                    </div>
+
+                    {cat.items.length === 0 ? (
+                      <div className="weekly-empty">No local dishes match your search.</div>
+                    ) : (
+                      <div className="weekly-local-list">
+                        {cat.items.map((item) => {
+                          const q = getCartQty(item.id);
+                          return (
+                            <article key={item.id} className="weekly-local-row">
+                              {item.imageUrl ? (
+                                <Link href={`/menu/${item.slug}`}>
+                                  <img src={item.imageUrl} alt={item.name} loading="lazy" />
+                                </Link>
+                              ) : (
+                                <div className="weekly-addon-placeholder" style={{ width: 106, height: 94 }}>
+                                  <Utensils size={24} />
+                                </div>
+                              )}
+                              <div className="weekly-local-detail">
+                                <div>
+                                  <Link href={`/menu/${item.slug}`}>{item.name}</Link>
+                                  <p>{item.description || "Prepared fresh by Rich-Dons Catering."}</p>
+                                </div>
+                                <div className="weekly-local-action">
+                                  <b className="weekly-price">{formatGHS(item.price)}</b>
+                                  {q > 0 ? (
+                                    renderQtyStepper(item.id, item.name)
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      className="weekly-add-btn"
+                                      aria-label={`Add ${item.name}`}
+                                      onClick={() => handleAddItem(item)}
+                                    >
+                                      <Plus size={16} />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </article>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </section>
+                );
+              }
+
+              // Default / Rice Dishes Grid
+              return (
+                <section
+                  key={cat.id}
+                  id={`menu-${cat.slug}`}
+                  className="weekly-section menu-category-section"
+                >
+                  <div className="weekly-section-head">
+                    <h2 className="weekly-section-title">{cat.name}</h2>
+                    <span className="weekly-section-meta">
+                      {cat.items.length} {cat.items.length === 1 ? "selection" : "selections"}
+                    </span>
+                  </div>
+
+                  {cat.items.length === 0 ? (
+                    <div className="weekly-empty">No dishes match your search in {cat.name}.</div>
+                  ) : (
+                    <div className="weekly-cards">
+                      {cat.items.map((item) => {
+                        const q = getCartQty(item.id);
+                        return (
+                          <article key={item.id} className="weekly-food-card">
+                            <Link href={`/menu/${item.slug}`} className="weekly-food-img">
+                              {item.imageUrl ? (
+                                <img src={item.imageUrl} alt={item.name} loading="lazy" />
+                              ) : (
+                                <div className="w-full h-full grid place-items-center text-amber-400">
+                                  <Utensils size={28} />
+                                </div>
+                              )}
+                              {item.isFeatured && <span className="weekly-food-badge">POPULAR</span>}
+                            </Link>
+                            <div className="weekly-food-info">
+                              <Link href={`/menu/${item.slug}`} className="weekly-food-name">
+                                {item.name}
+                              </Link>
+                              <div className="weekly-food-desc">
+                                {item.description || "Prepared fresh by Rich-Dons Catering."}
+                              </div>
+                              <div className="weekly-food-bottom">
+                                <span className="weekly-price">{formatGHS(item.price)}</span>
+                                {q > 0 ? (
+                                  renderQtyStepper(item.id, item.name)
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="weekly-add-btn"
+                                    aria-label={`Add ${item.name}`}
+                                    onClick={() => handleAddItem(item)}
+                                  >
+                                    <Plus size={16} />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
+          </div>
+
+          {/* ── PC RIGHT STICKY SIDEBAR: LIVE CART ── */}
+          <aside className="weekly-sidebar weekly-sidebar-right" aria-label="Live cart">
             <section className="weekly-side-card weekly-side-cart" aria-label="Live cart">
               <div className="weekly-side-head">
                 <span className="weekly-side-title">
@@ -416,358 +771,6 @@ export function WeeklyMenuClient({ categories, extras, combos }: WeeklyMenuClien
               )}
             </section>
           </aside>
-
-          {/* ── MAIN MENU CONTENT ── */}
-          <div className="weekly-main">
-            {/* ── 1. HERO BANNER ── */}
-            <section className="weekly-hero" aria-label="This Week's Menu">
-          <img
-            src="/coming-soon/jolof.avif"
-            alt="Freshly prepared Ghanaian Jollof rice and grilled chicken"
-            className="weekly-hero-bg"
-          />
-          <div className="weekly-hero-shade" />
-          <div className="weekly-hero-copy">
-            <div className="weekly-eyebrow">Freshly curated for you</div>
-            <h1>
-              This Week&apos;s
-              <br />
-              <span>Menu</span>
-            </h1>
-            <p>Good food, made memorable. Fixed weekly selections cooked fresh daily.</p>
-            <div className="weekly-date-pill">
-              <CalendarDays size={13} aria-hidden="true" />
-              <span>{weekLabel}</span>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 2. SEARCH & PRICE SORT ── */}
-        <div className="weekly-search-row">
-          <label className="weekly-search">
-            <Search size={16} aria-hidden="true" />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search this week's menu…"
-              aria-label="Search menu"
-            />
-          </label>
-          <button
-            type="button"
-            className={`weekly-filter-btn ${sortLow ? "active" : ""}`}
-            title={sortLow ? "Sorted by lowest price" : "Sort by lowest price"}
-            aria-label="Sort by price"
-            onClick={() => {
-              const next = !sortLow;
-              setSortLow(next);
-              showToast(next ? "Sorted by lowest price" : "Default menu order");
-            }}
-          >
-            <ArrowUpDown size={17} aria-hidden="true" />
-          </button>
-        </div>
-
-        {/* ── 3. CATEGORY CHIPS ── */}
-        <div className="weekly-chips" role="tablist" aria-label="Menu categories">
-          {filterChips.map((chip) => (
-            <button
-              key={chip.key}
-              type="button"
-              role="tab"
-              aria-selected={activeFilter === chip.key}
-              className={`weekly-chip ${activeFilter === chip.key ? "active" : ""}`}
-              onClick={() => setActiveFilter(chip.key)}
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
-
-        {/* ── 4. MENU SECTIONS ── */}
-        {processedCategories.map((cat) => {
-          const isHidden = activeFilter !== "all" && activeFilter !== cat.slug;
-          if (isHidden) return null;
-
-          // Combo Package Section
-          if (cat.kind === "combo") {
-            const allComboCards = [
-              ...cat.items.map((item) => ({
-                id: item.id,
-                name: item.name,
-                slug: item.slug,
-                description: item.description,
-                price: item.price,
-                imageUrl: item.imageUrl,
-                isMenuItem: true,
-              })),
-              ...extraStandaloneCombos.map((c) => ({
-                id: c.id,
-                name: c.name,
-                slug: c.slug,
-                description: c.description,
-                price: c.price,
-                imageUrl: c.imageUrl,
-                isMenuItem: false,
-              })),
-            ];
-
-            return (
-              <section
-                key={cat.id}
-                id={`menu-${cat.slug}`}
-                className="weekly-section menu-category-section"
-              >
-                <div className="weekly-section-head">
-                  <h2 className="weekly-section-title">{cat.name}</h2>
-                  <span className="weekly-section-meta">
-                    {allComboCards.length} {allComboCards.length === 1 ? "selection" : "selections"}
-                  </span>
-                </div>
-
-                {allComboCards.length === 0 ? (
-                  <div className="weekly-empty">No combo packages match your search.</div>
-                ) : (
-                  allComboCards.map((combo) => {
-                    const q = getCartQty(combo.id);
-                    return (
-                      <article key={combo.id} className="weekly-combo">
-                        <div className="weekly-combo-copy">
-                          <div className="weekly-featured-pill">★ FEATURED COMBO</div>
-                          <h3>{combo.name}</h3>
-                          <p>{combo.description || "Signature sharing platter crafted for big appetites."}</p>
-                          <div className="weekly-combo-price">{formatGHS(combo.price)}</div>
-                          <div className="weekly-combo-actions">
-                            {q > 0 ? (
-                              renderQtyStepper(combo.id, combo.name)
-                            ) : (
-                              <button
-                                type="button"
-                                className="weekly-add-combo-btn"
-                                onClick={() => handleAddItem(combo)}
-                              >
-                                ＋ Add combo
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        {combo.imageUrl && (
-                          <img
-                            src={combo.imageUrl}
-                            alt={combo.name}
-                            className="weekly-combo-img"
-                            loading="lazy"
-                          />
-                        )}
-                      </article>
-                    );
-                  })
-                )}
-              </section>
-            );
-          }
-
-          // Salads & Add-ons Section
-          if (cat.kind === "addons") {
-            const combinedAddons = [
-              ...cat.items.map((item) => ({
-                id: item.id,
-                name: item.name,
-                price: item.price,
-                imageUrl: item.imageUrl,
-                slug: item.slug,
-              })),
-              ...filteredExtras
-                .filter((ex) => !cat.items.some((i) => i.name.toLowerCase() === ex.name.toLowerCase()))
-                .map((ex) => ({
-                  id: ex.id,
-                  name: ex.name,
-                  price: ex.price,
-                  imageUrl: null as string | null,
-                  slug: null as string | null,
-                })),
-            ];
-
-            return (
-              <section
-                key={cat.id}
-                id={`menu-${cat.slug}`}
-                className="weekly-section menu-category-section"
-              >
-                <div className="weekly-section-head">
-                  <h2 className="weekly-section-title">{cat.name}</h2>
-                  <span className="weekly-section-meta">Make it yours</span>
-                </div>
-
-                {combinedAddons.length === 0 ? (
-                  <div className="weekly-empty">No add-ons match your search.</div>
-                ) : (
-                  <div className="weekly-addon-list">
-                    {combinedAddons.map((addon) => {
-                      const q = getCartQty(addon.id);
-                      return (
-                        <div key={addon.id} className="weekly-addon">
-                          {addon.imageUrl ? (
-                            <img src={addon.imageUrl} alt={addon.name} loading="lazy" />
-                          ) : (
-                            <div className="weekly-addon-placeholder" aria-hidden="true">
-                              <Sparkles size={18} />
-                            </div>
-                          )}
-                          <div className="weekly-addon-info">
-                            <div className="weekly-addon-name">{addon.name}</div>
-                            <div className="weekly-addon-price">{formatGHS(addon.price)}</div>
-                          </div>
-                          {q > 0 ? (
-                            renderQtyStepper(addon.id, addon.name)
-                          ) : (
-                            <button
-                              type="button"
-                              className="weekly-add-btn"
-                              aria-label={`Add ${addon.name}`}
-                              onClick={() => handleAddItem(addon)}
-                            >
-                              <Plus size={16} />
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
-            );
-          }
-
-          // Soups & Swallows / Local Delights Horizontal Rows
-          if (cat.kind === "locals") {
-            return (
-              <section
-                key={cat.id}
-                id={`menu-${cat.slug}`}
-                className="weekly-section menu-category-section"
-              >
-                <div className="weekly-section-head">
-                  <h2 className="weekly-section-title">{cat.name}</h2>
-                  <span className="weekly-section-meta">Ghanaian favourites</span>
-                </div>
-
-                <div className="weekly-sunday-note">
-                  ☀ Authentic Ghanaian soups, swallows, and local dishes — freshly prepared daily for your table.
-                </div>
-
-                {cat.items.length === 0 ? (
-                  <div className="weekly-empty">No local dishes match your search.</div>
-                ) : (
-                  <div className="weekly-local-list">
-                    {cat.items.map((item) => {
-                      const q = getCartQty(item.id);
-                      return (
-                        <article key={item.id} className="weekly-local-row">
-                          {item.imageUrl ? (
-                            <Link href={`/menu/${item.slug}`}>
-                              <img src={item.imageUrl} alt={item.name} loading="lazy" />
-                            </Link>
-                          ) : (
-                            <div className="weekly-addon-placeholder" style={{ width: 106, height: 94 }}>
-                              <Utensils size={24} />
-                            </div>
-                          )}
-                          <div className="weekly-local-detail">
-                            <div>
-                              <Link href={`/menu/${item.slug}`}>{item.name}</Link>
-                              <p>{item.description || "Prepared fresh by Rich-Dons Catering."}</p>
-                            </div>
-                            <div className="weekly-local-action">
-                              <b className="weekly-price">{formatGHS(item.price)}</b>
-                              {q > 0 ? (
-                                renderQtyStepper(item.id, item.name)
-                              ) : (
-                                <button
-                                  type="button"
-                                  className="weekly-add-btn"
-                                  aria-label={`Add ${item.name}`}
-                                  onClick={() => handleAddItem(item)}
-                                >
-                                  <Plus size={16} />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
-            );
-          }
-
-          // Default / Rice Dishes Grid
-          return (
-            <section
-              key={cat.id}
-              id={`menu-${cat.slug}`}
-              className="weekly-section menu-category-section"
-            >
-              <div className="weekly-section-head">
-                <h2 className="weekly-section-title">{cat.name}</h2>
-                <span className="weekly-section-meta">
-                  {cat.items.length} {cat.items.length === 1 ? "selection" : "selections"}
-                </span>
-              </div>
-
-              {cat.items.length === 0 ? (
-                <div className="weekly-empty">No dishes match your search in {cat.name}.</div>
-              ) : (
-                <div className="weekly-cards">
-                  {cat.items.map((item) => {
-                    const q = getCartQty(item.id);
-                    return (
-                      <article key={item.id} className="weekly-food-card">
-                        <Link href={`/menu/${item.slug}`} className="weekly-food-img">
-                          {item.imageUrl ? (
-                            <img src={item.imageUrl} alt={item.name} loading="lazy" />
-                          ) : (
-                            <div className="w-full h-full grid place-items-center text-amber-400">
-                              <Utensils size={28} />
-                            </div>
-                          )}
-                          {item.isFeatured && <span className="weekly-food-badge">POPULAR</span>}
-                        </Link>
-                        <div className="weekly-food-info">
-                          <Link href={`/menu/${item.slug}`} className="weekly-food-name">
-                            {item.name}
-                          </Link>
-                          <div className="weekly-food-desc">
-                            {item.description || "Prepared fresh by Rich-Dons Catering."}
-                          </div>
-                          <div className="weekly-food-bottom">
-                            <span className="weekly-price">{formatGHS(item.price)}</span>
-                            {q > 0 ? (
-                              renderQtyStepper(item.id, item.name)
-                            ) : (
-                              <button
-                                type="button"
-                                className="weekly-add-btn"
-                                aria-label={`Add ${item.name}`}
-                                onClick={() => handleAddItem(item)}
-                              >
-                                <Plus size={16} />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          );
-        })}
-          </div>
         </div>
       </div>
 

@@ -11,7 +11,7 @@ export default function CartPage() {
   const total = subtotal + delivery;
 
   return (
-    <main className="page narrow">
+    <main className="page narrow menu-theme-dark">
       <div className="page-heading">
         <span className="eyebrow">Your order</span>
         <h1>Shopping bag</h1>

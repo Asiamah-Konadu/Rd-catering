@@ -354,7 +354,7 @@ export default function CheckoutPage() {
 
   if (!items.length) {
     return (
-      <main className="page narrow">
+      <main className="page narrow menu-theme-dark">
         <div className="empty">
           <h2>Your bag is empty</h2>
           <p>Add items before checking out.</p>
@@ -364,7 +364,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="page narrow">
+    <main className="page narrow menu-theme-dark">
       <div className="page-heading">
         <span className="eyebrow">Checkout</span>
         <h1>Complete Your Order</h1>

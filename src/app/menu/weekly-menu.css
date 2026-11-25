@@ -18,7 +18,7 @@
 }
 
 .weekly-shell {
-  max-width: 1240px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 16px 16px 32px;
 }
@@ -46,8 +46,8 @@
 
   .weekly-layout {
     display: grid;
-    grid-template-columns: 280px minmax(0, 1fr);
-    gap: 24px;
+    grid-template-columns: 210px minmax(0, 1fr) 250px;
+    gap: 20px;
     align-items: start;
   }
 
@@ -63,7 +63,14 @@
 
 @media (min-width: 1024px) {
   .weekly-layout {
-    grid-template-columns: 310px minmax(0, 1fr);
+    grid-template-columns: 240px minmax(0, 1fr) 290px;
+    gap: 24px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .weekly-layout {
+    grid-template-columns: 255px minmax(0, 1fr) 310px;
     gap: 28px;
   }
 }
@@ -118,7 +125,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 28vh;
+  max-height: calc(100vh - 200px);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #3a3742 transparent;
@@ -249,7 +256,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 260px;
+  max-height: 470px;
   overflow-y: auto;
   padding-right: 2px;
   scrollbar-width: thin;
@@ -389,6 +396,7 @@
   .weekly-hero {
     min-height: 210px;
   }
+
   .weekly-hero-copy {
     padding: 32px 30px;
     max-width: 62%;

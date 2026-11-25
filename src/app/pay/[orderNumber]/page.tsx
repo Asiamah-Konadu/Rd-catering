@@ -62,7 +62,8 @@ export default function PaymentPage() {
   }, [orderNumber, startCheckout]);
 
   return (
-    <main className="mx-auto min-h-screen max-w-3xl px-4 py-8 sm:px-6">
+    <main className="menu-theme-dark min-h-screen">
+      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-5">
         <p className="text-sm font-semibold uppercase tracking-wide text-amber-800">Rich-Dons Catering</p>
         <h1 className="mt-1 text-2xl font-bold text-slate-900">Secure payment</h1>
@@ -99,6 +100,7 @@ export default function PaymentPage() {
           {error && <button type="button" onClick={() => void startCheckout()} disabled={starting} className="mt-4 rounded-xl bg-amber-600 px-4 py-2 font-semibold text-white disabled:opacity-60">{starting ? "Starting checkout…" : "Try again"}</button>}
         </section>
       )}
+      </div>
     </main>
   );
 }

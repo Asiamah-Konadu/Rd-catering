@@ -15,6 +15,7 @@ import { getShowcaseConfig } from "@/lib/showcase";
 import { prisma } from "@/lib/prisma";
 import SectionLineArt from "@/components/SectionLineArt";
 import JourneyRope from "@/components/JourneyRope";
+import GhanaShreddedHeaderBand from "@/components/GhanaShreddedHeaderBand";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +79,7 @@ export default async function Home() {
   const carouselDishes = weeklyMenuItems && weeklyMenuItems.length > 0 ? weeklyMenuItems : allDishes;
   return (
     <main className="home-page">
+      <GhanaShreddedHeaderBand />
       <HomepageWebGLBackground />
       <section className="home-hero">
         <div className="home-hero-copy">
