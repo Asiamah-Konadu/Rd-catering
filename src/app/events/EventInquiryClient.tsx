@@ -18,7 +18,7 @@ import {
   Layers,
   Award,
 } from "lucide-react";
-import EventBanquetWebGL from "@/components/events/EventBanquetWebGL";
+import SandTypographyHero from "@/components/events/SandTypography";
 import { BUSINESS_CONTACT } from "@/lib/business";
 
 export type EventFaq = {
@@ -99,28 +99,13 @@ export function EventInquiryClient({ whatsappUrl, faqs = [] }: EventInquiryProps
 
   return (
     <main className="events-page min-h-screen bg-[#fffaf5] text-[#211a16] selection:bg-amber-600 selection:text-white">
-      {/* ─── 1. HERO SECTION (PRESERVED AS REQUESTED) ─────────────────── */}
-      <section className="events-photo-hero" aria-label="Event catering in Accra">
-        <img
-          src="/events-banquet.jpg"
-          alt="A beautifully arranged Rich-Dons Catering banquet with golden chafing dishes"
-        />
-        <div className="events-photo-shade" />
-        <div className="events-webgl-desktop">
-          <EventBanquetWebGL />
-        </div>
-        <div className="events-photo-copy">
-          <span>Event catering in Accra</span>
-          <h1>Make your gathering worth gathering for.</h1>
-          <p>
-            From intimate dinners to milestone celebrations, we plan a menu
-            that feels generous, considered, and unmistakably Ghanaian.
-          </p>
-          <a href="#appointment">
-            Plan your event <span aria-hidden="true">↓</span>
-          </a>
-        </div>
-      </section>
+      {/* ─── 1. HERO SECTION (DOT TYPOGRAPHY WEBGL) ─────────────────── */}
+      <SandTypographyHero
+        heading="Make your gathering worth gathering for."
+        subheading="From intimate dinners to milestone celebrations in Accra, we plan a menu that feels generous, considered, and unmistakably Ghanaian."
+        ctaLabel="Plan your event ↓"
+        onCTAClick="#appointment"
+      />
 
       {/* ─── 2. CELEBRATION PILLARS STRIP ───────────────────────────────── */}
       <section

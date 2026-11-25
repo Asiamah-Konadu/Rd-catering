@@ -233,4 +233,40 @@ export async function getWeeklyMenuItems(): Promise<PublicMenuItem[] | null> {
     console.error("Error fetching weekly menu items:", error);
     return null;
   }
-}
+}
+
+export type PublicCombo = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  imageUrl: string | null;
+  price: number;
+  isAvailable: boolean;
+};
+
+export async function getPublicCombos(): Promise<PublicCombo[]> {
+  try {
+    const combos = await prisma.combo.findMany({
+      where: { isAvailable: true },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        imageUrl: true,
+        price: true,
+        isAvailable: true,
+      },
+    });
+    return combos.map((c) => ({
+      ...c,
+      price: Number(c.price.toString()),
+    }));
+  } catch (error) {
+    console.error("Error fetching public combos:", error);
+    return [];
+  }
+}
+

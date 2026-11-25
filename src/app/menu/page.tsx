@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import { ArrowDown, ArrowRight, Clock3, MapPin } from "lucide-react";
-import MenuCard from "@/components/MenuCard";
-import { BUSINESS_HOURS } from "@/lib/business";
-import MenuSideNav from "@/components/MenuSideNav";
-import { getPublicMenu, getPublicExtras } from "@/lib/menu";
+import { getPublicCombos, getPublicExtras, getPublicMenu } from "@/lib/menu";
 import { SITE_URL } from "@/lib/site-url";
+import { WeeklyMenuClient } from "./WeeklyMenuClient";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Our Kitchen Menu | Fresh Ghanaian Food & Office Lunch in Accra",
+  title: "This Week's Menu | Fresh Ghanaian Food & Office Lunch in Accra",
   description:
-    "Browse Rich-Dons Catering's complete kitchen menu. Smoky Ghanaian jollof rice, waakye, swallows, light soups, chicken, beef & custom combos delivered across Accra.",
+    "Browse Rich-Dons Catering's fixed weekly kitchen menu. Smoky Ghanaian jollof rice, waakye, swallows, light soups, chicken, beef & custom combos delivered across Accra.",
   alternates: { canonical: "/menu" },
   keywords: [
     "Ghanaian food menu",
+    "weekly menu Accra",
     "jollof rice Accra",
     "food delivery menu Accra",
     "lunch menu Accra",
@@ -24,7 +21,7 @@ export const metadata: Metadata = {
     "Rich-Dons menu",
   ],
   openGraph: {
-    title: "Ghanaian Food Menu in Accra | Rich-Dons Catering",
+    title: "This Week's Menu in Accra | Rich-Dons Catering",
     description:
       "Browse fresh Ghanaian favourites and custom combos. Delivery available across Accra.",
     url: "/menu",
@@ -32,18 +29,18 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Our Kitchen Menu | Rich-Dons Catering Accra",
+    title: "This Week's Menu | Rich-Dons Catering Accra",
     description:
       "Browse fresh Ghanaian favourites and custom combos. Delivery available across Accra.",
   },
 };
 
 export default async function MenuPage() {
-  const [categories, extras] = await Promise.all([
+  const [categories, extras, combos] = await Promise.all([
     getPublicMenu(),
     getPublicExtras(),
+    getPublicCombos(),
   ]);
-  const dishCount = categories.reduce((total, category) => total + category.items.length, 0);
 
   const menuSchema = {
     "@context": "https://schema.org",
@@ -60,7 +57,7 @@ export default async function MenuPage() {
           {
             "@type": "ListItem",
             position: 2,
-            name: "Our Menu",
+            name: "This Week's Menu",
             item: `${SITE_URL}/menu`,
           },
         ],
@@ -68,7 +65,7 @@ export default async function MenuPage() {
       {
         "@type": "Menu",
         "@id": `${SITE_URL}/menu#full-menu`,
-        name: "Rich-Dons Catering Kitchen Menu",
+        name: "Rich-Dons Catering Weekly Menu",
         url: `${SITE_URL}/menu`,
         inLanguage: "en-GH",
         hasMenuSection: categories.map((cat) => ({
@@ -82,7 +79,9 @@ export default async function MenuPage() {
               "@type": "Offer",
               price: item.price.toFixed(2),
               priceCurrency: "GHS",
-              availability: item.isAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              availability: item.isAvailable
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
             },
           })),
         })),
@@ -91,87 +90,28 @@ export default async function MenuPage() {
   };
 
   return (
-    <main className="page menu-page">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(menuSchema) }}
       />
-      <section className="menu-hero">
-        <div className="menu-hero-copy">
-          <span className="menu-eyebrow"><span /> Rich-Dons Catering · Accra</span>
-          <h1>Made for<br /><em>your kind</em> of hungry.</h1>
-          <p>Ghanaian favourites, freshly prepared and ready for your table.</p>
-          <a className="menu-hero-cta" href="#menu-categories">
-            Find your next favourite <ArrowDown size={17} aria-hidden="true" />
-          </a>
-          <div className="menu-service-details">
-            <span><Clock3 size={16} aria-hidden="true" /> {BUSINESS_HOURS.label}</span>
-            <span><MapPin size={16} aria-hidden="true" /> Delivered around Accra</span>
-          </div>
-        </div>
-        <div className="menu-hero-image">
-          <Image
-            src="/coming-soon/jolof.avif"
-            alt="A freshly prepared plate of Ghanaian Jollof rice"
-            fill
-            priority
-            sizes="(max-width: 760px) 100vw, 48vw"
-          />
-          <span className="menu-image-caption">A little taste of home <ArrowRight size={15} aria-hidden="true" /></span>
-        </div>
-      </section>
-
       {categories.length ? (
-        <>
-          <div className="menu-results-heading" id="menu-categories">
-            <div>
-              <span className="menu-eyebrow">Fresh from our kitchen</span>
-              <h2>What sounds good?</h2>
-            </div>
-            <span className="menu-dish-count">{String(dishCount).padStart(2, "0")} dishes to choose from</span>
-          </div>
-
-          <div className="menu-body-layout">
-            {/* Sticky left side nav */}
-            <MenuSideNav
-              categories={categories.map((c) => ({
-                id: c.id,
-                name: c.name,
-                slug: c.slug,
-                count: `${String(c.items.length).padStart(2, "0")} dishes`,
-              }))}
-            />
-
-            {/* Main scrollable content */}
-            <div className="menu-content-area">
-              {categories.map((category, index) => (
-                <section className="menu-category-section" id={`menu-${category.slug}`} key={category.id}>
-                  <div className="menu-category-heading">
-                    <span>{String(index + 1).padStart(2, "0")} / MENU CATEGORY</span>
-                    <h2>{category.name}</h2>
-                    <span>{String(category.items.length).padStart(2, "0")} dishes</span>
-                  </div>
-                  <div className="menu-grid">
-                    {category.items.map(item => (
-                      <MenuCard
-                        key={item.id}
-                        item={item}
-                        availableExtras={extras}
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          </div>
-        </>
+        <WeeklyMenuClient categories={categories} extras={extras} combos={combos} />
       ) : (
-        <div className="menu-empty-state">
-          <span className="menu-eyebrow">A little kitchen magic in progress</span>
-          <h2>Today&apos;s menu is being prepared.</h2>
-          <p>Check back soon to see what&apos;s fresh from our kitchen.</p>
-        </div>
+        <main className="weekly-dark-menu">
+          <div className="weekly-shell">
+            <div className="weekly-empty" style={{ marginTop: 48 }}>
+              <div className="weekly-eyebrow" style={{ marginBottom: 8 }}>
+                A little kitchen magic in progress
+              </div>
+              <h1 style={{ fontSize: 24, fontWeight: 850, margin: "0 0 8px", color: "#fff" }}>
+                This week&apos;s menu is being prepared.
+              </h1>
+              <p style={{ margin: 0 }}>Check back soon to see what&apos;s fresh from our kitchen.</p>
+            </div>
+          </div>
+        </main>
       )}
-    </main>
+    </>
   );
 }
