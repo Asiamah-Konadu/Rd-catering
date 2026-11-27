@@ -144,21 +144,24 @@ export async function POST(req: Request) {
     }
 
     // Replace weekly menu items with new order
-    await prisma.$transaction(async (tx) => {
-      await tx.weeklyMenuItem.deleteMany({
-        where: { weeklyMenuId },
-      });
+    const deleteItemsOp = prisma.weeklyMenuItem.deleteMany({
+      where: { weeklyMenuId },
+    });
 
-      if (Array.isArray(itemIds) && itemIds.length > 0) {
-        await tx.weeklyMenuItem.createMany({
+    if (Array.isArray(itemIds) && itemIds.length > 0) {
+      await prisma.$transaction([
+        deleteItemsOp,
+        prisma.weeklyMenuItem.createMany({
           data: itemIds.map((menuItemId, index) => ({
             weeklyMenuId,
             menuItemId,
             sortOrder: index,
           })),
-        });
-      }
-    });
+        }),
+      ]);
+    } else {
+      await prisma.$transaction([deleteItemsOp]);
+    }
 
     return NextResponse.json({ success: true, weeklyMenuId });
   } catch (error) {

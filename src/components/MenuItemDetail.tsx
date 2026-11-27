@@ -5,6 +5,7 @@ import { Plus, Minus, Check, Sparkles, Utensils } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useCart, type CartExtra } from "@/components/cart/CartProvider";
 import type { PublicMenuItem, PublicExtra } from "@/lib/menu";
+import AdSlot from "@/components/ads/AdSlot";
 
 interface MenuItemDetailProps {
   item: PublicMenuItem;
@@ -301,6 +302,9 @@ export default function MenuItemDetail({
             </div>
           </div>
         )}
+      </div>
+      <div className="mt-8">
+        <AdSlot slotKey="dish_detail_bottom" tone="dark" />
       </div>
     </main>
   );

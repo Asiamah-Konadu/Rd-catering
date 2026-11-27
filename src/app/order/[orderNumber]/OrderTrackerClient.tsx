@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import AdSlot from "@/components/ads/AdSlot";
 
 type OrderItem = {
   id: string;
@@ -93,9 +94,8 @@ function StarPicker({
             aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
           >
             <span
-              className={`transition-colors duration-150 ${
-                star <= active ? "text-amber-400" : "text-slate-200"
-              }`}
+              className={`transition-colors duration-150 ${star <= active ? "text-amber-400" : "text-slate-200"
+                }`}
             >
               ★
             </span>
@@ -103,9 +103,8 @@ function StarPicker({
         ))}
       </div>
       <span
-        className={`text-sm font-semibold transition-opacity duration-200 ${
-          active > 0 ? "opacity-100 text-amber-700" : "opacity-0"
-        }`}
+        className={`text-sm font-semibold transition-opacity duration-200 ${active > 0 ? "opacity-100 text-amber-700" : "opacity-0"
+          }`}
       >
         {labels[active]}
       </span>
@@ -304,325 +303,325 @@ export function OrderTrackerClient({
   return (
     <div className="menu-theme-dark min-h-screen">
       <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-8">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-amber-700 via-amber-600 to-amber-800 text-white p-6 md:p-8 rounded-2xl shadow-xl relative overflow-hidden">
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="bg-amber-500/30 text-amber-100 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-amber-400/30">
-                Live Order Tracker
-              </span>
-              {isRefreshing && (
-                <span className="text-[11px] text-amber-200 animate-pulse">
-                  Syncing...
+        {/* Header Banner */}
+        <div className="bg-gradient-to-r from-amber-700 via-amber-600 to-amber-800 text-white p-6 md:p-8 rounded-2xl shadow-xl relative overflow-hidden">
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="bg-amber-500/30 text-amber-100 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-amber-400/30">
+                  Live Order Tracker
                 </span>
-              )}
-            </div>
-            <h1 className="text-3xl font-extrabold mt-1">
-              Thank you, {order.customerName}!
-            </h1>
-            <p className="text-amber-100 text-sm mt-1">
-              Order Ref: <strong className="font-mono">{order.orderNumber}</strong>
-            </p>
-            {order.isScheduled && (
-              <div className="mt-2.5 inline-flex items-center gap-2 bg-amber-500/40 border border-amber-300/40 text-amber-50 px-3 py-1 rounded-xl text-xs font-semibold">
-                <span>📅 Scheduled Delivery:</span>
-                <strong>
-                  {order.scheduledFor
-                    ? new Date(order.scheduledFor).toLocaleDateString("en-GH", {
+                {isRefreshing && (
+                  <span className="text-[11px] text-amber-200 animate-pulse">
+                    Syncing...
+                  </span>
+                )}
+              </div>
+              <h1 className="text-3xl font-extrabold mt-1">
+                Thank you, {order.customerName}!
+              </h1>
+              <p className="text-amber-100 text-sm mt-1">
+                Order Ref: <strong className="font-mono">{order.orderNumber}</strong>
+              </p>
+              {order.isScheduled && (
+                <div className="mt-2.5 inline-flex items-center gap-2 bg-amber-500/40 border border-amber-300/40 text-amber-50 px-3 py-1 rounded-xl text-xs font-semibold">
+                  <span>📅 Scheduled Delivery:</span>
+                  <strong>
+                    {order.scheduledFor
+                      ? new Date(order.scheduledFor).toLocaleDateString("en-GH", {
                         weekday: "short",
                         month: "short",
                         day: "numeric",
                       })
-                    : "Tomorrow"}{" "}
-                  • {order.scheduledSlot}
-                </strong>
-              </div>
-            )}
+                      : "Tomorrow"}{" "}
+                    • {order.scheduledSlot}
+                  </strong>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={fetchLatest}
+              disabled={isRefreshing}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-xs transition"
+            >
+              {isRefreshing ? "Updating..." : "Refresh Status"}
+            </button>
           </div>
-          <button
-            onClick={fetchLatest}
-            disabled={isRefreshing}
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-xs transition"
-          >
-            {isRefreshing ? "Updating..." : "Refresh Status"}
-          </button>
         </div>
-      </div>
 
-      {/* Scheduled Info Notice */}
-      {order.isScheduled && !isCancelled && !isDelivered && (
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-5 rounded-2xl flex items-start gap-3.5 text-amber-950 shadow-xs">
-          <span className="text-2xl">⏰</span>
-          <div className="space-y-1">
-            <h3 className="font-bold text-sm text-amber-900">
-              Scheduled Kitchen Batch & Delivery Window
-            </h3>
-            <p className="text-xs text-amber-800">
-              This order is locked into tomorrow&apos;s kitchen preparation batch for{" "}
-              <strong>{order.scheduledSlot}</strong> on{" "}
-              <strong>
-                {order.scheduledFor
-                  ? new Date(order.scheduledFor).toLocaleDateString("en-GH", {
+        {/* Scheduled Info Notice */}
+        {order.isScheduled && !isCancelled && !isDelivered && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-5 rounded-2xl flex items-start gap-3.5 text-amber-950 shadow-xs">
+            <span className="text-2xl">⏰</span>
+            <div className="space-y-1">
+              <h3 className="font-bold text-sm text-amber-900">
+                Scheduled Kitchen Batch & Delivery Window
+              </h3>
+              <p className="text-xs text-amber-800">
+                This order is locked into tomorrow&apos;s kitchen preparation batch for{" "}
+                <strong>{order.scheduledSlot}</strong> on{" "}
+                <strong>
+                  {order.scheduledFor
+                    ? new Date(order.scheduledFor).toLocaleDateString("en-GH", {
                       weekday: "long",
                       month: "short",
                       day: "numeric",
                     })
-                  : "Tomorrow"}
-              </strong>
-              . Our chefs will begin cooking fresh ahead of your dispatch time.
+                    : "Tomorrow"}
+                </strong>
+                . Our chefs will begin cooking fresh ahead of your dispatch time.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Progress Timeline */}
+        {isCancelled ? (
+          <div className="bg-rose-50 border border-rose-200 p-6 rounded-2xl text-center space-y-2">
+            <span className="text-3xl">⚠️</span>
+            <h2 className="text-xl font-bold text-rose-800">Order Cancelled</h2>
+            <p className="text-sm text-rose-600">
+              This order was cancelled. Please call or WhatsApp customer service at 059 175 4764 (+233 59 175 4764) if you have questions.
             </p>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+              <h2 className="text-lg font-bold text-slate-900">Live Status</h2>
+              <span className="text-xs text-slate-500">
+                Auto-updating • Updated {lastSync.toLocaleTimeString()}
+              </span>
+            </div>
 
-      {/* Progress Timeline */}
-      {isCancelled ? (
-        <div className="bg-rose-50 border border-rose-200 p-6 rounded-2xl text-center space-y-2">
-          <span className="text-3xl">⚠️</span>
-          <h2 className="text-xl font-bold text-rose-800">Order Cancelled</h2>
-          <p className="text-sm text-rose-600">
-            This order was cancelled. Please call or WhatsApp customer service at 059 175 4764 (+233 59 175 4764) if you have questions.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-          <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-900">Live Status</h2>
-            <span className="text-xs text-slate-500">
-              Auto-updating • Updated {lastSync.toLocaleTimeString()}
-            </span>
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-3 relative">
+              {STEPS.map((step, idx) => {
+                const isDone = currentStepIndex >= idx;
+                const isCurrent = currentStepIndex === idx;
 
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-3 relative">
-            {STEPS.map((step, idx) => {
-              const isDone = currentStepIndex >= idx;
-              const isCurrent = currentStepIndex === idx;
-
-              return (
-                <div
-                  key={step.key}
-                  className={`p-3 rounded-xl border transition flex flex-col justify-between ${
-                    isCurrent
+                return (
+                  <div
+                    key={step.key}
+                    className={`p-3 rounded-xl border transition flex flex-col justify-between ${isCurrent
                       ? "bg-amber-50 border-amber-400 ring-2 ring-amber-400/20"
                       : isDone
-                      ? "bg-slate-50 border-slate-300"
-                      : "bg-white border-slate-100 opacity-60"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                        isDone
+                        ? "bg-slate-50 border-slate-300"
+                        : "bg-white border-slate-100 opacity-60"
+                      }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isDone
                           ? "bg-amber-600 text-white"
                           : "bg-slate-200 text-slate-600"
-                      }`}
-                    >
-                      {isDone ? "✓" : idx + 1}
-                    </span>
-                    {isCurrent && (
-                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                    )}
-                  </div>
-                  <div>
-                    <h4
-                      className={`text-xs font-bold ${
-                        isCurrent
+                          }`}
+                      >
+                        {isDone ? "✓" : idx + 1}
+                      </span>
+                      {isCurrent && (
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                      )}
+                    </div>
+                    <div>
+                      <h4
+                        className={`text-xs font-bold ${isCurrent
                           ? "text-amber-900"
                           : isDone
-                          ? "text-slate-900"
-                          : "text-slate-500"
-                      }`}
-                    >
-                      {step.label}
-                    </h4>
-                    <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">
-                      {step.desc}
-                    </p>
+                            ? "text-slate-900"
+                            : "text-slate-500"
+                          }`}
+                      >
+                        {step.label}
+                      </h4>
+                      <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">
+                        {step.desc}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── Delivery Rating ─────────────────────────────────────── */}
+        {isDelivered && (
+          <div>
+            {order.review ? (
+              <RatedCard review={order.review} />
+            ) : (
+              <RatingCard
+                orderNumber={order.orderNumber}
+                onSubmitted={handleReviewSubmitted}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Summary Breakdown */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 className="font-bold text-slate-900 border-b border-slate-100 pb-3">
+              Order Summary
+            </h3>
+            <div className="space-y-3">
+              {order.items.map((i) => (
+                <div key={i.id} className="flex justify-between items-center text-sm">
+                  <div className="text-slate-800 font-medium">
+                    {i.quantity} × {i.name}
+                  </div>
+                  <div className="font-bold text-slate-900">
+                    GH₵ {Number(i.totalPrice).toFixed(2)}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Delivery Rating ─────────────────────────────────────── */}
-      {isDelivered && (
-        <div>
-          {order.review ? (
-            <RatedCard review={order.review} />
-          ) : (
-            <RatingCard
-              orderNumber={order.orderNumber}
-              onSubmitted={handleReviewSubmitted}
-            />
-          )}
-        </div>
-      )}
-
-      {/* Summary Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <h3 className="font-bold text-slate-900 border-b border-slate-100 pb-3">
-            Order Summary
-          </h3>
-          <div className="space-y-3">
-            {order.items.map((i) => (
-              <div key={i.id} className="flex justify-between items-center text-sm">
-                <div className="text-slate-800 font-medium">
-                  {i.quantity} × {i.name}
-                </div>
-                <div className="font-bold text-slate-900">
-                  GH₵ {Number(i.totalPrice).toFixed(2)}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="border-t border-slate-100 pt-3 space-y-1.5 text-sm">
-            <div className="flex justify-between text-slate-600">
-              <span>Subtotal</span>
-              <span>GH₵ {Number(order.subtotal).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-              <span>Delivery Fee</span>
-              <span>GH₵ {Number(order.deliveryFee).toFixed(2)}</span>
-            </div>
-            {Number(order.discount) > 0 && (
-              <div className="flex justify-between text-emerald-600">
-                <span>Discount</span>
-                <span>-GH₵ {Number(order.discount).toFixed(2)}</span>
-              </div>
-            )}
-            <div className="flex justify-between font-extrabold text-base text-slate-900 pt-2 border-t border-slate-100">
-              <span>Total</span>
-              <span className="text-amber-700">
-                GH₵ {Number(order.total).toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Customer & Delivery Card */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 h-fit">
-          <h3 className="font-bold text-slate-900 border-b border-slate-100 pb-3">
-            Delivery Details
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div>
-              <span className="text-xs text-slate-500 block uppercase font-semibold">
-                Customer Phone
-              </span>
-              <span className="font-medium text-slate-900">
-                {order.customerPhone}
-              </span>
+              ))}
             </div>
 
-            {order.delivery && (
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500 block uppercase font-semibold">
-                    Address
-                  </span>
-                  {order.delivery.latitude !== null &&
-                    order.delivery.latitude !== undefined &&
-                    order.delivery.longitude !== null &&
-                    order.delivery.longitude !== undefined && (
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${order.delivery.latitude},${order.delivery.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] text-emerald-700 font-bold hover:underline"
-                    >
-                      📍 View on Map
-                    </a>
-                  )}
-                </div>
-                <p className="text-slate-900 font-medium">
-                  {order.delivery.address}, {order.delivery.city}
-                  {order.delivery.region ? `, ${order.delivery.region}` : ""}
-                </p>
+            <div className="border-t border-slate-100 pt-3 space-y-1.5 text-sm">
+              <div className="flex justify-between text-slate-600">
+                <span>Subtotal</span>
+                <span>GH₵ {Number(order.subtotal).toFixed(2)}</span>
               </div>
-            )}
-
-            {/* Payment status badge */}
-            <div className="pt-2">
-              <span className="text-xs text-slate-500 block uppercase font-semibold">
-                Payment Status
-              </span>
-              <div className={`mt-1 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold w-fit ${order.payment?.status === "PAID" ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200"}`}>
-                <span>{order.payment?.status ?? "PENDING"}</span>
-                <span className="text-[11px] font-normal">
-                  via {order.payment?.method ? order.payment.method.replace(/_/g, " ") : "MOBILE MONEY"}
-                </span>
+              <div className="flex justify-between text-slate-600">
+                <span>Delivery Fee</span>
+                <span>GH₵ {Number(order.deliveryFee).toFixed(2)}</span>
               </div>
-              {order.payment?.status !== "PAID" && order.status !== "CANCELLED" && (
-                <div className="mt-3">
-                  <Link
-                    href={`/pay/${order.orderNumber}`}
-                    className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-sm"
-                  >
-                    <span>💳 Complete Payment (Hubtel)</span>
-                  </Link>
+              {Number(order.discount) > 0 && (
+                <div className="flex justify-between text-emerald-600">
+                  <span>Discount</span>
+                  <span>-GH₵ {Number(order.discount).toFixed(2)}</span>
                 </div>
               )}
+              <div className="flex justify-between font-extrabold text-base text-slate-900 pt-2 border-t border-slate-100">
+                <span>Total</span>
+                <span className="text-amber-700">
+                  GH₵ {Number(order.total).toFixed(2)}
+                </span>
+              </div>
             </div>
+          </div>
 
-            {/* Schedule details if scheduled */}
-            {order.isScheduled && (
+          {/* Customer & Delivery Card */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 h-fit">
+            <h3 className="font-bold text-slate-900 border-b border-slate-100 pb-3">
+              Delivery Details
+            </h3>
+            <div className="space-y-2 text-sm">
+              <div>
+                <span className="text-xs text-slate-500 block uppercase font-semibold">
+                  Customer Phone
+                </span>
+                <span className="font-medium text-slate-900">
+                  {order.customerPhone}
+                </span>
+              </div>
+
+              {order.delivery && (
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500 block uppercase font-semibold">
+                      Address
+                    </span>
+                    {order.delivery.latitude !== null &&
+                      order.delivery.latitude !== undefined &&
+                      order.delivery.longitude !== null &&
+                      order.delivery.longitude !== undefined && (
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${order.delivery.latitude},${order.delivery.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-emerald-700 font-bold hover:underline"
+                        >
+                          📍 View on Map
+                        </a>
+                      )}
+                  </div>
+                  <p className="text-slate-900 font-medium">
+                    {order.delivery.address}, {order.delivery.city}
+                    {order.delivery.region ? `, ${order.delivery.region}` : ""}
+                  </p>
+                </div>
+              )}
+
+              {/* Payment status badge */}
               <div className="pt-2">
                 <span className="text-xs text-slate-500 block uppercase font-semibold">
-                  Scheduled Delivery
+                  Payment Status
                 </span>
-                <p className="text-xs font-bold text-amber-900 mt-0.5">
-                  {order.scheduledFor
-                    ? new Date(order.scheduledFor).toLocaleDateString("en-GH", {
+                <div className={`mt-1 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold w-fit ${order.payment?.status === "PAID" ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200"}`}>
+                  <span>{order.payment?.status ?? "PENDING"}</span>
+                  <span className="text-[11px] font-normal">
+                    via {order.payment?.method ? order.payment.method.replace(/_/g, " ") : "MOBILE MONEY"}
+                  </span>
+                </div>
+                {order.payment?.status !== "PAID" && order.status !== "CANCELLED" && (
+                  <div className="mt-3">
+                    <Link
+                      href={`/pay/${order.orderNumber}`}
+                      className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-sm"
+                    >
+                      <span>💳 Complete Payment (Hubtel)</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Schedule details if scheduled */}
+              {order.isScheduled && (
+                <div className="pt-2">
+                  <span className="text-xs text-slate-500 block uppercase font-semibold">
+                    Scheduled Delivery
+                  </span>
+                  <p className="text-xs font-bold text-amber-900 mt-0.5">
+                    {order.scheduledFor
+                      ? new Date(order.scheduledFor).toLocaleDateString("en-GH", {
                         weekday: "short",
                         month: "short",
                         day: "numeric",
                       })
-                    : "Tomorrow"}{" "}
-                  ({order.scheduledSlot})
+                      : "Tomorrow"}{" "}
+                    ({order.scheduledSlot})
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <span className="text-xs text-slate-500 block uppercase font-semibold">
+                  Order Placed
+                </span>
+                <span className="text-xs text-slate-700">
+                  {new Date(order.createdAt).toLocaleString("en-GH", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100">
+              <Link
+                href="/menu"
+                className="block w-full text-center py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs transition"
+              >
+                Order More Items
+              </Link>
+
+              <div className="mt-3 p-3 bg-amber-50/70 rounded-xl border border-amber-200/60 text-xs text-slate-700 space-y-1">
+                <span className="font-bold text-slate-900 block">Customer Service & Hotline</span>
+                <p>
+                  Need help with this order? Call or WhatsApp us at{" "}
+                  <a href="tel:+233591754764" className="font-bold text-amber-800 underline">
+                    059 175 4764
+                  </a>{" "}
+                  (<a href="https://wa.me/233591754764" target="_blank" rel="noopener noreferrer" className="text-emerald-700 font-bold underline">WhatsApp Direct</a>).
                 </p>
               </div>
-            )}
-
-            <div>
-              <span className="text-xs text-slate-500 block uppercase font-semibold">
-                Order Placed
-              </span>
-              <span className="text-xs text-slate-700">
-                {new Date(order.createdAt).toLocaleString("en-GH", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
-              </span>
             </div>
           </div>
-
-          <div className="pt-4 border-t border-slate-100">
-            <Link
-              href="/menu"
-              className="block w-full text-center py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs transition"
-            >
-              Order More Items
-            </Link>
-
-          <div className="mt-3 p-3 bg-amber-50/70 rounded-xl border border-amber-200/60 text-xs text-slate-700 space-y-1">
-            <span className="font-bold text-slate-900 block">Customer Service & Hotline</span>
-            <p>
-              Need help with this order? Call or WhatsApp us at{" "}
-              <a href="tel:+233591754764" className="font-bold text-amber-800 underline">
-                059 175 4764
-              </a>{" "}
-              (<a href="https://wa.me/233591754764" target="_blank" rel="noopener noreferrer" className="text-emerald-700 font-bold underline">WhatsApp Direct</a>).
-            </p>
-          </div>
-          </div>
+        </div>
+        <div className="max-w-4xl mx-auto px-4 pb-8">
+          <AdSlot slotKey="order_tracker_bottom" tone="light" />
         </div>
       </div>
-    </div>
     </div>
   );
 }

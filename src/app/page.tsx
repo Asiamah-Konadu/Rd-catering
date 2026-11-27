@@ -16,6 +16,7 @@ import { prisma } from "@/lib/prisma";
 import SectionLineArt from "@/components/SectionLineArt";
 import JourneyRope from "@/components/JourneyRope";
 import GhanaShreddedHeaderBand from "@/components/GhanaShreddedHeaderBand";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -227,6 +228,9 @@ export default async function Home() {
           </a>
         </aside>
       </section>
+      <div className="max-w-5xl mx-auto px-4">
+        <AdSlot slotKey="home_mid_banner" tone="light" />
+      </div>
       <ThisWeekDishesCarousel items={carouselDishes} />
 
       {featuredItem && (
@@ -270,7 +274,10 @@ export default async function Home() {
 
       <HowToOrderLaunchReveal />
 
-      <JourneyRope />
+      <JourneyRope />
+      <div className="max-w-5xl mx-auto px-4 pb-6">
+        <AdSlot slotKey="home_pre_footer" tone="light" />
+      </div>
     </main>
   );
 }

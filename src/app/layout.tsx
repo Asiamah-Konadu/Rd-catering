@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import InstallAppPrompt from "@/components/InstallAppPrompt";
 import MobileLiquidNav from "@/components/mobile/MobileLiquidNav";
 import { SITE_URL } from "@/lib/site-url";
+import { DEFAULT_PUBLISHER_ID, getAdSenseConfig } from "@/lib/ads";
+import { AdSenseProvider } from "@/components/ads/AdSenseProvider";
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || "G-K9K46SSV4D";
 
@@ -168,7 +170,9 @@ const structuredData = {
   ],
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const adConfig = await getAdSenseConfig();
+  const adsenseClientId = adConfig.publisherId || DEFAULT_PUBLISHER_ID;
   return (
     <html lang="en">
       <head>
@@ -192,6 +196,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             `,
           }}
         />
+        {/* Google AdSense */}
+        <meta name="google-adsense-account" content={adsenseClientId} />
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(
+            adsenseClientId
+          )}`}
+          crossOrigin="anonymous"
+        />
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
         <meta property="og:image" content={`${SITE_URL}/og-image.jpg`} />
         <meta property="og:image:secure_url" content={`${SITE_URL}/og-image.jpg`} />
@@ -208,12 +221,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <SplashScreen />
+        <AdSenseProvider config={adConfig}>
         <CartProvider>
           <Header />
           {children}
           <Footer />
           <MobileLiquidNav />
         </CartProvider>
+        </AdSenseProvider>
         <InstallAppPrompt />
       </body>
     </html>

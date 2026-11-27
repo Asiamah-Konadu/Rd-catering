@@ -25,6 +25,7 @@ import {
   X,
   Menu,
   ExternalLink,
+  Megaphone,
 } from "lucide-react";
 
 export interface AdminSidebarUser {
@@ -141,6 +142,12 @@ const NAV_GROUPS = [
         label: "Site Settings",
         href: "/admin/settings",
         icon: Settings2,
+        roles: ["ADMIN", "MENU_MANAGER"],
+      },
+      {
+        label: "AdSense & Ads",
+        href: "/admin/ads",
+        icon: Megaphone,
         roles: ["ADMIN", "MENU_MANAGER"],
       },
     ],

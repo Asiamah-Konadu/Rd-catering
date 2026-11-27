@@ -344,3 +344,12 @@ model SiteSettings {
   promoMinOrderGHS    Decimal  @default(0)
   updatedAt           DateTime @updatedAt
 }
+
+/// Singleton table for manual Google AdSense configuration & per-container toggles.
+model AdSenseConfig {
+  id          String   @id @default("singleton")
+  enabled     Boolean  @default(false)
+  publisherId String   @default("")
+  slotsJson   String   @default("[]")
+  updatedAt   DateTime @updatedAt
+}

@@ -8322,3 +8322,81 @@ body:has(.weekly-dark-menu, .menu-theme-dark) {
     animation: none;
   }
 }
+
+/* ─── Manual AdSense Containers (Zero-CLS & UX-Safe) ─── */
+.rd-ad-wrapper {
+  width: 100%;
+  margin: 1.75rem auto;
+  padding: 0.75rem;
+  border-radius: 16px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.rd-ad-wrapper-light {
+  background: rgba(24, 24, 27, 0.025);
+  border: 1px solid rgba(24, 24, 27, 0.08);
+}
+
+.rd-ad-wrapper-dark {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.rd-ad-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  opacity: 0.55;
+  user-select: none;
+}
+
+.rd-ad-wrapper-light .rd-ad-label {
+  color: #52525b;
+}
+
+.rd-ad-wrapper-dark .rd-ad-label {
+  color: #a1a1aa;
+}
+
+.rd-ad-box {
+  width: 100%;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ID-targeted responsive min-heights prevent AdSense script from stripping height and avoid CLS */
+#ad-slot-home_mid_banner,
+#ad-slot-home_pre_footer,
+#ad-slot-menu_in_feed,
+#ad-slot-dish_detail_bottom,
+#ad-slot-corporate_directory_mid,
+#ad-slot-events_pre_faq,
+#ad-slot-order_tracker_bottom {
+  min-height: 100px;
+  max-width: 970px;
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  #ad-slot-home_mid_banner,
+  #ad-slot-home_pre_footer,
+  #ad-slot-menu_in_feed,
+  #ad-slot-dish_detail_bottom,
+  #ad-slot-corporate_directory_mid,
+  #ad-slot-events_pre_faq,
+  #ad-slot-order_tracker_bottom {
+    min-height: 90px;
+  }
+}
+
+#ad-slot-menu_sidebar_desktop {
+  min-height: 250px;
+  max-width: 300px;
+  margin-inline: auto;
+}

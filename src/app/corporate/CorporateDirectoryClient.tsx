@@ -15,6 +15,7 @@ import {
   Users,
   MessageCircle,
 } from "lucide-react";
+import AdSlot from "@/components/ads/AdSlot";
 
 export type PublicCompanyInfo = {
   id: string;
@@ -378,6 +379,8 @@ export function CorporateDirectoryClient({
             </div>
           </div>
         </section>
+
+        <AdSlot slotKey="corporate_directory_mid" tone="dark" />
 
         <section className="space-y-5 pb-8" aria-labelledby="corporate-faq-heading">
           <div className="text-center">

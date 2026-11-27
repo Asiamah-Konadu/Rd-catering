@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 import { checkIsKitchenOpen } from "@/lib/kitchen-hours";
@@ -266,111 +267,118 @@ export async function POST(request: Request) {
 
     const promoCodeRaw = typeof payload.promoCode === "string" ? payload.promoCode.trim().toUpperCase() : null;
 
-    const result = await prisma.$transaction(async transaction => {
-      let discount = 0;
-      let validPromoCode: string | null = null;
+    let discount = 0;
+    let validPromoCode: string | null = null;
 
-      // Apply corporate discount percentage if active
-      if (company && Number(company.discountPercent) > 0) {
-        discount += (subtotal * Number(company.discountPercent)) / 100;
-      }
+    // Apply corporate discount percentage if active
+    if (company && Number(company.discountPercent) > 0) {
+      discount += (subtotal * Number(company.discountPercent)) / 100;
+    }
 
-      if (promoCodeRaw) {
-        const promoEntry = await transaction.waitlistEntry.findUnique({
-          where: { promoCode: promoCodeRaw },
-        });
-
-        if (!promoEntry) {
-          throw new Error("Invalid promo code.");
-        }
-        if (promoEntry.isUsed) {
-          throw new Error("This early-bird promo code has already been redeemed.");
-        }
-
-        // Free delivery perk: discount equals delivery fee if fee > 0
-        if (fee > 0) {
-          discount += fee;
-        }
-        validPromoCode = promoEntry.promoCode;
-      }
-
-      const finalTotal = Math.max(0, subtotal + fee - discount);
-
-      const createdOrder = await transaction.order.create({
-        data: {
-          orderNumber: orderNumber(),
-          companyId: company?.id || null,
-          staffDepartment: staffDepartment || null,
-          customerName: name,
-          customerPhone: phone,
-          customerEmail: email || null,
-          subtotal,
-          deliveryFee: fee,
-          discount,
-          total: finalTotal,
-          promoCode: validPromoCode,
-          notes: notes || null,
-          isScheduled,
-          scheduledFor,
-          scheduledSlot,
-          items: {
-            create: orderLines.map(line => ({
-              menuItemId: line.item.id,
-              name: line.selectedExtras.length > 0 ? `${line.item.name} Combo` : line.item.name,
-              quantity: line.quantity,
-              unitPrice: line.unitPrice,
-              totalPrice: line.totalPrice,
-              ...(line.selectedExtras.length > 0
-                ? {
-                    extras: {
-                      create: line.selectedExtras.map(ex => ({
-                        extraId: ex.id,
-                        price: ex.price,
-                        quantity: 1,
-                      })),
-                    },
-                  }
-                : {}),
-            })),
-          },
-          delivery: {
-            create: {
-              address,
-              city,
-              region: region || null,
-              latitude,
-              longitude,
-              status: "PENDING",
-            },
-          },
-          payment: {
-            create: {
-              amount: finalTotal,
-              method: "MOBILE_MONEY",
-              status: "PENDING",
-            },
-          },
-        },
-        select: { id: true, orderNumber: true },
+    if (promoCodeRaw) {
+      const promoEntry = await prisma.waitlistEntry.findUnique({
+        where: { promoCode: promoCodeRaw },
       });
 
-      if (validPromoCode) {
-        await transaction.waitlistEntry.update({
-          where: { promoCode: validPromoCode },
+      if (!promoEntry) {
+        return NextResponse.json({ error: "Invalid promo code." }, { status: 400 });
+      }
+      if (promoEntry.isUsed) {
+        return NextResponse.json({ error: "This early-bird promo code has already been redeemed." }, { status: 400 });
+      }
+
+      // Free delivery perk: discount equals delivery fee if fee > 0
+      if (fee > 0) {
+        discount += fee;
+      }
+      validPromoCode = promoEntry.promoCode;
+    }
+
+    const finalTotal = Math.max(0, subtotal + fee - discount);
+    const orderId = crypto.randomUUID();
+
+    const createOrderOp = prisma.order.create({
+      data: {
+        id: orderId,
+        orderNumber: orderNumber(),
+        companyId: company?.id || null,
+        staffDepartment: staffDepartment || null,
+        customerName: name,
+        customerPhone: phone,
+        customerEmail: email || null,
+        subtotal,
+        deliveryFee: fee,
+        discount,
+        total: finalTotal,
+        promoCode: validPromoCode,
+        notes: notes || null,
+        isScheduled,
+        scheduledFor,
+        scheduledSlot,
+        items: {
+          create: orderLines.map(line => ({
+            menuItemId: line.item.id,
+            name: line.selectedExtras.length > 0 ? `${line.item.name} Combo` : line.item.name,
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
+            totalPrice: line.totalPrice,
+            ...(line.selectedExtras.length > 0
+              ? {
+                  extras: {
+                    create: line.selectedExtras.map(ex => ({
+                      extraId: ex.id,
+                      price: ex.price,
+                      quantity: 1,
+                    })),
+                  },
+                }
+              : {}),
+          })),
+        },
+        delivery: {
+          create: {
+            address,
+            city,
+            region: region || null,
+            latitude,
+            longitude,
+            status: "PENDING",
+          },
+        },
+        payment: {
+          create: {
+            amount: finalTotal,
+            method: "MOBILE_MONEY",
+            status: "PENDING",
+          },
+        },
+      },
+      select: { id: true, orderNumber: true },
+    });
+
+    let createdOrder: { id: string; orderNumber: string };
+    if (validPromoCode) {
+      [, createdOrder] = await prisma.$transaction([
+        prisma.waitlistEntry.update({
+          where: { promoCode: validPromoCode, isUsed: false },
           data: {
             isUsed: true,
             usedAt: new Date(),
-            usedInOrderId: createdOrder.id,
+            usedInOrderId: orderId,
           },
-        });
-      }
+        }),
+        createOrderOp,
+      ]);
+    } else {
+      [createdOrder] = await prisma.$transaction([createOrderOp]);
+    }
 
-      return { order: createdOrder, finalTotal, discount };
-    });
-
-    return NextResponse.json({ orderNumber: result.order.orderNumber }, { status: 201 });
+    return NextResponse.json({ orderNumber: createdOrder.orderNumber }, { status: 201 });
   } catch (err: unknown) {
     console.error("Failed to create order:", err);
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+      return NextResponse.json({ error: "This early-bird promo code has already been redeemed." }, { status: 400 });
+    }
     const errorMessage = err instanceof Error ? err.message : "Unable to create your order right now. Please try again.";
     return NextResponse.json({ error: errorMessage }, { status: 400 });
   }

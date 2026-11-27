@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/components/cart/CartProvider";
 import type { PublicCombo, PublicExtra, PublicMenuItem } from "@/lib/menu";
+import AdSlot from "@/components/ads/AdSlot";
 import "./weekly-menu.css";
 
 export type MenuCategoryGroup = {
@@ -327,6 +328,7 @@ export function WeeklyMenuClient({ categories, extras, combos }: WeeklyMenuClien
                 })}
               </ul>
             </nav>
+            <AdSlot slotKey="menu_sidebar_desktop" tone="dark" className="mt-4" />
           </aside>
 
           {/* ── MAIN MENU CONTENT ── */}
@@ -398,9 +400,11 @@ export function WeeklyMenuClient({ categories, extras, combos }: WeeklyMenuClien
             </div>
 
             {/* ── 4. MENU SECTIONS ── */}
-            {processedCategories.map((cat) => {
+            {processedCategories.map((cat, catIndex) => {
               const isHidden = activeFilter !== "all" && activeFilter !== cat.slug;
               if (isHidden) return null;
+
+              const sectionNode = (() => {
 
               // Combo Package Section
               if (cat.kind === "combo") {
@@ -677,6 +681,16 @@ export function WeeklyMenuClient({ categories, extras, combos }: WeeklyMenuClien
                     </div>
                   )}
                 </section>
+              );
+              })();
+
+              return (
+                <React.Fragment key={cat.id}>
+                  {sectionNode}
+                  {activeFilter === "all" && catIndex === 1 && (
+                    <AdSlot slotKey="menu_in_feed" tone="dark" />
+                  )}
+                </React.Fragment>
               );
             })}
           </div>

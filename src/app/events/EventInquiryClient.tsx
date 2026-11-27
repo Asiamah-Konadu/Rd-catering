@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import SandTypographyHero from "@/components/events/SandTypography";
 import { BUSINESS_CONTACT } from "@/lib/business";
+import AdSlot from "@/components/ads/AdSlot";
 
 export type EventFaq = {
   question: string;
@@ -586,6 +587,10 @@ export function EventInquiryClient({ whatsappUrl, faqs = [] }: EventInquiryProps
           </div>
         </div>
       </section>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8">
+        <AdSlot slotKey="events_pre_faq" tone="light" />
+      </div>
 
       {/* ─── 6. FREQUENTLY ASKED QUESTIONS (FAQ) ──────────────────────── */}
       {faqs.length > 0 && (

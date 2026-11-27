@@ -123,28 +123,27 @@ export async function PATCH(req: Request) {
       nextOrderStatus = "DELIVERED";
     }
 
-    const updated = await prisma.$transaction(async (tx) => {
-      const updatedDelivery = await tx.delivery.update({
-        where: { id: deliveryId },
-        data: {
-          status: nextDeliveryStatus,
-          ...(nextDeliveryStatus === "DELIVERED" ? { deliveredAt: new Date() } : {}),
-        },
-        include: {
-          agent: { select: { id: true, name: true, phone: true } },
-          order: { include: { items: true } },
-        },
-      });
-
-      if (nextOrderStatus) {
-        await tx.order.update({
-          where: { id: existingDelivery.orderId },
-          data: { status: nextOrderStatus },
-        });
-      }
-
-      return updatedDelivery;
+    const updateDeliveryOp = prisma.delivery.update({
+      where: { id: deliveryId },
+      data: {
+        status: nextDeliveryStatus,
+        ...(nextDeliveryStatus === "DELIVERED" ? { deliveredAt: new Date() } : {}),
+      },
+      include: {
+        agent: { select: { id: true, name: true, phone: true } },
+        order: { include: { items: true } },
+      },
     });
+
+    const [updated] = nextOrderStatus
+      ? await prisma.$transaction([
+          updateDeliveryOp,
+          prisma.order.update({
+            where: { id: existingDelivery.orderId },
+            data: { status: nextOrderStatus },
+          }),
+        ])
+      : await prisma.$transaction([updateDeliveryOp]);
 
     return NextResponse.json(updated);
   } catch (error) {

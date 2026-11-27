@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/authz";
 import {
+  Prisma,
   OrderStatus,
   DeliveryStatus,
   PaymentStatus,
@@ -53,23 +54,29 @@ export async function PATCH(
       );
     }
 
-    const updatedOrder = await prisma.$transaction(async (tx) => {
-      const order = await tx.order.findUnique({
-        where: { id },
-        include: { delivery: true },
-      });
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { delivery: true },
+    });
 
-      if (!order) return null;
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
 
-      if (status) {
-        await tx.order.update({
+    const ops: Prisma.PrismaPromise<unknown>[] = [];
+
+    if (status) {
+      ops.push(
+        prisma.order.update({
           where: { id },
           data: { status },
-        });
-      }
+        })
+      );
+    }
 
-      if (paymentStatus !== undefined) {
-        await tx.payment.upsert({
+    if (paymentStatus !== undefined) {
+      ops.push(
+        prisma.payment.upsert({
           where: { orderId: id },
           create: {
             orderId: id,
@@ -78,12 +85,14 @@ export async function PATCH(
             status: paymentStatus,
           },
           update: { status: paymentStatus },
-        });
-      }
+        })
+      );
+    }
 
-      if (deliveryStatus || agentId !== undefined) {
-        if (!order.delivery) {
-          await tx.delivery.create({
+    if (deliveryStatus || agentId !== undefined) {
+      if (!order.delivery) {
+        ops.push(
+          prisma.delivery.create({
             data: {
               orderId: id,
               address: "Customer Address",
@@ -91,54 +100,60 @@ export async function PATCH(
               agentId: agentId || null,
               status: agentId ? "ASSIGNED" : (deliveryStatus || "PENDING"),
               assignedAt: agentId ? new Date() : null,
-            }
-          });
-        } else {
-          const updateDeliveryData: {
-            status?: DeliveryStatus;
-            agentId?: string | null;
-            assignedAt?: Date | null;
-            deliveredAt?: Date | null;
-          } = {};
+            },
+          })
+        );
+      } else {
+        const updateDeliveryData: {
+          status?: DeliveryStatus;
+          agentId?: string | null;
+          assignedAt?: Date | null;
+          deliveredAt?: Date | null;
+        } = {};
 
-          if (deliveryStatus) {
-            updateDeliveryData.status = deliveryStatus;
-            if (deliveryStatus === "DELIVERED") {
-              updateDeliveryData.deliveredAt = new Date();
+        if (deliveryStatus) {
+          updateDeliveryData.status = deliveryStatus;
+          if (deliveryStatus === "DELIVERED") {
+            updateDeliveryData.deliveredAt = new Date();
+          }
+        }
+
+        if (agentId !== undefined) {
+          updateDeliveryData.agentId = agentId || null;
+          if (agentId) {
+            updateDeliveryData.assignedAt = new Date();
+            if (order.delivery.status === "PENDING") {
+              updateDeliveryData.status = "ASSIGNED";
             }
           }
+        }
 
-          if (agentId !== undefined) {
-            updateDeliveryData.agentId = agentId || null;
-            if (agentId) {
-              updateDeliveryData.assignedAt = new Date();
-              if (order.delivery.status === "PENDING") {
-                updateDeliveryData.status = "ASSIGNED";
-              }
-            }
-          }
-
-          await tx.delivery.update({
+        ops.push(
+          prisma.delivery.update({
             where: { orderId: id },
             data: updateDeliveryData,
-          });
-        }
+          })
+        );
       }
+    }
 
-      return tx.order.findUnique({
-        where: { id },
-        include: {
-          items: {
-            include: { extras: { include: { extra: true } } },
-          },
-          payment: true,
-          delivery: {
-            include: {
-              agent: { select: { id: true, name: true, phone: true } },
-            },
+    if (ops.length > 0) {
+      await prisma.$transaction(ops);
+    }
+
+    const updatedOrder = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: {
+          include: { extras: { include: { extra: true } } },
+        },
+        payment: true,
+        delivery: {
+          include: {
+            agent: { select: { id: true, name: true, phone: true } },
           },
         },
-      });
+      },
     });
 
     if (!updatedOrder) {

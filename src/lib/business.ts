@@ -27,5 +27,5 @@ export const BUSINESS_CONTACT = {
   whatsapp: "059 175 4764",
   whatsappInternational: "+233591754764",
   whatsappUsername: "richdonscatering",
-  phones: ["0550103277", "0591754764"],
+  phones: ["0248179348", "0591754764"],
 } as const;
