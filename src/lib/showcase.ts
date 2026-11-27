@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 export interface ShowcaseDishItem {
@@ -127,31 +128,35 @@ export const DEFAULT_SHOWCASE_CONFIG: ShowcaseConfig = {
 
 const SHOWCASE_SLUG = "home-webgl-showcase";
 
-export async function getShowcaseConfig(): Promise<ShowcaseConfig> {
-  try {
-    const page = await prisma.cmsPage.findUnique({
-      where: { slug: SHOWCASE_SLUG },
-    });
+export const getShowcaseConfig = unstable_cache(
+  async (): Promise<ShowcaseConfig> => {
+    try {
+      const page = await prisma.cmsPage.findUnique({
+        where: { slug: SHOWCASE_SLUG },
+      });
 
-    if (page && page.content) {
-      const parsed = JSON.parse(page.content);
-      if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
-        return {
-          title: parsed.title || DEFAULT_SHOWCASE_CONFIG.title,
-          subtitle: parsed.subtitle || DEFAULT_SHOWCASE_CONFIG.subtitle,
-          kicker: parsed.kicker || DEFAULT_SHOWCASE_CONFIG.kicker,
-          ctaText: parsed.ctaText || DEFAULT_SHOWCASE_CONFIG.ctaText,
-          ctaUrl: parsed.ctaUrl || DEFAULT_SHOWCASE_CONFIG.ctaUrl,
-          items: parsed.items,
-        };
+      if (page && page.content) {
+        const parsed = JSON.parse(page.content);
+        if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+          return {
+            title: parsed.title || DEFAULT_SHOWCASE_CONFIG.title,
+            subtitle: parsed.subtitle || DEFAULT_SHOWCASE_CONFIG.subtitle,
+            kicker: parsed.kicker || DEFAULT_SHOWCASE_CONFIG.kicker,
+            ctaText: parsed.ctaText || DEFAULT_SHOWCASE_CONFIG.ctaText,
+            ctaUrl: parsed.ctaUrl || DEFAULT_SHOWCASE_CONFIG.ctaUrl,
+            items: parsed.items,
+          };
+        }
       }
+    } catch (err) {
+      console.error("Failed to read showcase config from database:", err);
     }
-  } catch (err) {
-    console.error("Failed to read showcase config from database:", err);
-  }
 
-  return DEFAULT_SHOWCASE_CONFIG;
-}
+    return DEFAULT_SHOWCASE_CONFIG;
+  },
+  ["showcase-config"],
+  { revalidate: 300 } // 5 min
+);
 
 export async function saveShowcaseConfig(config: ShowcaseConfig): Promise<boolean> {
   try {

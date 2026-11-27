@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 export type AdSlotKey =
@@ -184,26 +185,30 @@ export function mergeAdSlots(rawJson: string | null | undefined): AdSlotConfig[]
   });
 }
 
-export async function getAdSenseConfig(): Promise<AdSenseConfigData> {
-  try {
-    const row = await prisma.adSenseConfig.findUnique({
-      where: { id: "singleton" },
-    });
+export const getAdSenseConfig = unstable_cache(
+  async (): Promise<AdSenseConfigData> => {
+    try {
+      const row = await prisma.adSenseConfig.findUnique({
+        where: { id: "singleton" },
+      });
 
-    if (!row) {
+      if (!row) {
+        return DEFAULT_ADSENSE_CONFIG;
+      }
+
+      return {
+        enabled: Boolean(row.enabled),
+        publisherId:
+          row.publisherId?.trim() ||
+          DEFAULT_PUBLISHER_ID,
+        slots: mergeAdSlots(row.slotsJson),
+      };
+    } catch (error) {
+      // Graceful fallback if D1 migration hasn't been applied yet
+      console.error("Failed to fetch AdSense config:", error);
       return DEFAULT_ADSENSE_CONFIG;
     }
-
-    return {
-      enabled: Boolean(row.enabled),
-      publisherId:
-        row.publisherId?.trim() ||
-        DEFAULT_PUBLISHER_ID,
-      slots: mergeAdSlots(row.slotsJson),
-    };
-  } catch (error) {
-    // Graceful fallback if D1 migration hasn't been applied yet
-    console.error("Failed to fetch AdSense config:", error);
-    return DEFAULT_ADSENSE_CONFIG;
-  }
-}
+  },
+  ["adsense-config"],
+  { revalidate: 300 } // 5 min — ads config rarely changes
+);

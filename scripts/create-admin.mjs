@@ -22,7 +22,7 @@ if (password.length < 12) {
 const prisma = createPrisma();
 
 try {
-  const passwordHash = await hash(password, 12);
+  const passwordHash = await hash(password, 10);
   await prisma.user.upsert({
     where: { email },
     update: { name, passwordHash, role: "ADMIN", isActive: true },

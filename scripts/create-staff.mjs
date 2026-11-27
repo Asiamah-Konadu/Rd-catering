@@ -33,7 +33,7 @@ const prisma = createPrisma();
 const role = rawRole;
 
 try {
-  const passwordHash = await hash(password, 12);
+  const passwordHash = await hash(password, 10);
   const user = await prisma.user.upsert({
     where: { email },
     update: { name, passwordHash, role, isActive: true },

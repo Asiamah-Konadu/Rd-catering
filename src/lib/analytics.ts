@@ -26,69 +26,144 @@ export async function getAdminAnalytics(timeRange: TimeRange = "7d") {
   const startDate = getDateFilter(timeRange);
   const dateWhere = startDate ? { createdAt: { gte: startDate } } : {};
 
-  // Fetch orders in range
-  const orders = await prisma.order.findMany({
-    where: dateWhere,
-    include: {
-      payment: true,
-      delivery: true,
-      items: {
-        include: {
-          menuItem: true,
-        },
+  const paidCondition = {
+    OR: [
+      { payment: { status: PaymentStatus.PAID } },
+      { status: OrderStatus.DELIVERED },
+    ] as object[],
+  };
+
+  const [
+    totalOrders,
+    completedOrders,
+    activeOrders,
+    cancelledOrders,
+    revenueAgg,
+    paidCount,
+    mmCount,
+    cardCount,
+    cashCount,
+    waCount,
+    statusPaid,
+    statusPending,
+    statusFailedRefunded,
+    trendRows,
+    topDishesRaw,
+    reviewsAgg,
+    deliveryRows,
+  ] = await Promise.all([
+    // --- counts ---
+    prisma.order.count({ where: dateWhere }),
+    prisma.order.count({ where: { ...dateWhere, status: OrderStatus.DELIVERED } }),
+    prisma.order.count({
+      where: {
+        ...dateWhere,
+        status: { in: [OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.OUT_FOR_DELIVERY] },
       },
-    },
-    orderBy: { createdAt: "asc" },
-  });
+    }),
+    prisma.order.count({ where: { ...dateWhere, status: OrderStatus.CANCELLED } }),
 
-  const totalOrders = orders.length;
-  const completedOrders = orders.filter((o) => o.status === OrderStatus.DELIVERED);
-  const cancelledOrders = orders.filter((o) => o.status === OrderStatus.CANCELLED);
-  const activeOrders = orders.filter(
-    (o) =>
-      o.status === OrderStatus.PENDING ||
-      o.status === OrderStatus.CONFIRMED ||
-      o.status === OrderStatus.PREPARING ||
-      o.status === OrderStatus.READY ||
-      o.status === OrderStatus.OUT_FOR_DELIVERY
-  );
+    // --- revenue aggregate ---
+    prisma.order.aggregate({
+      where: { ...dateWhere, ...paidCondition },
+      _sum: { total: true },
+    }),
+    prisma.order.count({ where: { ...dateWhere, ...paidCondition } }),
 
-  // Revenue computations (from paid orders or delivered orders)
-  const paidOrders = orders.filter(
-    (o) => o.payment?.status === PaymentStatus.PAID || o.status === OrderStatus.DELIVERED
-  );
-  const totalRevenue = paidOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
-  const averageOrderValue = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0;
+    // --- payment method counts ---
+    prisma.order.count({ where: { ...dateWhere, payment: { method: PaymentMethod.MOBILE_MONEY } } }),
+    prisma.order.count({ where: { ...dateWhere, payment: { method: PaymentMethod.CARD } } }),
+    prisma.order.count({ where: { ...dateWhere, payment: { method: PaymentMethod.CASH } } }),
+    prisma.order.count({ where: { ...dateWhere, payment: { method: PaymentMethod.WHATSAPP } } }),
 
-  // Payment Breakdown
+    // --- payment status counts ---
+    prisma.order.count({ where: { ...dateWhere, payment: { status: PaymentStatus.PAID } } }),
+    prisma.order.count({
+      where: {
+        ...dateWhere,
+        OR: [{ payment: { status: PaymentStatus.PENDING } }, { payment: null }] as object[],
+      },
+    }),
+    prisma.order.count({
+      where: {
+        ...dateWhere,
+        OR: [
+          { payment: { status: PaymentStatus.FAILED } },
+          { payment: { status: PaymentStatus.REFUNDED } },
+        ] as object[],
+      },
+    }),
+
+    // --- daily trend: minimal select, bounded by time range ---
+    prisma.order.findMany({
+      where: dateWhere,
+      select: {
+        createdAt: true,
+        total: true,
+        status: true,
+        payment: { select: { status: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+
+    // --- top dishes via groupBy ---
+    prisma.orderItem.groupBy({
+      by: ["name"],
+      where: { order: { ...dateWhere, status: { not: OrderStatus.CANCELLED } } },
+      _sum: { quantity: true, totalPrice: true },
+      orderBy: { _sum: { quantity: "desc" } },
+      take: 5,
+    }),
+
+    // --- reviews aggregate ---
+    prisma.review.aggregate({
+      where: { isVisible: true },
+      _avg: { rating: true },
+      _count: { _all: true },
+    }),
+
+    // --- delivery times: bounded by take:100 ---
+    prisma.delivery.findMany({
+      where: {
+        status: DeliveryStatus.DELIVERED,
+        assignedAt: { not: null },
+        deliveredAt: { not: null },
+        ...(startDate ? { deliveredAt: { gte: startDate } } : {}),
+      },
+      select: { assignedAt: true, deliveredAt: true },
+      take: 100,
+    }),
+  ]);
+
+  // Revenue & average order value
+  const totalRevenue = Number(revenueAgg._sum.total ?? 0);
+  const averageOrderValue = paidCount > 0 ? totalRevenue / paidCount : 0;
+
+  // Payment method & status breakdowns
   const paymentMethods = {
-    MOBILE_MONEY: orders.filter((o) => o.payment?.method === PaymentMethod.MOBILE_MONEY).length,
-    CARD: orders.filter((o) => o.payment?.method === PaymentMethod.CARD).length,
-    CASH: orders.filter((o) => o.payment?.method === PaymentMethod.CASH).length,
-    WHATSAPP: orders.filter((o) => o.payment?.method === PaymentMethod.WHATSAPP).length,
+    MOBILE_MONEY: mmCount,
+    CARD: cardCount,
+    CASH: cashCount,
+    WHATSAPP: waCount,
   };
 
   const paymentStatuses = {
-    PAID: orders.filter((o) => o.payment?.status === PaymentStatus.PAID).length,
-    PENDING: orders.filter((o) => o.payment?.status === PaymentStatus.PENDING || !o.payment).length,
-    FAILED_REFUNDED: orders.filter(
-      (o) => o.payment?.status === PaymentStatus.FAILED || o.payment?.status === PaymentStatus.REFUNDED
-    ).length,
+    PAID: statusPaid,
+    PENDING: statusPending,
+    FAILED_REFUNDED: statusFailedRefunded,
   };
 
-  // Daily Trend Buckets
+  // Daily trend buckets (built from minimal-field rows)
   const dailyBuckets: { [key: string]: { label: string; revenue: number; orders: number } } = {};
-  orders.forEach((o) => {
+  trendRows.forEach((o) => {
     const key = o.createdAt.toISOString().slice(0, 10);
-    const dateObj = new Date(o.createdAt);
-    const label = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-
+    const label = new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     if (!dailyBuckets[key]) {
       dailyBuckets[key] = { label, revenue: 0, orders: 0 };
     }
     dailyBuckets[key].orders += 1;
     if (o.payment?.status === PaymentStatus.PAID || o.status === OrderStatus.DELIVERED) {
-      dailyBuckets[key].revenue += Number(o.total || 0);
+      dailyBuckets[key].revenue += Number(o.total ?? 0);
     }
   });
 
@@ -101,41 +176,23 @@ export async function getAdminAnalytics(timeRange: TimeRange = "7d") {
       orders: dailyBuckets[k].orders,
     }));
 
-  // Top dishes sold in this timeframe
-  const itemCounts: { [name: string]: { name: string; quantity: number; revenue: number } } = {};
-  orders.forEach((o) => {
-    if (o.status !== OrderStatus.CANCELLED) {
-      o.items.forEach((item) => {
-        const name = item.name;
-        if (!itemCounts[name]) {
-          itemCounts[name] = { name, quantity: 0, revenue: 0 };
-        }
-        itemCounts[name].quantity += item.quantity;
-        itemCounts[name].revenue += Number(item.totalPrice || 0);
-      });
-    }
-  });
+  // Top dishes from groupBy result
+  const topDishes = topDishesRaw.map((row) => ({
+    name: row.name,
+    quantity: row._sum.quantity ?? 0,
+    revenue: Math.round(Number(row._sum.totalPrice ?? 0) * 100) / 100,
+  }));
 
-  const topDishes = Object.values(itemCounts)
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 5);
+  // Reviews
+  const avgRating = reviewsAgg._avg.rating ?? 5.0;
+  const totalReviews = reviewsAgg._count._all;
 
-  // Reviews & Rating
-  const reviews = await prisma.review.findMany({
-    where: { isVisible: true },
-    select: { rating: true },
-  });
-  const avgRating =
-    reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : 5.0;
-
-  // Logistics Fulfillment times (for delivered orders with dates)
+  // Average delivery minutes
   let totalDeliveryMinutes = 0;
   let deliveredCount = 0;
-  orders.forEach((o) => {
-    if (o.delivery?.status === DeliveryStatus.DELIVERED && o.delivery.assignedAt && o.delivery.deliveredAt) {
-      const diffMs = new Date(o.delivery.deliveredAt).getTime() - new Date(o.delivery.assignedAt).getTime();
+  deliveryRows.forEach((d) => {
+    if (d.assignedAt && d.deliveredAt) {
+      const diffMs = new Date(d.deliveredAt).getTime() - new Date(d.assignedAt).getTime();
       if (diffMs > 0) {
         totalDeliveryMinutes += diffMs / (1000 * 60);
         deliveredCount += 1;
@@ -149,15 +206,15 @@ export async function getAdminAnalytics(timeRange: TimeRange = "7d") {
     totalRevenue: Math.round(totalRevenue * 100) / 100,
     averageOrderValue: Math.round(averageOrderValue * 100) / 100,
     totalOrders,
-    completedOrders: completedOrders.length,
-    activeOrders: activeOrders.length,
-    cancelledOrders: cancelledOrders.length,
+    completedOrders,
+    activeOrders,
+    cancelledOrders,
     paymentMethods,
     paymentStatuses,
     dailyTrend,
     topDishes,
     avgRating: Math.round(avgRating * 10) / 10,
-    totalReviews: reviews.length,
+    totalReviews,
     avgDeliveryMinutes,
   };
 }
@@ -276,7 +333,7 @@ export async function getKitchenAnalytics() {
 // 3. MENU_MANAGER (CATALOG & PRODUCT) ANALYTICS
 // -------------------------------------------------------------
 export async function getMenuManagerAnalytics() {
-  const [categories, totalMenuItems, activeMenuItems, unavailableMenuItems, orderItems, weeklySpecialCount] =
+  const [categories, totalMenuItems, activeMenuItems, unavailableMenuItems, orderItemsRaw, weeklySpecialCount, extrasRaw] =
     await Promise.all([
       prisma.category.findMany({
         include: {
@@ -288,30 +345,38 @@ export async function getMenuManagerAnalytics() {
       prisma.menuItem.count(),
       prisma.menuItem.count({ where: { isAvailable: true } }),
       prisma.menuItem.count({ where: { isAvailable: false } }),
-      prisma.orderItem.findMany({
-        select: {
-          name: true,
-          quantity: true,
-          totalPrice: true,
-          menuItemId: true,
-        },
+      // groupBy: get top 11 so we can split top-6 and low-5 without loading all rows
+      prisma.orderItem.groupBy({
+        by: ["name"],
+        _sum: { quantity: true, totalPrice: true },
+        orderBy: { _sum: { quantity: "desc" } },
+        take: 11,
       }),
       prisma.weeklyMenuItem.count(),
+      // bounded extras: select only needed fields, capped at 500 rows
+      prisma.orderItemExtra.findMany({
+        select: {
+          extraId: true,
+          quantity: true,
+          extra: { select: { name: true } },
+        },
+        take: 500,
+      }),
     ]);
 
-  // Aggregate item velocity
-  const itemVelocityMap: { [name: string]: { name: string; quantity: number; revenue: number } } = {};
-  orderItems.forEach((item) => {
-    if (!itemVelocityMap[item.name]) {
-      itemVelocityMap[item.name] = { name: item.name, quantity: 0, revenue: 0 };
-    }
-    itemVelocityMap[item.name].quantity += item.quantity;
-    itemVelocityMap[item.name].revenue += Number(item.totalPrice || 0);
-  });
+  // Build velocity list from groupBy result
+  const sortedDishes = orderItemsRaw.map((row) => ({
+    name: row.name,
+    quantity: row._sum.quantity ?? 0,
+    revenue: Math.round(Number(row._sum.totalPrice ?? 0) * 100) / 100,
+  }));
 
-  const sortedDishes = Object.values(itemVelocityMap).sort((a, b) => b.quantity - a.quantity);
   const topDishes = sortedDishes.slice(0, 6);
-  const lowDemandDishes = sortedDishes.length > 6 ? sortedDishes.slice(-5).reverse() : [];
+  // For low demand we need ascending order — re-sort the fetched slice
+  const lowDemandDishes =
+    sortedDishes.length > 6
+      ? [...sortedDishes].sort((a, b) => a.quantity - b.quantity).slice(0, 5)
+      : [];
 
   // Category coverage
   const categoryStats = categories.map((cat) => ({
@@ -321,15 +386,9 @@ export async function getMenuManagerAnalytics() {
     inactiveItems: cat.menuItems.filter((i) => !i.isAvailable).length,
   }));
 
-  // Popular Extras/Add-ons
-  const extras = await prisma.orderItemExtra.findMany({
-    include: {
-      extra: true,
-    },
-  });
-
+  // Popular Extras/Add-ons (from bounded findMany)
   const extraCounts: { [name: string]: { name: string; count: number } } = {};
-  extras.forEach((e) => {
+  extrasRaw.forEach((e) => {
     const name = e.extra?.name || "Extra Add-on";
     if (!extraCounts[name]) extraCounts[name] = { name, count: 0 };
     extraCounts[name].count += e.quantity;
